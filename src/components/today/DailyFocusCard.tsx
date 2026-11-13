@@ -51,55 +51,53 @@ export const DailyFocusCard: React.FC<Props> = ({
     setDraft('');
   };
 
-  // Display mode when focus exists and not currently editing
   if (focus && !isEditing) {
     return (
       <motion.section
         aria-label="Enfoque del día"
-        initial={{ opacity: 0, y: -6 }}
+        initial={{ opacity: 0, y: -4 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className={`rounded-xl p-4 md:p-5 bg-[#0F172A] border transition-all ${
+        transition={{ duration: 0.18 }}
+        className={`rounded-[24px] p-5 md:p-6 border transition-colors ${
           focus.isCompleted
-            ? 'border-emerald-500/35 ring-1 ring-[#10B981]/20'
-            : 'border-white/[0.08]'
+            ? 'bg-[#fafafb] border-[#17191c]/25'
+            : 'bg-[#fafafb] border-[#ececec]'
         }`}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
             <motion.button
               type="button"
-              whileTap={{ scale: 0.88 }}
-              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9 }}
               onClick={onToggleComplete}
               aria-label={focus.isCompleted ? 'Marcar enfoque como pendiente' : 'Marcar enfoque como logrado'}
-              className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 cursor-pointer ${
+              className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors cursor-pointer ${
                 focus.isCompleted
-                  ? 'bg-[#10B981] text-[#003824] border border-[#34D399] glow-emerald-node'
-                  : 'bg-[#1E293B] text-transparent hover:text-slate-400 border border-white/15 hover:border-emerald-500/40'
+                  ? 'bg-[#17191c] text-white border border-[#17191c]'
+                  : 'bg-white text-transparent hover:text-[#777b86] border border-[#17191c]/25 hover:border-[#17191c]'
               }`}
               title={focus.isCompleted ? 'Marcar como pendiente' : 'Marcar enfoque como logrado'}
             >
-              <Check className={`w-4 h-4 stroke-[3] ${focus.isCompleted ? 'text-[#003824]' : ''}`} />
+              <Check className="w-4 h-4 stroke-[2.5]" />
             </motion.button>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-amber-400">
-                <Compass className="w-3.5 h-3.5 shrink-0" />
-                <span>Enfoque del Día</span>
+              <div className="flex items-center gap-2 text-[13px] text-[#979799]">
+                <Compass className="w-3.5 h-3.5 text-[#17191c] shrink-0" />
+                <span>Enfoque del día</span>
                 {focus.isCompleted && (
                   <>
-                    <span className="text-slate-600" aria-hidden="true">·</span>
-                    <span className="text-emerald-400">Logrado hoy</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="text-[#17191c] font-medium">Logrado hoy</span>
                   </>
                 )}
               </div>
 
               <p
-                className={`text-base md:text-lg font-bold tracking-tight mt-0.5 break-words transition-colors ${
+                className={`text-[18px] font-medium tracking-[-0.01em] mt-0.5 break-words transition-colors ${
                   focus.isCompleted
-                    ? 'text-slate-300 line-through decoration-emerald-500/50'
-                    : 'text-white'
+                    ? 'text-[#777b86] line-through'
+                    : 'text-[#17191c]'
                 }`}
               >
                 {focus.intent}
@@ -111,7 +109,7 @@ export const DailyFocusCard: React.FC<Props> = ({
             <button
               type="button"
               onClick={handleStartEdit}
-              className="px-3 py-1.5 rounded-lg bg-[#1E293B] hover:bg-[#27354A] border border-white/10 text-xs font-semibold text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full bg-white hover:bg-[#f2f2f3] border border-[#ececec] text-[13px] text-[#17191c] transition-colors inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
               <Edit2 className="w-3.5 h-3.5" />
               <span>Editar</span>
@@ -122,9 +120,9 @@ export const DailyFocusCard: React.FC<Props> = ({
               onClick={onClearFocus}
               aria-label="Quitar enfoque del día"
               title="Quitar enfoque del día"
-              className="p-1.5 rounded-lg bg-[#1E293B] hover:bg-red-950/50 border border-white/10 hover:border-red-500/30 text-slate-400 hover:text-red-300 transition-colors shrink-0 cursor-pointer"
+              className="p-2 rounded-full bg-white hover:bg-[#fbe1d1] border border-[#ececec] text-[#777b86] hover:text-[#5d2a1a] transition-colors shrink-0 cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -132,22 +130,21 @@ export const DailyFocusCard: React.FC<Props> = ({
     );
   }
 
-  // Input / Creation / Edit mode
   return (
     <motion.section
       aria-label="Definir enfoque del día"
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className="rounded-xl p-4 md:p-5 bg-[#0F172A] border border-white/[0.08]"
+      transition={{ duration: 0.18 }}
+      className="rounded-[24px] p-5 md:p-6 bg-[#fafafb] border border-[#ececec]"
     >
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
-          <Compass className="w-4 h-4 text-amber-400 shrink-0" />
-          <h2 className="text-sm font-bold text-white tracking-tight">
-            {isEditing ? 'Actualizar Enfoque del Día' : 'Intención & Enfoque de Hoy'}
+          <Compass className="w-4 h-4 text-[#17191c] shrink-0" />
+          <h2 className="text-[15px] font-medium text-[#17191c] tracking-tight">
+            {isEditing ? 'Actualizar enfoque del día' : 'Intención & enfoque de hoy'}
           </h2>
-          <span className="hidden sm:inline text-xs text-slate-400">
+          <span className="hidden sm:inline text-[14px] text-[#777b86]">
             · Define tu ancla principal para mantenerte centrado
           </span>
         </div>
@@ -156,7 +153,7 @@ export const DailyFocusCard: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setIsEditing(false)}
-            className="text-xs font-semibold text-slate-400 hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="text-[13px] text-[#777b86] hover:text-[#17191c] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             Cancelar
           </button>
@@ -171,26 +168,26 @@ export const DailyFocusCard: React.FC<Props> = ({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="¿Qué es lo único que hará que hoy valga la pena?"
-          className="flex-1 px-3.5 py-2.5 rounded-lg bg-[#090D16] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/20 transition-all"
+          className="flex-1 px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] placeholder-[#a3a6af] text-[15px] focus:outline-none focus:border-[#17191c] transition-colors"
         />
 
         <button
           type="submit"
           disabled={!draft.trim()}
-          className="px-4 py-2.5 rounded-lg bg-[#10B981] hover:bg-[#34D399] disabled:opacity-45 disabled:pointer-events-none text-[#003824] text-xs font-bold transition-all shadow-[0_0_14px_rgba(16,185,129,0.28)] whitespace-nowrap shrink-0 cursor-pointer"
+          className="px-5 py-2.5 rounded-full bg-[#17191c] hover:bg-[#2a2d32] disabled:opacity-40 disabled:pointer-events-none text-white text-[14px] font-normal transition-colors whitespace-nowrap shrink-0 cursor-pointer"
         >
           {isEditing ? 'Guardar enfoque' : 'Fijar enfoque'}
         </button>
       </form>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-[11px] font-medium text-slate-500">Sugerencias:</span>
+      <div className="mt-3.5 flex flex-wrap items-center gap-2">
+        <span className="text-[12px] text-[#979799]">Sugerencias:</span>
         {FOCUS_PRESETS.map((preset) => (
           <button
             key={preset}
             type="button"
             onClick={() => handlePresetClick(preset)}
-            className="px-2.5 py-1 rounded-md bg-[#1E293B] hover:bg-[#27354A] border border-white/[0.08] text-[11px] font-medium text-slate-300 hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="px-3 py-1 rounded-full bg-white hover:bg-[#f2f2f3] border border-[#ececec] text-[12px] text-[#777b86] hover:text-[#17191c] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             {preset}
           </button>

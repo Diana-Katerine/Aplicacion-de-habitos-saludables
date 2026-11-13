@@ -1,20 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import {
-  Flame,
-  Check,
-  Plus,
-  Minus,
-  Sparkles,
-  ArrowRight,
-  Shield,
-  Clock,
-  TrendingUp,
-  Droplets,
-  Calendar,
-  Compass,
-  CheckCircle,
-} from 'lucide-react';
+import { Check, Plus, Minus } from 'lucide-react';
+import { HeroThreeScene } from './HeroThreeScene';
 
 interface Props {
   onStartFree: () => void;
@@ -22,318 +9,356 @@ interface Props {
   onTryDemo: () => void;
 }
 
+const CORE_OFFERINGS = [
+  {
+    tag: 'Ritual diario',
+    title: 'Vista Hoy con secuencia propia',
+    description:
+      'Ordena tus hábitos arrastrando tarjetas, respeta tus días de descanso sin romper rachas y reinicia exactamente a las 00:00 locales.',
+  },
+  {
+    tag: 'Concentración',
+    title: 'Enfoque Ambiental y diario breve',
+    description:
+      'Atenúa la pantalla con audio generativo, redacta notas de ritual en Markdown y registra tu energía (1–5) y ánimo al completar.',
+  },
+  {
+    tag: 'Analítica e IA',
+    title: 'Mapa de 90 días y zonas de impulso',
+    description:
+      'Visualiza tu constancia trimestral, compara tu progreso mes a mes y descubre con IA los horarios óptimos para cada hábito.',
+  },
+  {
+    tag: 'Control total',
+    title: 'Categorías, retos y respaldo portable',
+    description:
+      'Personaliza categorías con halos suaves, únete a metas mensuales, explora plantillas y exporta todo tu historial en JSON o PDF.',
+  },
+];
+
+const WORKFLOW_STEPS = [
+  {
+    num: '01',
+    title: 'Diseña tu rutina sin rigidez',
+    body: 'Crea hábitos numéricos o binarios eligiendo únicamente los días que planeas practicar.',
+  },
+  {
+    num: '02',
+    title: 'Registra en segundos cada día',
+    body: 'Marca tu avance desde la vista Hoy o entra en Enfoque Ambiental para bloques profundos.',
+  },
+  {
+    num: '03',
+    title: 'Ajusta con evidencia real',
+    body: 'Detecta patrones de energía, compara meses y adopta tus mejores franjas horarias.',
+  },
+];
+
 export const LandingPage: React.FC<Props> = ({
   onStartFree,
   onLogin,
   onTryDemo,
 }) => {
-  // Interactive Hero Demo State
   const [demoWater, setDemoWater] = useState(6);
   const [demoMeditation, setDemoMeditation] = useState(false);
   const [demoStreak, setDemoStreak] = useState(14);
-  const [showCelebration, setShowCelebration] = useState(false);
 
   const isWaterDone = demoWater >= 8;
 
   const handleWaterStep = (delta: number) => {
-    const next = Math.max(0, Math.min(8, demoWater + delta));
-    setDemoWater(next);
-    if (next === 8 && !isWaterDone) {
-      setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 2500);
-    }
+    setDemoWater((prev) => Math.max(0, Math.min(8, prev + delta)));
   };
 
   const handleToggleMeditation = () => {
     const next = !demoMeditation;
     setDemoMeditation(next);
-    if (next) {
-      setDemoStreak((s) => s + 1);
-    } else {
-      setDemoStreak((s) => Math.max(14, s - 1));
-    }
+    setDemoStreak((s) => (next ? s + 1 : Math.max(14, s - 1)));
   };
 
   return (
-    <div className="space-y-20 py-8 md:py-16">
-      {/* Hero Section */}
-      <div className="max-w-5xl mx-auto text-center space-y-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Sistema Luminous Momentum — Diseño de Alto Rendimiento</span>
-        </div>
+    <div className="w-full bg-white text-[#17191c]">
+      {/* SECTION 1: Hero — Singular Editorial Statement + Animable Three.js 3D Sculpture */}
+      <section className="w-full bg-white pt-10 pb-20 md:pt-16 md:pb-24">
+        <div className="max-w-[1200px] mx-auto px-5 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+            <div className="lg:col-span-6 space-y-6">
+              <h1 className="font-signifier font-normal text-[44px] sm:text-[60px] xl:text-[74px] leading-[1.06] tracking-[-0.025em] text-[#17191c] text-balance">
+                Construye hábitos{' '}
+                <em className="italic font-normal">en un minuto al día</em>
+              </h1>
 
-        <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight text-balance leading-tight">
-          Construye hábitos saludables en{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] via-[#34D399] to-emerald-300">
-            1 minuto al día
-          </span>
-        </h1>
+              <p className="text-[17px] leading-[1.5] text-[#777b86] max-w-[480px]">
+                Rituales diarios, enfoque ambiental y analítica clara sobre un lienzo sereno, libre de ruido visual.
+              </p>
 
-        <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed text-balance">
-          El habit tracker de mínima fricción diseñado con motor de rachas transaccional, bioluminiscencia táctil y respeto milimétrico a tu zona horaria local.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <button
-            onClick={onStartFree}
-            className="w-full sm:w-auto px-7 py-3 rounded-lg bg-[#10B981] hover:bg-[#34D399] text-[#003824] text-sm font-bold transition-all shadow-[0_0_24px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <span>Comenzar gratis</span>
-            <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-          </button>
-
-          <button
-            onClick={onTryDemo}
-            className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#1E293B] hover:bg-[#27354A] border border-white/10 text-sm font-semibold text-white transition-colors cursor-pointer"
-          >
-            Probar demo interactiva
-          </button>
-        </div>
-
-        <div className="pt-2 text-xs text-slate-500">
-          Sin tarjeta de crédito · Funciona en móvil y escritorio · Datos sincronizados
-        </div>
-      </div>
-
-      {/* Interactive Live Preview Sandbox */}
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-3">
-          <span className="text-xs uppercase tracking-widest font-bold text-slate-400">
-            Prueba el registro en vivo aquí abajo ↓
-          </span>
-        </div>
-
-        <div className="rounded-2xl bg-[#0F172A] border border-white/15 p-5 md:p-6 shadow-2xl relative overflow-hidden">
-          <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.08]">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-bold text-white tracking-wide">
-                Vista "Hoy" — Registro en tiempo real
-              </span>
-            </div>
-
-            <div
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold tabular-nums glow-amber-flame"
-              style={{
-                backgroundColor: 'rgba(245, 158, 11, 0.12)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                color: '#F59E0B',
-              }}
-            >
-              <Flame className="w-3.5 h-3.5 fill-[#F59E0B]" />
-              <span>{demoStreak} días en racha</span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {/* Interactive Single Node: Meditación */}
-            <div
-              className={`p-4 rounded-xl border transition-all ${
-                demoMeditation
-                  ? 'bg-[#111827] border-emerald-500/30 ring-1 ring-emerald-500/20'
-                  : 'bg-[#181b25] border-white/10'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">
-                      Mente & Foco
-                    </span>
-                    <h4
-                      className={`text-sm font-bold transition-colors ${
-                        demoMeditation ? 'text-slate-300 line-through' : 'text-white'
-                      }`}
-                    >
-                      Meditación consciente matutina
-                    </h4>
-                    <span className="text-[11px] text-slate-400">Meta: 1 sesión diaria</span>
-                  </div>
-                </div>
-
-                <motion.button
-                  whileTap={{ scale: 0.88 }}
-                  whileHover={{ scale: 1.05 }}
-                  onClick={handleToggleMeditation}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                    demoMeditation
-                      ? 'bg-[#10B981] text-[#003824] border border-[#34D399] glow-emerald-node'
-                      : 'bg-[#1E293B] text-slate-500 hover:text-white border border-white/15'
-                  }`}
-                  title="Haz clic para marcar como completado"
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={onStartFree}
+                  className="px-6 py-3 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[15px] leading-none font-normal transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <Check className={`w-4 h-4 stroke-[3] ${demoMeditation ? 'text-[#003824]' : ''}`} />
-                </motion.button>
+                  Comenzar gratis
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onTryDemo}
+                  className="px-6 py-3 rounded-full bg-transparent border border-[#17191c] hover:bg-[#fafafb] text-[#17191c] text-[15px] leading-none font-normal transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  Probar demo
+                </button>
               </div>
             </div>
 
-            {/* Interactive Cumulative: Vasos de agua */}
-            <div
-              className={`p-4 rounded-xl border transition-all ${
-                isWaterDone
-                  ? 'bg-[#111827] border-emerald-500/30 ring-1 ring-emerald-500/20'
-                  : 'bg-[#181b25] border-white/10'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
-                    <Droplets className="w-4 h-4" />
+            <div className="lg:col-span-6">
+              <HeroThreeScene />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 2: Sobre la página & Qué ofrecemos — 4 Core Pillars */}
+      <section id="que-ofrecemos" className="w-full bg-[#fafafb] py-20 border-t border-[#ececec]">
+        <div className="max-w-[1200px] mx-auto px-5 sm:px-6 space-y-12">
+          <div className="max-w-[660px] space-y-3">
+            <span className="text-[14px] text-[#979799] block">
+              Qué ofrecemos
+            </span>
+            <h2 className="font-signifier font-normal text-[36px] md:text-[48px] leading-[1.15] tracking-[-0.015em] text-[#17191c]">
+              Todo lo esencial para{' '}
+              <em className="italic font-normal">sostener tu constancia</em>
+            </h2>
+            <p className="text-[16px] leading-[1.55] text-[#777b86]">
+              Diseñamos Impulso Diario para acompañarte sin castigar tus días de descanso ni saturarte con gráficos innecesarios.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {CORE_OFFERINGS.map((item) => (
+              <div
+                key={item.title}
+                className="steep-card-mist p-7 flex flex-col justify-between space-y-3"
+              >
+                <span className="text-[13px] text-[#979799] block">
+                  {item.tag}
+                </span>
+                <h3 className="text-[20px] font-medium text-[#17191c] tracking-[-0.01em]">
+                  {item.title}
+                </h3>
+                <p className="text-[15px] leading-[1.55] text-[#777b86]">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 3: Cómo funciona + Única prueba interactiva limpia */}
+      <section id="como-funciona" className="w-full bg-white py-20 border-t border-[#ececec]">
+        <div className="max-w-[1200px] mx-auto px-5 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-6 space-y-8">
+            <div className="space-y-3">
+              <span className="text-[14px] text-[#979799] block">
+                Cómo funciona
+              </span>
+              <h2 className="font-signifier font-normal text-[36px] md:text-[46px] leading-[1.15] tracking-[-0.015em] text-[#17191c]">
+                Tres pasos hacia una{' '}
+                <em className="italic font-normal">rutina predecible</em>
+              </h2>
+            </div>
+
+            <div className="divide-y divide-[#ececec] border-t border-b border-[#ececec]">
+              {WORKFLOW_STEPS.map((s) => (
+                <div key={s.num} className="py-5 flex items-start gap-5">
+                  <span className="text-[14px] font-medium text-[#5d2a1a] tabular-nums pt-0.5 shrink-0">
+                    {s.num}
+                  </span>
+                  <div className="space-y-1">
+                    <h3 className="text-[17px] font-medium text-[#17191c]">
+                      {s.title}
+                    </h3>
+                    <p className="text-[14px] leading-[1.55] text-[#777b86]">
+                      {s.body}
+                    </p>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">
-                      Hidratación
-                    </span>
-                    <h4
-                      className={`text-sm font-bold transition-colors ${
-                        isWaterDone ? 'text-slate-300 line-through' : 'text-white'
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Single Clean Interactive Preview Card */}
+          <div className="lg:col-span-6">
+            <div className="steep-artifact p-6 sm:p-7 space-y-5">
+              <div className="flex items-center justify-between pb-4 border-b border-[#ececec]">
+                <div>
+                  <span className="text-[12px] text-[#979799] block">Vista previa</span>
+                  <span className="text-[16px] font-medium text-[#17191c]">
+                    Registro diario en vivo
+                  </span>
+                </div>
+                <span className="text-[13px] text-[#5d2a1a] font-medium tabular-nums">
+                  {demoStreak} días en racha
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {/* Meditation item */}
+                <div
+                  className={`p-4 rounded-[16px] border transition-colors ${
+                    demoMeditation
+                      ? 'bg-[#fafafb] border-[#17191c]/20'
+                      : 'bg-white border-[#ececec]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <span className="text-[12px] text-[#979799] block">Mente &amp; Foco</span>
+                      <p
+                        className={`text-[15px] font-medium mt-0.5 truncate ${
+                          demoMeditation ? 'text-[#777b86] line-through' : 'text-[#17191c]'
+                        }`}
+                      >
+                        Meditación consciente matutina
+                      </p>
+                    </div>
+
+                    <motion.button
+                      type="button"
+                      whileTap={{ scale: 0.92 }}
+                      onClick={handleToggleMeditation}
+                      aria-label="Completar meditación de prueba"
+                      className={`w-9 h-9 rounded-full flex items-center justify-center border transition-colors shrink-0 cursor-pointer ${
+                        demoMeditation
+                          ? 'bg-[#17191c] border-[#17191c] text-white'
+                          : 'bg-white border-[#17191c]/25 text-transparent hover:border-[#17191c] hover:text-[#777b86]'
                       }`}
                     >
-                      Tomar 8 vasos de agua
-                    </h4>
-                    <span className="text-[11px] text-slate-400">Meta: 8 vasos al día</span>
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                    </motion.button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-white tabular-nums mr-1">
-                    {demoWater}/8
-                  </span>
+                {/* Water stepper item */}
+                <div
+                  className={`p-4 rounded-[16px] border transition-colors ${
+                    isWaterDone
+                      ? 'bg-[#fafafb] border-[#17191c]/20'
+                      : 'bg-white border-[#ececec]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <span className="text-[12px] text-[#979799] block">Vitalidad</span>
+                      <p
+                        className={`text-[15px] font-medium mt-0.5 truncate ${
+                          isWaterDone ? 'text-[#777b86] line-through' : 'text-[#17191c]'
+                        }`}
+                      >
+                        Tomar 8 vasos de agua
+                      </p>
+                    </div>
 
-                  <button
-                    onClick={() => handleWaterStep(-1)}
-                    disabled={demoWater <= 0}
-                    className="w-8 h-8 rounded-lg bg-[#1E293B] hover:bg-[#27354A] disabled:opacity-30 text-white flex items-center justify-center border border-white/10 cursor-pointer"
-                  >
-                    <Minus className="w-3.5 h-3.5" />
-                  </button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-[13px] font-medium text-[#17191c] tabular-nums mr-1">
+                        {demoWater}/8
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleWaterStep(-1)}
+                        disabled={demoWater <= 0}
+                        aria-label="Restar vaso"
+                        className="w-8 h-8 rounded-full border border-[#ececec] bg-white hover:bg-[#f2f2f3] disabled:opacity-35 text-[#17191c] flex items-center justify-center cursor-pointer"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleWaterStep(1)}
+                        disabled={demoWater >= 8}
+                        aria-label="Sumar vaso"
+                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                          isWaterDone
+                            ? 'bg-[#17191c] text-white'
+                            : 'bg-[#f2f2f3] hover:bg-[#17191c] hover:text-white text-[#17191c]'
+                        }`}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
 
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => handleWaterStep(1)}
-                    disabled={demoWater >= 8}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
-                      isWaterDone
-                        ? 'bg-[#10B981] border-[#34D399] text-[#003824] glow-emerald'
-                        : 'bg-[#10B981]/20 hover:bg-[#10B981] hover:text-[#003824] border-[#10B981]/40 text-[#10B981]'
-                    }`}
-                  >
-                    <Plus className="w-4 h-4 stroke-[2.5]" />
-                  </motion.button>
+                  <div className="w-full h-1.5 rounded-full bg-[#f2f2f3] mt-3 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[#17191c] transition-all duration-300"
+                      style={{ width: `${(demoWater / 8) * 100}%` }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Progress bar */}
-              <div className="w-full h-1.5 rounded-full bg-[#1E293B] mt-3 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-[#10B981] transition-all duration-300"
-                  style={{ width: `${(demoWater / 8) * 100}%` }}
-                />
+              <div className="pt-2 flex items-center justify-between text-[13px]">
+                <span className="text-[#777b86]">
+                  Adherencia semanal estimada:{' '}
+                  <strong className="font-medium text-[#17191c] tabular-nums">92.4%</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={onTryDemo}
+                  className="text-[#17191c] hover:underline underline-offset-4 cursor-pointer whitespace-nowrap"
+                >
+                  Abrir app demo →
+                </button>
               </div>
             </div>
           </div>
-
-          {showCelebration && (
-            <div className="mt-3 p-2.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-center text-xs font-bold text-emerald-300 animate-bounce">
-              🎉 ¡Meta de hidratación cumplida! Así de fácil se siente avanzar.
-            </div>
-          )}
         </div>
-      </div>
+      </section>
 
-      {/* 3 Pillars / Feature Grid */}
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="rounded-xl p-6 bg-[#0F172A] border border-white/[0.08] flex flex-col justify-between">
-          <div>
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4">
-              <CheckCircle className="w-5 h-5" />
+      {/* SECTION 4: Single Blush Peach Callout + Quiet Closing CTA */}
+      <section id="historia" className="w-full bg-[#fafafb] py-20 border-t border-[#ececec]">
+        <div className="max-w-[1200px] mx-auto px-5 sm:px-6 space-y-20">
+          <div className="steep-card-peach p-8 sm:p-12 md:p-14">
+            <div className="max-w-[820px] space-y-5">
+              <span className="text-[14px] text-[#5d2a1a]/80 block">
+                Historia de constancia
+              </span>
+              <blockquote className="font-signifier font-normal text-[24px] sm:text-[32px] leading-[1.3] tracking-[-0.015em] text-[#5d2a1a]">
+                “Llevo 42 días consecutivos de lectura e hidratación. Tener mis hábitos sobre un lienzo limpio, respetando mis días programados, convirtió el registro en un ritual sereno.”
+              </blockquote>
+              <p className="text-[14px] text-[#5d2a1a]">
+                <span className="font-medium">Diego Valencia</span> · Diseñador de Producto, Bogotá
+              </p>
             </div>
-            <h3 className="text-base font-bold text-white tracking-tight">
-              Registro en 1 Clic
-            </h3>
-            <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-              Sin fricción ni formularios interminables. Tu vista "Hoy" reúne exclusivamente lo que te toca hacer hoy según tu programación semanal.
+          </div>
+
+          <div className="max-w-[720px] mx-auto text-center space-y-6">
+            <h2 className="font-signifier font-normal text-[36px] md:text-[50px] leading-[1.15] tracking-[-0.015em] text-[#17191c]">
+              Empieza tu rutina hoy con{' '}
+              <em className="italic font-normal">total claridad</em>
+            </h2>
+            <p className="text-[16px] leading-[1.5] text-[#777b86]">
+              Sin tarjetas de crédito ni configuraciones complejas. Respeta tu zona horaria desde el primer día.
             </p>
-          </div>
-          <span className="text-[11px] font-semibold text-emerald-400 mt-4 block">
-            Actualización optimista instantánea
-          </span>
-        </div>
-
-        <div className="rounded-xl p-6 bg-[#0F172A] border border-white/[0.08] flex flex-col justify-between">
-          <div>
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4">
-              <Flame className="w-5 h-5 fill-amber-400" />
-            </div>
-            <h3 className="text-base font-bold text-white tracking-tight">
-              Motor de Rachas Transaccional
-            </h3>
-            <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-              Cálculo riguroso de racha actual y récord histórico. Si un hábito está programado solo L-M-V, los fines de semana no rompen tu racha.
-            </p>
-          </div>
-          <span className="text-[11px] font-semibold text-amber-400 mt-4 block">
-            Reconocimiento de días programados
-          </span>
-        </div>
-
-        <div className="rounded-xl p-6 bg-[#0F172A] border border-white/[0.08] flex flex-col justify-between">
-          <div>
-            <div className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4">
-              <Clock className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-white tracking-tight">
-              Zona Horaria IANA Precisa
-            </h3>
-            <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-              Cortes de medianoche estrictamente a las 00:00 de tu hora local. Sin sorpresas donde tus hábitos se reinicien antes de que te vayas a dormir.
-            </p>
-          </div>
-          <span className="text-[11px] font-semibold text-indigo-400 mt-4 block">
-            Detección automática de huso horario
-          </span>
-        </div>
-      </div>
-
-      {/* Social Proof */}
-      <div className="max-w-4xl mx-auto rounded-2xl bg-[#0F172A] border border-white/[0.08] p-6 md:p-8">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xl shrink-0">
-            DV
-          </div>
-          <div className="space-y-1 text-center md:text-left">
-            <p className="text-sm md:text-base text-slate-200 italic leading-relaxed">
-              "Llevo 42 días consecutivos de lectura e hidratación. La interfaz oscura con el resplandor verde hace que marcar el hábito sea un placer sensorial, y el respeto por los días programados me quitó la culpa de los fines de semana."
-            </p>
-            <div className="text-xs text-slate-400 pt-1">
-              <strong className="text-white">Diego Valencia</strong> · Diseñador de Producto, Bogotá (GMT-5)
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={onStartFree}
+                className="px-6 py-3 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[15px] leading-none font-normal transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                Crear cuenta gratis
+              </button>
+              <button
+                type="button"
+                onClick={onLogin}
+                className="px-6 py-3 rounded-full bg-transparent border border-[#17191c] hover:bg-white text-[#17191c] text-[15px] leading-none font-normal transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                Iniciar sesión
+              </button>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Bottom CTA Banner */}
-      <div className="max-w-5xl mx-auto text-center rounded-2xl bg-gradient-to-r from-emerald-950/40 via-[#0F172A] to-emerald-950/40 border border-emerald-500/30 p-8 md:p-12 space-y-4">
-        <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-          Empieza a construir tu mejor versión hoy
-        </h2>
-        <p className="text-xs md:text-sm text-slate-300 max-w-xl mx-auto">
-          Únete a cientos de personas que han transformado su consistencia diaria sin esfuerzo innecesario.
-        </p>
-        <div className="pt-2">
-          <button
-            onClick={onStartFree}
-            className="px-8 py-3 rounded-lg bg-[#10B981] hover:bg-[#34D399] text-[#003824] text-sm font-bold transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] cursor-pointer"
-          >
-            Crear mi cuenta gratis
-          </button>
-        </div>
-      </div>
+      </section>
     </div>
   );
 };

@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Challenge, DailyFocus, Habit, HabitLog, HabitWithTodayLog, User, ViewRoute } from './types';
-import { StorageService, getTodayDateString } from './services/storage';
+import { Challenge, DailyFocus, EvaluatedBadge, Habit, HabitLog, HabitWithTodayLog, User, ViewRoute, WeeklyFocus } from './types';
+import { StorageService, getSundayWeekKey, getTodayDateString, isTodaySunday } from './services/storage';
+import { BadgesService } from './services/badges';
+import {
+  AdaptiveReminderSuggestion,
+  buildAdaptiveReminders,
+  hasSentAdaptivePushToday,
+  markAdaptivePushSentToday,
+  tryDispatchBrowserPushNotification,
+} from './services/reminders';
 import { Navbar } from './components/layout/Navbar';
 import { TodayView } from './components/today/TodayView';
 import { HabitsView } from './components/habits/HabitsView';
@@ -9,8 +17,10 @@ import { ChallengesView } from './components/challenges/ChallengesView';
 import { TemplatesView } from './components/templates/TemplatesView';
 import { ProfileView } from './components/profile/ProfileView';
 import { LandingPage } from './components/landing/LandingPage';
-import { HabitModal } from './components/habits/HabitModal';
+import { HabitModal, JournalSavePayload } from './components/habits/HabitModal';
+import { getMoodMeta } from './services/journaling';
 import { AuthModal } from './components/auth/AuthModal';
+import { WeeklyReflectionModal } from './components/today/WeeklyReflectionModal';
 import { ToastContainer, ToastMessage } from './components/common/Toast';
 
 export default function App() {
@@ -20,17 +30,21 @@ export default function App() {
   const [allHabits, setAllHabits] = useState<Habit[]>([]);
   const [allLogs, setAllLogs] = useState<HabitLog[]>([]);
   const [dailyFocus, setDailyFocus] = useState<DailyFocus | null>(null);
+  const [weeklyFocus, setWeeklyFocus] = useState<WeeklyFocus | null>(null);
   const [allDailyFocuses, setAllDailyFocuses] = useState<DailyFocus[]>([]);
   const [joinedChallengeIds, setJoinedChallengeIds] = useState<string[]>([]);
   const [customChallenges, setCustomChallenges] = useState<Challenge[]>([]);
+  const [badges, setBadges] = useState<EvaluatedBadge[]>([]);
   const [categories, setCategories] = useState(StorageService.getCategories());
   const [templates, setTemplates] = useState(StorageService.getTemplates());
 
   // Modals & Toasts
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [habitToEdit, setHabitToEdit] = useState<Habit | null>(null);
+  const [journalPrompt, setJournalPrompt] = useState<{ habit: Habit; log: HabitLog } | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [isWeeklyReflectionOpen, setIsWeeklyReflectionOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // Initialize user & data on load
@@ -47,24 +61,87 @@ export default function App() {
     }
   }, []);
 
-  const refreshData = (activeUser: User) => {
+  // Auto-open Sunday Weekly Reflection modal on the first visit of the week
+  useEffect(() => {
+    if (!user) {
+      setIsWeeklyReflectionOpen(false);
+      return;
+    }
+    const weekKey = getSundayWeekKey(user.timezone);
+    if (isTodaySunday(user.timezone) && !StorageService.hasSeenWeeklyReflection(user.id, weekKey)) {
+      setIsWeeklyReflectionOpen(true);
+    }
+  }, [user?.id, user?.timezone]);
+
+  // Auto-suggest adaptive push-notification-like reminder in the late afternoon for incomplete habits
+  useEffect(() => {
+    if (!user || user.reminderEnabled === false || todayHabits.length === 0) return;
+
+    const checkAndNotify = () => {
+      if (hasSentAdaptivePushToday(user.id, user.timezone)) return;
+      const { timeInfo, suggestions } = buildAdaptiveReminders({
+        habits: todayHabits,
+        timezone: user.timezone,
+        eveningCutoffTime: user.reminderEveningTime,
+      });
+
+      if (timeInfo.isLateAfternoon && suggestions.length > 0) {
+        const primary = suggestions[0];
+        markAdaptivePushSentToday(user.id, user.timezone);
+        addToast({
+          type: 'reminder',
+          metaLabel: 'Impulso Diario · Recordatorio adaptativo',
+          title: `¿Completaste "${primary.habit.title}"?`,
+          description: primary.reason,
+          actionLabel: 'Completar ahora',
+          onAction: () => handleCheckIn(primary.habit.id, undefined, true),
+          secondaryLabel: `Ajustar a ${primary.suggestedTime}`,
+          onSecondaryAction: () => handleApplyReminderTime(primary.habit.id, primary.suggestedTime),
+        });
+        tryDispatchBrowserPushNotification(
+          `Impulso Diario · ${primary.habit.title}`,
+          primary.reason
+        );
+      }
+    };
+
+    checkAndNotify();
+    const intervalId = window.setInterval(checkAndNotify, 60_000);
+    return () => window.clearInterval(intervalId);
+  }, [user?.id, user?.timezone, user?.reminderEnabled, user?.reminderEveningTime, todayHabits]);
+
+  const refreshData = (activeUser: User, notifyNewBadges = false) => {
     const habits = StorageService.getHabits(activeUser.id);
     const logs = StorageService.getLogs(activeUser.id);
     const todayH = StorageService.getTodayHabits(activeUser.id, activeUser.timezone);
     const focus = StorageService.getDailyFocus(activeUser.id, activeUser.timezone);
+    const wFocus = StorageService.getWeeklyFocus(activeUser.id, activeUser.timezone);
     const focuses = StorageService.getAllDailyFocuses(activeUser.id);
     const joined = StorageService.getJoinedChallengeIds(activeUser.id);
     const custom = StorageService.getCustomChallenges(activeUser.id);
+    const badgeEval = BadgesService.syncAndEvaluateBadges(activeUser.id, habits, logs);
 
     setAllHabits(habits);
     setAllLogs(logs);
     setTodayHabits(todayH);
     setDailyFocus(focus);
+    setWeeklyFocus(wFocus);
     setAllDailyFocuses(focuses);
     setJoinedChallengeIds(joined);
     setCustomChallenges(custom);
+    setBadges(badgeEval.badges);
     setCategories(StorageService.getCategories());
     setTemplates(StorageService.getTemplates());
+
+    if (notifyNewBadges && badgeEval.newlyUnlocked.length > 0) {
+      badgeEval.newlyUnlocked.forEach((b) => {
+        addToast({
+          type: 'success',
+          title: `¡Insignia desbloqueada: ${b.definition.name}!`,
+          description: `${b.definition.subtitle} · ${b.qualifyingHabitTitle || b.definition.description}`,
+        });
+      });
+    }
   };
 
   const addToast = (toast: Omit<ToastMessage, 'id'>) => {
@@ -100,16 +177,20 @@ export default function App() {
         user.timezone
       );
 
-      refreshData(user);
+      refreshData(user, true);
 
-      // Toast feedback
+      // Toast feedback & Contextual Journaling prompt
       if (!previousCompleted && result.log.isCompleted) {
+        if (result.habit.contextualJournalingEnabled !== false) {
+          setJournalPrompt({ habit: result.habit, log: result.log });
+        }
         addToast({
           type: 'success',
           title: `¡${result.habit.title} completado!`,
           description: `Racha en ${result.habit.currentStreak} días consecutivos.`,
           onUndo: () => {
             // Rollback check-in
+            setJournalPrompt(null);
             StorageService.checkInHabit(user.id, habitId, undefined, false, user.timezone);
             refreshData(user);
             addToast({
@@ -136,6 +217,53 @@ export default function App() {
     }
   };
 
+  // Save Contextual Journal (Energy 1-5, Mood Tag, optional quick note)
+  const handleSaveJournal = (habitId: string, payload: JournalSavePayload) => {
+    if (!user) return;
+    StorageService.saveLogContext(
+      user.id,
+      habitId,
+      {
+        energyLevel: payload.energyLevel,
+        moodTag: payload.moodTag,
+        journalEntry: payload.journalEntry,
+      },
+      user.timezone
+    );
+
+    if (payload.appendToRitualNotes && payload.journalEntry?.trim()) {
+      const targetHabit = allHabits.find((h) => h.id === habitId);
+      if (targetHabit) {
+        const dateLabel = new Intl.DateTimeFormat('es-ES', {
+          day: '2-digit',
+          month: 'short',
+        }).format(new Date());
+        const existingNotes = (targetHabit.notes || '').trim();
+        const appended = `- **${dateLabel}:** ${payload.journalEntry.trim()}`;
+        const nextNotes = existingNotes ? `${existingNotes}\n${appended}` : appended;
+        StorageService.updateHabit(user.id, habitId, { notes: nextNotes.slice(0, 2000) });
+      }
+    }
+
+    setJournalPrompt(null);
+    refreshData(user);
+
+    const moodLabel = getMoodMeta(payload.moodTag)?.label;
+    const summaryParts = [
+      payload.energyLevel ? `Energía ${payload.energyLevel}/5` : null,
+      moodLabel || null,
+    ].filter(Boolean);
+
+    addToast({
+      type: 'success',
+      title: 'Diario contextual guardado',
+      description:
+        summaryParts.length > 0
+          ? `${summaryParts.join(' · ')} correlacionado en Estadísticas.`
+          : 'Nota de sesión registrada correctamente.',
+    });
+  };
+
   // Save Habit (create or update)
   const handleSaveHabit = (habitData: {
     title: string;
@@ -146,18 +274,29 @@ export default function App() {
     reminderTime?: string;
     notes?: string;
     isActive: boolean;
+    contextualJournalingEnabled: boolean;
+    todayContext?: JournalSavePayload;
   }) => {
     if (!user) return;
+    const { todayContext, ...habitFields } = habitData;
 
     if (habitToEdit) {
-      StorageService.updateHabit(user.id, habitToEdit.id, habitData);
+      StorageService.updateHabit(user.id, habitToEdit.id, habitFields);
+      if (todayContext) {
+        StorageService.saveLogContext(
+          user.id,
+          habitToEdit.id,
+          todayContext,
+          user.timezone
+        );
+      }
       addToast({
         type: 'success',
         title: 'Hábito actualizado',
         description: `Los cambios en "${habitData.title}" fueron guardados.`,
       });
     } else {
-      StorageService.createHabit(user.id, habitData);
+      StorageService.createHabit(user.id, habitFields);
       addToast({
         type: 'success',
         title: 'Hábito creado con éxito',
@@ -186,6 +325,13 @@ export default function App() {
         ? `"${habit.title}" volverá a aparecer en tu vista diaria.`
         : `"${habit.title}" ha sido pausado sin borrar su historial.`,
     });
+  };
+
+  // Reorder daily habit sequence
+  const handleReorderHabits = (orderedHabitIds: string[]) => {
+    if (!user) return;
+    StorageService.reorderHabits(user.id, orderedHabitIds);
+    refreshData(user);
   };
 
   // Delete Habit
@@ -295,6 +441,56 @@ export default function App() {
     });
   };
 
+  // Sunday Weekly Reflection & Weekly Focus Intent handlers
+  const handleSaveWeeklyFocus = (intent: string, reflectionNote?: string) => {
+    if (!user) return;
+    const saved = StorageService.saveWeeklyFocus(user.id, intent, reflectionNote, user.timezone);
+    setWeeklyFocus(saved);
+    setIsWeeklyReflectionOpen(false);
+    addToast({
+      type: 'success',
+      title: 'Enfoque semanal fijado',
+      description: `"${saved.intent}" guiará tu próxima semana.`,
+    });
+  };
+
+  const handleDismissWeeklyReflection = () => {
+    if (user) {
+      StorageService.markWeeklyReflectionSeen(user.id, getSundayWeekKey(user.timezone));
+    }
+    setIsWeeklyReflectionOpen(false);
+  };
+
+  // Adaptive Reminder handlers
+  const handleApplyReminderTime = (habitId: string, newReminderTime: string) => {
+    if (!user) return;
+    const updated = StorageService.updateHabit(user.id, habitId, { reminderTime: newReminderTime });
+    refreshData(user);
+    addToast({
+      type: 'success',
+      title: 'Recordatorio reprogramado',
+      description: `"${updated.title}" ahora está programado para las ${newReminderTime}.`,
+    });
+  };
+
+  const handleTriggerPushAlert = (suggestion: AdaptiveReminderSuggestion) => {
+    if (!user) return;
+    addToast({
+      type: 'reminder',
+      metaLabel: 'Impulso Diario · Alerta push adaptativa',
+      title: `Pendiente hoy: ${suggestion.habit.title}`,
+      description: suggestion.reason,
+      actionLabel: 'Completar ahora',
+      onAction: () => handleCheckIn(suggestion.habit.id, undefined, true),
+      secondaryLabel: `Ajustar a ${suggestion.suggestedTime}`,
+      onSecondaryAction: () => handleApplyReminderTime(suggestion.habit.id, suggestion.suggestedTime),
+    });
+    tryDispatchBrowserPushNotification(
+      `Impulso Diario · ${suggestion.habit.title}`,
+      suggestion.reason
+    );
+  };
+
   // Challenge handlers
   const handleToggleJoinChallenge = (challengeId: string) => {
     if (!user) return;
@@ -345,6 +541,65 @@ export default function App() {
     });
   };
 
+  // Category Manager handlers
+  const handleCreateCategory = (data: {
+    name: string;
+    iconName: string;
+    colorHex: string;
+    bioluminescentTheme?: import('./types').BioluminescentThemeId;
+  }) => {
+    if (!user) return;
+    const created = StorageService.createCategory(data);
+    refreshData(user);
+    addToast({
+      type: 'success',
+      title: 'Categoría creada',
+      description: `"${created.name}" ya está disponible para organizar tus hábitos.`,
+    });
+  };
+
+  const handleUpdateCategory = (
+    categoryId: number,
+    updates: {
+      name: string;
+      iconName: string;
+      colorHex: string;
+      bioluminescentTheme?: import('./types').BioluminescentThemeId;
+    }
+  ) => {
+    if (!user) return;
+    const updated = StorageService.updateCategory(categoryId, updates);
+    refreshData(user);
+    addToast({
+      type: 'success',
+      title: 'Categoría actualizada',
+      description: `Se actualizaron el nombre, color e iluminación de "${updated.name}".`,
+    });
+  };
+
+  const handleDeleteCategory = (categoryId: number) => {
+    if (!user) return;
+    const target = categories.find((c) => c.id === categoryId);
+    const result = StorageService.deleteCategory(user.id, categoryId);
+    if (!result.deleted) {
+      addToast({
+        type: 'error',
+        title: 'No se pudo eliminar',
+        description: 'Debes mantener al menos una categoría activa.',
+      });
+      return;
+    }
+    refreshData(user);
+    addToast({
+      type: 'info',
+      title: 'Categoría eliminada',
+      description:
+        result.reassignedCount > 0 && result.fallbackCategory
+          ? `"${target?.name || 'Categoría'}" eliminada. ${result.reassignedCount} hábito(s) movido(s) a "${result.fallbackCategory.name}".`
+          : `"${target?.name || 'Categoría'}" fue eliminada.`,
+    });
+  };
+
   // Quick Demo Access from Landing Page
   const handleTryDemo = () => {
     const demoUser = StorageService.getOrCreateDemoUser();
@@ -359,7 +614,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090D16] text-[#dfe2ef] flex flex-col selection:bg-[#10B981]/30 selection:text-white">
+    <div className="min-h-screen bg-white text-[#17191c] flex flex-col selection:bg-[#fbe1d1] selection:text-[#5d2a1a]">
       {/* 3-Zone Navigation Header */}
       <Navbar
         currentRoute={currentRoute}
@@ -377,7 +632,13 @@ export default function App() {
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+      <main
+        className={
+          currentRoute === 'landing' && !user
+            ? 'flex-1 w-full'
+            : 'flex-1 max-w-[1200px] w-full mx-auto px-5 sm:px-6 py-8 md:py-10'
+        }
+      >
         {currentRoute === 'landing' && !user && (
           <LandingPage
             onStartFree={() => {
@@ -397,9 +658,13 @@ export default function App() {
             user={user}
             habits={todayHabits}
             dailyFocus={dailyFocus}
+            weeklyFocus={weeklyFocus}
             onSaveFocus={handleSaveFocus}
             onToggleFocusComplete={handleToggleFocusComplete}
             onClearFocus={handleClearFocus}
+            onOpenWeeklyReflection={() => setIsWeeklyReflectionOpen(true)}
+            onApplyReminderTime={handleApplyReminderTime}
+            onTriggerPushAlert={handleTriggerPushAlert}
             onCheckIn={handleCheckIn}
             onOpenCreateModal={() => {
               setHabitToEdit(null);
@@ -412,6 +677,7 @@ export default function App() {
             }}
             onTogglePause={handleTogglePause}
             onDeleteHabit={handleDeleteHabit}
+            onReorderHabits={handleReorderHabits}
           />
         )}
 
@@ -441,6 +707,7 @@ export default function App() {
             logs={allLogs}
             dailyFocuses={allDailyFocuses}
             categories={categories}
+            badges={badges}
             joinedChallengeIds={joinedChallengeIds}
             customChallenges={customChallenges}
             onToggleJoin={handleToggleJoinChallenge}
@@ -451,7 +718,24 @@ export default function App() {
         )}
 
         {user && currentRoute === 'stats' && (
-          <StatsView habits={allHabits} logs={allLogs} categories={categories} />
+          <StatsView
+            habits={allHabits}
+            logs={allLogs}
+            categories={categories}
+            badges={badges}
+            userName={user.fullName}
+            timezone={user.timezone}
+            onApplyReminderTime={handleApplyReminderTime}
+            onReportExported={(filename, topCategoryName, weeklyRate) => {
+              addToast({
+                type: 'success',
+                title: 'Reporte semanal PDF generado',
+                description: topCategoryName
+                  ? `Adherencia 7d: ${weeklyRate}% · Top categoría: ${topCategoryName} (${filename})`
+                  : `Archivo guardado como ${filename}`,
+              });
+            }}
+          />
         )}
 
         {user && currentRoute === 'templates' && (
@@ -470,6 +754,12 @@ export default function App() {
         {user && currentRoute === 'profile' && (
           <ProfileView
             user={user}
+            badges={badges}
+            categories={categories}
+            habits={allHabits}
+            onCreateCategory={handleCreateCategory}
+            onUpdateCategory={handleUpdateCategory}
+            onDeleteCategory={handleDeleteCategory}
             onUpdateUser={handleUpdateUser}
             onResetData={handleResetData}
             onLogout={handleLogout}
@@ -477,27 +767,45 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-white/[0.06] py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span>Luminous Momentum © {new Date().getFullYear()} — Habit Tracker & Ritual Formation</span>
-          <div className="flex items-center gap-4 text-slate-400">
-            <span>Zona Horaria: <strong className="text-slate-300 font-mono">{user?.timezone || 'Auto'}</strong></span>
-            <span>·</span>
-            <span>Estilo: <strong className="text-emerald-400">Luminous Emerald</strong></span>
+      {/* Editorial Footer */}
+      <footer className="border-t border-[#ececec] bg-[#fafafb] py-8 text-[13px] text-[#777b86]">
+        <div className="max-w-[1200px] mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <span>Impulso Diario © {new Date().getFullYear()} · Rituales diarios y analítica de constancia</span>
+          <div className="flex items-center gap-4 text-[#777b86]">
+            <span>
+              Zona horaria:{' '}
+              <strong className="text-[#17191c] font-mono font-normal">
+                {user?.timezone || 'Auto'}
+              </strong>
+            </span>
           </div>
         </div>
       </footer>
 
-      {/* Habit Create / Edit Modal */}
+      {/* Habit Create / Edit & Contextual Journaling Modal */}
       <HabitModal
-        isOpen={isHabitModalOpen}
+        isOpen={isHabitModalOpen || Boolean(journalPrompt)}
         onClose={() => {
           setIsHabitModalOpen(false);
           setHabitToEdit(null);
+          setJournalPrompt(null);
         }}
         categories={categories}
         habitToEdit={habitToEdit}
+        mode={journalPrompt ? 'journal' : 'habit'}
+        journalHabit={journalPrompt?.habit || null}
+        journalLog={
+          journalPrompt
+            ? journalPrompt.log
+            : habitToEdit && user
+            ? allLogs.find(
+                (l) =>
+                  l.habitId === habitToEdit.id &&
+                  l.logDate === getTodayDateString(user.timezone)
+              ) || null
+            : null
+        }
+        onSaveJournal={handleSaveJournal}
         onSave={handleSaveHabit}
       />
 
@@ -512,6 +820,22 @@ export default function App() {
           refreshData(loggedUser);
         }}
       />
+
+      {/* Sunday Weekly Reflection & Upcoming Week Focus Modal */}
+      {user && (
+        <WeeklyReflectionModal
+          isOpen={isWeeklyReflectionOpen}
+          habits={allHabits}
+          logs={allLogs}
+          categories={categories}
+          badges={badges}
+          timezone={user.timezone}
+          userName={user.fullName}
+          existingWeeklyFocus={weeklyFocus}
+          onSaveWeeklyFocus={handleSaveWeeklyFocus}
+          onDismiss={handleDismissWeeklyReflection}
+        />
+      )}
 
       {/* Global Toast Alerts */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />

@@ -1,10 +1,24 @@
 export type DayOfWeek = 1 | 2 | 3 | 4 | 5 | 6 | 7; // 1 = Monday, 7 = Sunday
 
+export type EnergyLevel = 1 | 2 | 3 | 4 | 5;
+
+export type MoodTag = 'focused' | 'motivated' | 'calm' | 'tired' | 'stressed';
+
+export type BioluminescentThemeId =
+  | 'auto'
+  | 'cool-blue'
+  | 'warm-amber'
+  | 'emerald'
+  | 'indigo'
+  | 'magenta'
+  | 'custom';
+
 export interface Category {
   id: number;
   name: string;
   iconName: string;
   colorHex: string;
+  bioluminescentTheme?: BioluminescentThemeId;
 }
 
 export interface Habit {
@@ -23,6 +37,8 @@ export interface Habit {
   deletedAt?: string | null;
   reminderTime?: string; // "HH:mm"
   notes?: string;
+  sortOrder?: number;
+  contextualJournalingEnabled?: boolean;
 }
 
 export interface HabitLog {
@@ -32,6 +48,9 @@ export interface HabitLog {
   logDate: string; // YYYY-MM-DD
   completedValue: number;
   isCompleted: boolean;
+  energyLevel?: EnergyLevel;
+  moodTag?: MoodTag;
+  journalEntry?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -83,6 +102,16 @@ export interface DailyFocus {
   updatedAt: string;
 }
 
+export interface WeeklyFocus {
+  id: string;
+  userId: string;
+  weekKey: string; // YYYY-MM-DD of Sunday anchoring the week
+  intent: string;
+  reflectionNote?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type ChallengeKind = 'community' | 'milestone' | 'custom';
 
 export interface Challenge {
@@ -108,6 +137,65 @@ export interface Challenge {
   manualProgress?: number;
   rewardLabel: string;
   endDate?: string;
+}
+
+export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
+
+export interface BadgeDefinition {
+  id: string;
+  name: string;
+  subtitle: string;
+  description: string;
+  tier: BadgeTier;
+  iconName: 'Flame' | 'Shield' | 'Zap' | 'Award' | 'Crown' | 'Compass' | 'Star' | 'Trophy';
+  ruleType: 'habit_streak' | 'simultaneous_streaks' | 'total_completions';
+  threshold: number;
+  secondaryThreshold?: number; // e.g., 3 habits with >= 7d streak
+}
+
+export interface UnlockedBadgeRecord {
+  badgeId: string;
+  unlockedAt: string;
+  habitTitle?: string;
+}
+
+export interface EvaluatedBadge {
+  definition: BadgeDefinition;
+  isUnlocked: boolean;
+  unlockedAt?: string;
+  qualifyingHabitTitle?: string;
+  currentValue: number;
+  targetValue: number;
+  percentage: number;
+}
+
+export interface WeeklyForecastPoint {
+  dayLabel: string;
+  dayOfWeek: number;
+  predictedScore: number;
+  baselineRate: number;
+  zoneType: 'peak' | 'steady' | 'risk';
+  momentumZone: string;
+  optimalWindow: string;
+  focusTip: string;
+}
+
+export interface HabitTimeRecommendation {
+  habitId: string;
+  habitTitle: string;
+  currentReminderTime: string;
+  suggestedOptimalTime: string;
+  expectedLiftPercent: number;
+  rationale: string;
+}
+
+export interface MomentumForecastResult {
+  headline: string;
+  peakMomentumWindow: string;
+  secondaryMomentumWindow: string;
+  weeklyForecast: WeeklyForecastPoint[];
+  habitTimeRecommendations: HabitTimeRecommendation[];
+  generatedAt: string;
 }
 
 export type ViewRoute = 'today' | 'habits' | 'stats' | 'challenges' | 'templates' | 'profile';

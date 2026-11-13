@@ -1,13 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { X, Clock, Calendar, Check, AlertCircle } from 'lucide-react';
-import { Category, DayOfWeek, Habit } from '../../types';
+import { X, AlertCircle, BatteryCharging, Check } from 'lucide-react';
+import {
+  Category,
+  DayOfWeek,
+  EnergyLevel,
+  Habit,
+  HabitLog,
+  MoodTag,
+} from '../../types';
+import { ENERGY_OPTIONS, MOOD_OPTIONS } from '../../services/journaling';
 import { CategoryIcon } from '../common/CategoryIcon';
+import { RitualNotesEditor } from './RitualNotesEditor';
+
+export interface JournalSavePayload {
+  energyLevel?: EnergyLevel;
+  moodTag?: MoodTag;
+  journalEntry?: string;
+  appendToRitualNotes?: boolean;
+}
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   categories: Category[];
   habitToEdit?: Habit | null;
+  mode?: 'habit' | 'journal';
+  journalHabit?: Habit | null;
+  journalLog?: HabitLog | null;
+  onSaveJournal?: (habitId: string, payload: JournalSavePayload) => void;
   onSave: (habitData: {
     title: string;
     categoryId: number;
@@ -17,6 +37,8 @@ interface Props {
     reminderTime?: string;
     notes?: string;
     isActive: boolean;
+    contextualJournalingEnabled: boolean;
+    todayContext?: JournalSavePayload;
   }) => void;
 }
 
@@ -35,6 +57,10 @@ export const HabitModal: React.FC<Props> = ({
   onClose,
   categories,
   habitToEdit,
+  mode = 'habit',
+  journalHabit,
+  journalLog,
+  onSaveJournal,
   onSave,
 }) => {
   const [title, setTitle] = useState('');
@@ -44,9 +70,23 @@ export const HabitModal: React.FC<Props> = ({
   const [scheduledDays, setScheduledDays] = useState<DayOfWeek[]>([1, 2, 3, 4, 5, 6, 7]);
   const [reminderTime, setReminderTime] = useState('');
   const [notes, setNotes] = useState('');
+  const [contextualJournalingEnabled, setContextualJournalingEnabled] = useState(true);
+  const [energyLevel, setEnergyLevel] = useState<EnergyLevel | undefined>(undefined);
+  const [moodTag, setMoodTag] = useState<MoodTag | undefined>(undefined);
+  const [journalEntry, setJournalEntry] = useState('');
+  const [appendToRitualNotes, setAppendToRitualNotes] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    if (mode === 'journal') {
+      setEnergyLevel(journalLog?.energyLevel);
+      setMoodTag(journalLog?.moodTag);
+      setJournalEntry(journalLog?.journalEntry || '');
+      setAppendToRitualNotes(false);
+      setErrors({});
+      return;
+    }
+
     if (habitToEdit) {
       setTitle(habitToEdit.title);
       setCategoryId(habitToEdit.categoryId);
@@ -55,6 +95,10 @@ export const HabitModal: React.FC<Props> = ({
       setScheduledDays(habitToEdit.scheduledDays);
       setReminderTime(habitToEdit.reminderTime || '');
       setNotes(habitToEdit.notes || '');
+      setContextualJournalingEnabled(habitToEdit.contextualJournalingEnabled !== false);
+      setEnergyLevel(journalLog?.energyLevel);
+      setMoodTag(journalLog?.moodTag);
+      setJournalEntry(journalLog?.journalEntry || '');
     } else {
       setTitle('');
       setCategoryId(categories[0]?.id || 1);
@@ -63,9 +107,13 @@ export const HabitModal: React.FC<Props> = ({
       setScheduledDays([1, 2, 3, 4, 5, 6, 7]);
       setReminderTime('');
       setNotes('');
+      setContextualJournalingEnabled(true);
+      setEnergyLevel(undefined);
+      setMoodTag(undefined);
+      setJournalEntry('');
     }
     setErrors({});
-  }, [habitToEdit, isOpen, categories]);
+  }, [habitToEdit, journalHabit, journalLog, mode, isOpen, categories]);
 
   if (!isOpen) return null;
 
@@ -129,30 +177,222 @@ export const HabitModal: React.FC<Props> = ({
       reminderTime: reminderTime.trim() || undefined,
       notes: notes.trim() || undefined,
       isActive: habitToEdit ? habitToEdit.isActive : true,
+      contextualJournalingEnabled,
+      todayContext:
+        habitToEdit && journalLog?.isCompleted && (energyLevel || moodTag || journalEntry.trim())
+          ? {
+              energyLevel,
+              moodTag,
+              journalEntry: journalEntry.trim() || undefined,
+            }
+          : undefined,
     });
     onClose();
   };
 
+  const handleJournalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!journalHabit) return;
+
+    if (!energyLevel && !moodTag && !journalEntry.trim()) {
+      setErrors({
+        journal: 'Selecciona al menos tu nivel de energía o estado de ánimo (o presiona Omitir).',
+      });
+      return;
+    }
+
+    onSaveJournal?.(journalHabit.id, {
+      energyLevel,
+      moodTag,
+      journalEntry: journalEntry.trim() || undefined,
+      appendToRitualNotes,
+    });
+    onClose();
+  };
+
+  if (mode === 'journal' && journalHabit) {
+    const habitCategory = categories.find((c) => c.id === journalHabit.categoryId);
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#17191c]/35 backdrop-blur-sm overflow-y-auto">
+        <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto steep-modal p-6 sm:p-8 my-4">
+          <div className="flex items-start justify-between gap-3 pb-4 border-b border-[#ececec]">
+            <div>
+              <div className="flex items-center gap-2 text-[13px] text-[#979799]">
+                <BatteryCharging className="w-4 h-4 text-[#17191c] shrink-0" />
+                <span>Diario contextual al completar</span>
+                {habitCategory && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span style={{ color: habitCategory.colorHex }}>{habitCategory.name}</span>
+                  </>
+                )}
+              </div>
+              <h2 className="font-signifier font-normal text-[28px] leading-[1.2] text-[#17191c] mt-1">
+                {journalHabit.title}
+              </h2>
+              <p className="text-[14px] text-[#777b86] mt-0.5">
+                Registra tu energía y ánimo para descubrir correlaciones en Estadísticas.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Cerrar"
+              className="p-2 rounded-full text-[#777b86] hover:text-[#17191c] hover:bg-[#f2f2f3] transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <form onSubmit={handleJournalSubmit} className="mt-5 space-y-5">
+            {/* Energy Level 1-5 */}
+            <div>
+              <label className="block text-[13px] text-[#777b86] mb-2">
+                Nivel de energía (1–5)
+              </label>
+              <div className="grid grid-cols-5 gap-2">
+                {ENERGY_OPTIONS.map((opt) => {
+                  const selected = energyLevel === opt.level;
+                  return (
+                    <button
+                      key={opt.level}
+                      type="button"
+                      onClick={() => {
+                        setEnergyLevel(opt.level);
+                        setErrors({});
+                      }}
+                      className={`py-2.5 px-1.5 rounded-[16px] border text-center transition-colors cursor-pointer ${
+                        selected
+                          ? 'bg-[#17191c] border-[#17191c] text-white'
+                          : 'bg-white border-[#ececec] text-[#17191c] hover:bg-[#fafafb]'
+                      }`}
+                    >
+                      <span className="text-[17px] font-medium tabular-nums block">
+                        {opt.level}
+                      </span>
+                      <span
+                        className={`text-[11px] block mt-0.5 ${
+                          selected ? 'text-white/75' : 'text-[#777b86]'
+                        }`}
+                      >
+                        {opt.shortLabel}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Mood Tag */}
+            <div>
+              <label className="block text-[13px] text-[#777b86] mb-2">
+                Estado de ánimo
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {MOOD_OPTIONS.map((opt) => {
+                  const selected = moodTag === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => {
+                        setMoodTag(opt.id);
+                        setErrors({});
+                      }}
+                      className={`px-3.5 py-2.5 rounded-full border text-left transition-colors cursor-pointer flex items-center gap-2 ${
+                        selected
+                          ? 'bg-[#17191c] text-white border-[#17191c]'
+                          : 'bg-white border-[#ececec] text-[#17191c] hover:bg-[#fafafb]'
+                      }`}
+                    >
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: selected ? '#ffffff' : opt.colorHex }}
+                      />
+                      <span className="text-[13px] truncate">{opt.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Quick Note */}
+            <div>
+              <label className="block text-[13px] text-[#777b86] mb-1.5">
+                Nota o aprendizaje breve (opcional)
+              </label>
+              <textarea
+                rows={2}
+                maxLength={240}
+                value={journalEntry}
+                onChange={(e) => setJournalEntry(e.target.value)}
+                placeholder="Ej: Completarlo antes del mediodía mantuvo mi enfoque alto."
+                className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] placeholder-[#a3a6af] text-[14px] focus:outline-none focus:border-[#17191c] resize-none"
+              />
+              {journalEntry.trim().length > 0 && (
+                <label className="mt-2.5 inline-flex items-center gap-2 text-[13px] text-[#777b86] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={appendToRitualNotes}
+                    onChange={(e) => setAppendToRitualNotes(e.target.checked)}
+                    className="rounded border-[#d4d4d8] accent-[#17191c]"
+                  />
+                  <span>Guardar también en las Notas del Ritual Diario de este hábito</span>
+                </label>
+              )}
+            </div>
+
+            {errors.journal && (
+              <p className="text-[13px] text-[#5d2a1a] bg-[#fbe1d1] px-3.5 py-2 rounded-[12px] flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{errors.journal}</span>
+              </p>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#ececec]">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-5 py-2.5 rounded-full bg-transparent hover:bg-[#fafafb] border border-[#17191c]/25 text-[14px] text-[#17191c] transition-colors cursor-pointer"
+              >
+                Omitir
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2.5 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[14px] transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+              >
+                <Check className="w-4 h-4" />
+                <span>Guardar registro</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-lg rounded-2xl bg-[#111827] border border-white/10 shadow-2xl p-6 my-8">
-        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
-          <h2 className="text-lg font-bold text-white">
-            {habitToEdit ? 'Editar Hábito' : 'Crear Nuevo Hábito'}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#17191c]/35 backdrop-blur-sm overflow-y-auto">
+      <div className="relative w-full max-w-xl max-h-[92vh] overflow-y-auto steep-modal p-6 sm:p-8 my-4">
+        <div className="flex items-center justify-between pb-4 border-b border-[#ececec]">
+          <h2 className="font-signifier font-normal text-[28px] leading-[1.2] text-[#17191c]">
+            {habitToEdit ? 'Editar hábito' : 'Crear nuevo hábito'}
           </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+            aria-label="Cerrar"
+            className="p-2 rounded-full text-[#777b86] hover:text-[#17191c] hover:bg-[#f2f2f3] transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-5">
           {/* Title */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-              Título del Hábito *
+            <label className="block text-[13px] text-[#777b86] mb-1.5">
+              Título del hábito *
             </label>
             <input
               type="text"
@@ -169,23 +409,23 @@ export const HabitModal: React.FC<Props> = ({
                 }
               }}
               placeholder="Ej: Tomar 8 vasos de agua, Meditar, Correr..."
-              className="w-full px-3.5 py-2.5 rounded-lg bg-[#090D16] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/20 transition-all"
+              className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] placeholder-[#a3a6af] text-[15px] focus:outline-none focus:border-[#17191c] transition-colors"
             />
-            <div className="flex items-center justify-between mt-1 text-[11px]">
+            <div className="flex items-center justify-between mt-1.5 text-[12px]">
               {errors.title ? (
-                <span className="text-red-400 flex items-center gap-1 font-medium">
-                  <AlertCircle className="w-3 h-3" /> {errors.title}
+                <span className="text-[#b91c1c] flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" /> {errors.title}
                 </span>
               ) : (
-                <span className="text-slate-500">Sé específico y conciso.</span>
+                <span className="text-[#979799]">Sé específico y conciso.</span>
               )}
-              <span className="text-slate-500 tabular-nums">{title.length}/60</span>
+              <span className="text-[#979799] tabular-nums">{title.length}/60</span>
             </div>
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-[13px] text-[#777b86] mb-1.5">
               Categoría
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-36 overflow-y-auto pr-1">
@@ -196,19 +436,22 @@ export const HabitModal: React.FC<Props> = ({
                     key={cat.id}
                     type="button"
                     onClick={() => setCategoryId(cat.id)}
-                    className={`flex items-center gap-2 p-2 rounded-lg border text-left text-xs transition-all cursor-pointer ${
+                    className={`flex items-center gap-2 px-3 py-2 rounded-[14px] border text-left text-[13px] transition-colors cursor-pointer ${
                       isSelected
-                        ? 'bg-[#1E293B] border-emerald-500 text-white shadow-sm ring-1 ring-emerald-500/30'
-                        : 'bg-[#090D16] border-white/10 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                        ? 'bg-[#17191c] border-[#17191c] text-white'
+                        : 'bg-white border-[#ececec] text-[#17191c] hover:bg-[#fafafb]'
                     }`}
                   >
                     <div
-                      className="w-6 h-6 rounded flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${cat.colorHex}25`, color: cat.colorHex }}
+                      className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
+                      style={{
+                        backgroundColor: isSelected ? 'rgba(255,255,255,0.14)' : `${cat.colorHex}18`,
+                        color: isSelected ? '#ffffff' : cat.colorHex,
+                      }}
                     >
                       <CategoryIcon name={cat.iconName} className="w-3.5 h-3.5" />
                     </div>
-                    <span className="truncate font-medium">{cat.name}</span>
+                    <span className="truncate">{cat.name}</span>
                   </button>
                 );
               })}
@@ -218,7 +461,7 @@ export const HabitModal: React.FC<Props> = ({
           {/* Target Value & Unit */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-[13px] text-[#777b86] mb-1.5">
                 Meta diaria *
               </label>
               <input
@@ -227,15 +470,15 @@ export const HabitModal: React.FC<Props> = ({
                 max="9999"
                 value={targetValue}
                 onChange={(e) => setTargetValue(parseInt(e.target.value) || 1)}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-[#090D16] border border-white/15 text-white text-sm focus:outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/20 tabular-nums"
+                className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[15px] focus:outline-none focus:border-[#17191c] tabular-nums"
               />
-              <span className="text-[11px] text-slate-500 mt-1 block">
+              <span className="text-[12px] text-[#979799] mt-1 block">
                 1 para hábitos de un solo clic
               </span>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-[13px] text-[#777b86] mb-1.5">
                 Unidad de medida
               </label>
               <input
@@ -244,39 +487,39 @@ export const HabitModal: React.FC<Props> = ({
                 value={unitLabel}
                 onChange={(e) => setUnitLabel(e.target.value)}
                 placeholder="vez, vasos, min, páginas..."
-                className="w-full px-3.5 py-2.5 rounded-lg bg-[#090D16] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/20"
+                className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] placeholder-[#a3a6af] text-[15px] focus:outline-none focus:border-[#17191c]"
               />
-              <span className="text-[11px] text-slate-500 mt-1 block">Ej: vasos, min, km</span>
+              <span className="text-[12px] text-[#979799] mt-1 block">Ej: vasos, min, km</span>
             </div>
           </div>
 
           {/* Frequency Days */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-[13px] text-[#777b86]">
                 Días programados *
               </label>
-              <div className="flex items-center gap-2 text-[11px]">
+              <div className="flex items-center gap-2 text-[12px]">
                 <button
                   type="button"
                   onClick={() => setPresetDays('all')}
-                  className="text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
+                  className="text-[#777b86] hover:text-[#17191c] transition-colors cursor-pointer"
                 >
                   Todos
                 </button>
-                <span className="text-slate-600">·</span>
+                <span className="text-[#a3a6af]">·</span>
                 <button
                   type="button"
                   onClick={() => setPresetDays('weekdays')}
-                  className="text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
+                  className="text-[#777b86] hover:text-[#17191c] transition-colors cursor-pointer"
                 >
                   L-V
                 </button>
-                <span className="text-slate-600">·</span>
+                <span className="text-[#a3a6af]">·</span>
                 <button
                   type="button"
                   onClick={() => setPresetDays('weekend')}
-                  className="text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
+                  className="text-[#777b86] hover:text-[#17191c] transition-colors cursor-pointer"
                 >
                   S-D
                 </button>
@@ -291,10 +534,10 @@ export const HabitModal: React.FC<Props> = ({
                     key={day}
                     type="button"
                     onClick={() => toggleDay(day)}
-                    className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                    className={`flex-1 py-2 rounded-full text-[13px] font-medium border transition-colors cursor-pointer ${
                       active
-                        ? 'bg-[#10B981] border-[#34D399] text-[#003824] shadow-[0_0_10px_rgba(16,185,129,0.3)]'
-                        : 'bg-[#090D16] border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                        ? 'bg-[#17191c] border-[#17191c] text-white'
+                        : 'bg-white border-[#ececec] text-[#777b86] hover:text-[#17191c] hover:border-[#17191c]/30'
                     }`}
                     title={full}
                   >
@@ -304,57 +547,125 @@ export const HabitModal: React.FC<Props> = ({
               })}
             </div>
             {errors.days && (
-              <span className="text-red-400 text-[11px] flex items-center gap-1 font-medium mt-1">
-                <AlertCircle className="w-3 h-3" /> {errors.days}
+              <span className="text-[#b91c1c] text-[12px] flex items-center gap-1 mt-1.5">
+                <AlertCircle className="w-3.5 h-3.5" /> {errors.days}
               </span>
             )}
           </div>
 
-          {/* Reminder Time */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Reminder Time & Contextual Journaling Toggle */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Hora de recordatorio (Opcional)
+              <label className="block text-[13px] text-[#777b86] mb-1.5">
+                Hora de recordatorio (opcional)
               </label>
-              <div className="relative">
-                <input
-                  type="time"
-                  value={reminderTime}
-                  onChange={(e) => setReminderTime(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#090D16] border border-white/15 text-white text-sm focus:outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/20"
-                />
-              </div>
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c]"
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Notas / Propósito
+              <label className="block text-[13px] text-[#777b86] mb-1.5">
+                Diario contextual
               </label>
-              <input
-                type="text"
-                maxLength={80}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Ej: Para mantener energía en la tarde"
-                className="w-full px-3.5 py-2.5 rounded-lg bg-[#090D16] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/20"
-              />
+              <button
+                type="button"
+                onClick={() => setContextualJournalingEnabled((prev) => !prev)}
+                className={`w-full px-4 py-2.5 rounded-[16px] border text-left text-[13px] flex items-center justify-between transition-colors cursor-pointer ${
+                  contextualJournalingEnabled
+                    ? 'bg-[#f2f2f3] border-[#17191c] text-[#17191c]'
+                    : 'bg-white border-[#ececec] text-[#777b86] hover:text-[#17191c]'
+                }`}
+              >
+                <span>Energía y ánimo al completar</span>
+                <span className="font-medium">
+                  {contextualJournalingEnabled ? 'Activo' : 'Inactivo'}
+                </span>
+              </button>
             </div>
           </div>
 
+          {/* Inline Today Context when editing an already completed habit */}
+          {habitToEdit && journalLog?.isCompleted && (
+            <div className="pt-4 border-t border-[#ececec] space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] text-[#777b86]">
+                  Registro contextual de hoy
+                </span>
+                <span className="text-[12px] text-[#17191c] font-medium">Completado hoy</span>
+              </div>
+              <div className="grid grid-cols-5 gap-1.5">
+                {ENERGY_OPTIONS.map((opt) => {
+                  const selected = energyLevel === opt.level;
+                  return (
+                    <button
+                      key={opt.level}
+                      type="button"
+                      onClick={() => setEnergyLevel(opt.level)}
+                      className={`py-1.5 rounded-full border text-[12px] font-medium tabular-nums transition-colors cursor-pointer ${
+                        selected
+                          ? 'bg-[#17191c] border-[#17191c] text-white'
+                          : 'bg-white border-[#ececec] text-[#777b86] hover:text-[#17191c]'
+                      }`}
+                      title={`Energía ${opt.level}/5 (${opt.shortLabel})`}
+                    >
+                      E:{opt.level}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {MOOD_OPTIONS.map((opt) => {
+                  const selected = moodTag === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setMoodTag(opt.id)}
+                      className={`px-3 py-1 rounded-full border text-[12px] transition-colors cursor-pointer ${
+                        selected
+                          ? 'bg-[#17191c] text-white border-[#17191c]'
+                          : 'bg-white border-[#ececec] text-[#777b86] hover:text-[#17191c]'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Daily Ritual Notes (Markdown Editor) */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-[13px] text-[#777b86]">
+                Notas del ritual diario
+              </label>
+              <span className="text-[12px] text-[#979799]">
+                Aprendizajes y contexto tras cada sesión
+              </span>
+            </div>
+            <RitualNotesEditor value={notes} onChange={setNotes} maxLength={2000} />
+          </div>
+
           {/* Action buttons */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.08]">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#ececec]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-[#1E293B] hover:bg-[#27354A] border border-white/10 text-xs font-semibold text-slate-300 transition-colors cursor-pointer"
+              className="px-5 py-2.5 rounded-full bg-transparent hover:bg-[#fafafb] border border-[#17191c]/25 text-[14px] text-[#17191c] transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-lg bg-[#10B981] hover:bg-[#34D399] text-[#003824] text-xs font-bold transition-all shadow-[0_0_16px_rgba(16,185,129,0.35)] cursor-pointer"
+              className="px-6 py-2.5 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[14px] transition-colors cursor-pointer"
             >
-              {habitToEdit ? 'Guardar Cambios' : 'Crear Hábito'}
+              {habitToEdit ? 'Guardar cambios' : 'Crear hábito'}
             </button>
           </div>
         </form>

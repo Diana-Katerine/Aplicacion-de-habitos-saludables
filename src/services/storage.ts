@@ -1,4 +1,4 @@
-import { Category, Challenge, DailyFocus, Habit, HabitLog, HabitTemplate, HabitWithTodayLog, User, DayOfWeek } from '../types';
+import { Category, Challenge, DailyFocus, EnergyLevel, Habit, HabitLog, HabitTemplate, HabitWithTodayLog, MoodTag, User, DayOfWeek, WeeklyFocus } from '../types';
 
 export const DEFAULT_CATEGORIES: Category[] = [
   { id: 1, name: 'Hidratación', iconName: 'Droplets', colorHex: '#0EA5E9' },
@@ -101,6 +101,8 @@ const STORAGE_KEYS = {
   TEMPLATES: 'lm_templates',
   THEME: 'lm_theme',
   DAILY_FOCUS: 'lm_daily_focus',
+  WEEKLY_FOCUS: 'lm_weekly_focus',
+  WEEKLY_REFLECTION_SEEN: 'lm_weekly_reflection_seen',
   JOINED_CHALLENGES: 'lm_joined_challenges',
   CUSTOM_CHALLENGES: 'lm_custom_challenges',
 };
@@ -144,6 +146,29 @@ export function detectBrowserTimezone(): string {
   } catch {
     return 'UTC';
   }
+}
+
+function getLocalAnchorDate(timezone?: string): Date {
+  const todayStr = getTodayDateString(timezone);
+  const parts = todayStr.split('-').map(Number);
+  if (parts.length === 3 && parts.every((n) => !Number.isNaN(n))) {
+    return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+  }
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+}
+
+// Returns YYYY-MM-DD of the Sunday starting the current Sunday-Saturday week
+export function getSundayWeekKey(timezone?: string): string {
+  const anchor = getLocalAnchorDate(timezone);
+  const sundayOffset = anchor.getDay(); // 0 = Sunday, 1 = Mon, ... 6 = Sat
+  const sunday = new Date(anchor);
+  sunday.setDate(anchor.getDate() - sundayOffset);
+  return formatDate(sunday);
+}
+
+export function isTodaySunday(timezone?: string): boolean {
+  return getLocalAnchorDate(timezone).getDay() === 0;
 }
 
 // Generate sample realistic past logs
@@ -245,12 +270,15 @@ function generateSeedData(userId: string) {
   const logs: HabitLog[] = [];
   const today = new Date();
 
+  const moodCycle: MoodTag[] = ['focused', 'motivated', 'calm', 'focused', 'calm', 'tired', 'stressed'];
+
   // Populate trailing 45 days
   for (let i = 45; i >= 1; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const dateStr = formatDate(d);
     const dayOfWeek = getDayOfWeek(d);
+    const dayEnergyBase = dayOfWeek <= 4 ? 4 : dayOfWeek === 5 ? 3 : 3;
 
     habits.forEach((habit) => {
       if (habit.scheduledDays.includes(dayOfWeek)) {
@@ -261,6 +289,14 @@ function generateSeedData(userId: string) {
           ? habit.targetValue
           : Math.floor((habit.targetValue * (pseudoRandom % 70)) / 100);
 
+        const energyOffset = (pseudoRandom % 3) - 1;
+        const energyLevel = isCompleted
+          ? (Math.max(1, Math.min(5, dayEnergyBase + energyOffset)) as EnergyLevel)
+          : undefined;
+        const moodTag = isCompleted
+          ? moodCycle[(d.getDate() + habit.categoryId + i) % moodCycle.length]
+          : undefined;
+
         logs.push({
           id: `log-${habit.id}-${dateStr}`,
           habitId: habit.id,
@@ -268,6 +304,8 @@ function generateSeedData(userId: string) {
           logDate: dateStr,
           completedValue,
           isCompleted,
+          energyLevel,
+          moodTag,
           createdAt: d.toISOString(),
           updatedAt: d.toISOString(),
         });
@@ -299,6 +337,8 @@ function generateSeedData(userId: string) {
     logDate: todayStr,
     completedValue: 1,
     isCompleted: true,
+    energyLevel: 4,
+    moodTag: 'calm',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
@@ -312,6 +352,8 @@ function generateSeedData(userId: string) {
       logDate: todayStr,
       completedValue: 1,
       isCompleted: true,
+      energyLevel: 5,
+      moodTag: 'focused',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -382,6 +424,82 @@ export class StorageService {
     return DEFAULT_CATEGORIES;
   }
 
+  static saveCategories(categories: Category[]): void {
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+  }
+
+  static createCategory(data: {
+    name: string;
+    iconName: string;
+    colorHex: string;
+    bioluminescentTheme?: Category['bioluminescentTheme'];
+  }): Category {
+    const categories = this.getCategories();
+    const nextId = categories.reduce((max, c) => Math.max(max, c.id), 0) + 1;
+    const newCategory: Category = {
+      id: nextId,
+      name: data.name.trim(),
+      iconName: data.iconName,
+      colorHex: data.colorHex,
+      bioluminescentTheme: data.bioluminescentTheme,
+    };
+    this.saveCategories([...categories, newCategory]);
+    return newCategory;
+  }
+
+  static updateCategory(
+    categoryId: number,
+    updates: Partial<Omit<Category, 'id'>>
+  ): Category {
+    const categories = this.getCategories();
+    const index = categories.findIndex((c) => c.id === categoryId);
+    if (index === -1) throw new Error('Categoría no encontrada');
+
+    const updated: Category = {
+      ...categories[index],
+      ...updates,
+      name: updates.name !== undefined ? updates.name.trim() : categories[index].name,
+    };
+    const next = [...categories];
+    next[index] = updated;
+    this.saveCategories(next);
+    return updated;
+  }
+
+  static deleteCategory(
+    userId: string,
+    categoryId: number
+  ): { deleted: boolean; reassignedCount: number; fallbackCategory?: Category } {
+    const categories = this.getCategories();
+    if (categories.length <= 1) {
+      return { deleted: false, reassignedCount: 0 };
+    }
+
+    const remaining = categories.filter((c) => c.id !== categoryId);
+    if (remaining.length === categories.length) {
+      return { deleted: false, reassignedCount: 0 };
+    }
+
+    const fallbackCategory = remaining[0];
+    this.saveCategories(remaining);
+
+    // Reassign habits belonging to deleted category
+    const allHabits = this.getAllHabits();
+    let reassignedCount = 0;
+    const updatedHabits = allHabits.map((h) => {
+      if (h.userId === userId && h.categoryId === categoryId) {
+        reassignedCount += 1;
+        return { ...h, categoryId: fallbackCategory.id, updatedAt: new Date().toISOString() };
+      }
+      return h;
+    });
+    if (reassignedCount > 0) {
+      this.saveHabits(updatedHabits);
+    }
+
+    return { deleted: true, reassignedCount, fallbackCategory };
+  }
+
   static getTemplates(): HabitTemplate[] {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
@@ -397,7 +515,16 @@ export class StorageService {
       const data = localStorage.getItem(STORAGE_KEYS.HABITS);
       if (data) {
         const habits: Habit[] = JSON.parse(data);
-        return habits.filter((h) => h.userId === userId && !h.deletedAt);
+        return habits
+          .filter((h) => h.userId === userId && !h.deletedAt)
+          .map((h, idx) => ({ habit: h, idx }))
+          .sort((a, b) => {
+            const orderA = a.habit.sortOrder ?? a.idx;
+            const orderB = b.habit.sortOrder ?? b.idx;
+            if (orderA !== orderB) return orderA - orderB;
+            return a.idx - b.idx;
+          })
+          .map((entry) => entry.habit);
       }
     } catch (e) {
       console.error(e);
@@ -621,12 +748,49 @@ export class StorageService {
     };
   }
 
+  // Save contextual journaling metadata (energy level, mood tag, optional note) onto a habit log
+  static saveLogContext(
+    userId: string,
+    habitId: string,
+    context: {
+      energyLevel?: EnergyLevel;
+      moodTag?: MoodTag;
+      journalEntry?: string;
+    },
+    timezone?: string,
+    targetDate?: string
+  ): HabitLog | null {
+    const logDate = targetDate || getTodayDateString(timezone);
+    const allLogs = this.getLogs(userId);
+    const idx = allLogs.findIndex((l) => l.habitId === habitId && l.logDate === logDate);
+    if (idx === -1) return null;
+
+    const updated: HabitLog = {
+      ...allLogs[idx],
+      energyLevel: context.energyLevel ?? allLogs[idx].energyLevel,
+      moodTag: context.moodTag ?? allLogs[idx].moodTag,
+      journalEntry:
+        context.journalEntry !== undefined
+          ? context.journalEntry.trim() || undefined
+          : allLogs[idx].journalEntry,
+      updatedAt: new Date().toISOString(),
+    };
+    allLogs[idx] = updated;
+    this.saveLogs(allLogs);
+    return updated;
+  }
+
   // Create habit
   static createHabit(
     userId: string,
     habitData: Omit<Habit, 'id' | 'userId' | 'currentStreak' | 'bestStreak' | 'createdAt' | 'updatedAt'>
   ): Habit {
     const allHabits = this.getAllHabits();
+    const userHabits = this.getHabits(userId);
+    const maxSortOrder = userHabits.reduce(
+      (max, h, idx) => Math.max(max, h.sortOrder ?? idx),
+      -1
+    );
     const now = new Date().toISOString();
     const newHabit: Habit = {
       ...habitData,
@@ -634,6 +798,7 @@ export class StorageService {
       userId,
       currentStreak: 0,
       bestStreak: 0,
+      sortOrder: habitData.sortOrder ?? maxSortOrder + 1,
       createdAt: now,
       updatedAt: now,
     };
@@ -641,6 +806,52 @@ export class StorageService {
     allHabits.push(newHabit);
     this.saveHabits(allHabits);
     return newHabit;
+  }
+
+  // Persist user's custom sequence for daily routines
+  static reorderHabits(userId: string, orderedVisibleIds: string[]): Habit[] {
+    const allHabits = this.getAllHabits();
+    const currentUserHabits = this.getHabits(userId);
+    if (currentUserHabits.length === 0 || orderedVisibleIds.length === 0) {
+      return currentUserHabits;
+    }
+
+    const habitById = new Map(currentUserHabits.map((h) => [h.id, h]));
+    const visibleSet = new Set(orderedVisibleIds.filter((id) => habitById.has(id)));
+    const reorderedVisible = orderedVisibleIds
+      .map((id) => habitById.get(id))
+      .filter((h): h is Habit => Boolean(h));
+
+    // Place reordered visible habits into the exact slots they occupied
+    let visibleCursor = 0;
+    const mergedUserSequence = currentUserHabits.map((habit) => {
+      if (visibleSet.has(habit.id) && visibleCursor < reorderedVisible.length) {
+        const nextHabit = reorderedVisible[visibleCursor];
+        visibleCursor += 1;
+        return nextHabit;
+      }
+      return habit;
+    });
+
+    const now = new Date().toISOString();
+    const updatedOrderById = new Map<string, number>();
+    mergedUserSequence.forEach((h, index) => {
+      updatedOrderById.set(h.id, index);
+    });
+
+    const nextAllHabits = allHabits.map((h) => {
+      if (h.userId === userId && updatedOrderById.has(h.id)) {
+        return {
+          ...h,
+          sortOrder: updatedOrderById.get(h.id),
+          updatedAt: now,
+        };
+      }
+      return h;
+    });
+
+    this.saveHabits(nextAllHabits);
+    return this.getHabits(userId);
   }
 
   // Update habit
@@ -765,6 +976,92 @@ export class StorageService {
     localStorage.setItem(STORAGE_KEYS.DAILY_FOCUS, JSON.stringify(filtered));
   }
 
+  // Sunday Weekly Reflection & Weekly Focus Intent Methods
+  static hasSeenWeeklyReflection(userId: string, weekKey: string): boolean {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.WEEKLY_REFLECTION_SEEN);
+      if (!raw) return false;
+      const map: Record<string, string[]> = JSON.parse(raw);
+      return (map[userId] || []).includes(weekKey);
+    } catch {
+      return false;
+    }
+  }
+
+  static markWeeklyReflectionSeen(userId: string, weekKey: string): void {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.WEEKLY_REFLECTION_SEEN);
+      const map: Record<string, string[]> = raw ? JSON.parse(raw) : {};
+      const current = map[userId] || [];
+      if (!current.includes(weekKey)) {
+        map[userId] = [...current, weekKey];
+        localStorage.setItem(STORAGE_KEYS.WEEKLY_REFLECTION_SEEN, JSON.stringify(map));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  static getWeeklyFocus(userId: string, timezone?: string): WeeklyFocus | null {
+    try {
+      const weekKey = getSundayWeekKey(timezone);
+      const raw = localStorage.getItem(STORAGE_KEYS.WEEKLY_FOCUS);
+      if (!raw) return null;
+      const all: WeeklyFocus[] = JSON.parse(raw);
+      return all.find((f) => f.userId === userId && f.weekKey === weekKey) || null;
+    } catch {
+      return null;
+    }
+  }
+
+  static saveWeeklyFocus(
+    userId: string,
+    intent: string,
+    reflectionNote?: string,
+    timezone?: string
+  ): WeeklyFocus {
+    const weekKey = getSundayWeekKey(timezone);
+    const raw = localStorage.getItem(STORAGE_KEYS.WEEKLY_FOCUS);
+    const all: WeeklyFocus[] = raw ? JSON.parse(raw) : [];
+    const now = new Date().toISOString();
+    const idx = all.findIndex((f) => f.userId === userId && f.weekKey === weekKey);
+
+    let record: WeeklyFocus;
+    if (idx !== -1) {
+      record = {
+        ...all[idx],
+        intent: intent.trim(),
+        reflectionNote: reflectionNote?.trim() || undefined,
+        updatedAt: now,
+      };
+      all[idx] = record;
+    } else {
+      record = {
+        id: `wfocus-${userId}-${weekKey}`,
+        userId,
+        weekKey,
+        intent: intent.trim(),
+        reflectionNote: reflectionNote?.trim() || undefined,
+        createdAt: now,
+        updatedAt: now,
+      };
+      all.push(record);
+    }
+
+    localStorage.setItem(STORAGE_KEYS.WEEKLY_FOCUS, JSON.stringify(all));
+    this.markWeeklyReflectionSeen(userId, weekKey);
+    return record;
+  }
+
+  static clearWeeklyFocus(userId: string, timezone?: string): void {
+    const weekKey = getSundayWeekKey(timezone);
+    const raw = localStorage.getItem(STORAGE_KEYS.WEEKLY_FOCUS);
+    if (!raw) return;
+    const all: WeeklyFocus[] = JSON.parse(raw);
+    const filtered = all.filter((f) => !(f.userId === userId && f.weekKey === weekKey));
+    localStorage.setItem(STORAGE_KEYS.WEEKLY_FOCUS, JSON.stringify(filtered));
+  }
+
   // Challenges & Milestones Methods
   static getDefaultChallenges(): Challenge[] {
     const now = new Date();
@@ -869,7 +1166,7 @@ export class StorageService {
       {
         id: 'ch-mile-3',
         kind: 'milestone',
-        title: 'Centurión Luminous: 100 Check-ins',
+        title: 'Centurión Impulso Diario: 100 Check-ins',
         description:
           'Acumula 100 registros completados en tu historial total. Cada pequeño paso suma.',
         targetCount: 100,
@@ -1109,8 +1406,11 @@ export class StorageService {
   // Reset all user data to seed
   static resetUserData(userId: string): void {
     localStorage.removeItem(STORAGE_KEYS.DAILY_FOCUS);
+    localStorage.removeItem(STORAGE_KEYS.WEEKLY_FOCUS);
+    localStorage.removeItem(STORAGE_KEYS.WEEKLY_REFLECTION_SEEN);
     localStorage.removeItem(STORAGE_KEYS.JOINED_CHALLENGES);
     localStorage.removeItem(STORAGE_KEYS.CUSTOM_CHALLENGES);
+    localStorage.removeItem('lm_unlocked_badges');
     this.initializeSeedData(userId, true);
   }
 }

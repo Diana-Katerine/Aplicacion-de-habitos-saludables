@@ -1,20 +1,39 @@
 import React, { useState } from 'react';
 import {
-  User as UserIcon,
   Globe,
   Bell,
   Download,
   RotateCcw,
   LogOut,
-  Shield,
   Check,
   Palette,
 } from 'lucide-react';
-import { User } from '../../types';
+import { BioluminescentThemeId, Category, EvaluatedBadge, Habit, User } from '../../types';
 import { detectBrowserTimezone, StorageService } from '../../services/storage';
+import { BadgesModule } from '../badges/BadgesModule';
+import { CategoryManager } from './CategoryManager';
 
 interface Props {
   user: User;
+  badges: EvaluatedBadge[];
+  categories: Category[];
+  habits: Habit[];
+  onCreateCategory: (data: {
+    name: string;
+    iconName: string;
+    colorHex: string;
+    bioluminescentTheme?: BioluminescentThemeId;
+  }) => void;
+  onUpdateCategory: (
+    categoryId: number,
+    updates: {
+      name: string;
+      iconName: string;
+      colorHex: string;
+      bioluminescentTheme?: BioluminescentThemeId;
+    }
+  ) => void;
+  onDeleteCategory: (categoryId: number) => void;
   onUpdateUser: (updatedUser: Partial<User>) => void;
   onResetData: () => void;
   onLogout: () => void;
@@ -37,6 +56,12 @@ const COMMON_TIMEZONES = [
 
 export const ProfileView: React.FC<Props> = ({
   user,
+  badges,
+  categories,
+  habits,
+  onCreateCategory,
+  onUpdateCategory,
+  onDeleteCategory,
   onUpdateUser,
   onResetData,
   onLogout,
@@ -48,6 +73,8 @@ export const ProfileView: React.FC<Props> = ({
   const [morningTime, setMorningTime] = useState(user.reminderMorningTime || '08:00');
   const [eveningTime, setEveningTime] = useState(user.reminderEveningTime || '21:00');
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [exportSuccess, setExportSuccess] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,17 +90,15 @@ export const ProfileView: React.FC<Props> = ({
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
-  const [exportSuccess, setExportSuccess] = useState(false);
-
   const handleExportJSON = () => {
     try {
-      const habits = StorageService.getHabits(user.id);
-      const logs = StorageService.getLogs(user.id);
-      const categories = StorageService.getCategories();
+      const userHabits = StorageService.getHabits(user.id);
+      const userLogs = StorageService.getLogs(user.id);
+      const allCategories = StorageService.getCategories();
       const dailyFocuses = StorageService.getAllDailyFocuses(user.id);
 
       const backupPayload = {
-        app: 'Luminous Momentum - Habit Tracker',
+        app: 'Impulso Diario - Habit Tracker',
         version: '1.0.0',
         exportedAt: new Date().toISOString(),
         user: {
@@ -84,15 +109,25 @@ export const ProfileView: React.FC<Props> = ({
           createdAt: user.createdAt,
         },
         metadata: {
-          totalHabits: habits.length,
-          totalLogs: logs.length,
-          categoriesCount: categories.length,
+          totalHabits: userHabits.length,
+          totalLogs: userLogs.length,
+          categoriesCount: allCategories.length,
           dailyFocusesCount: dailyFocuses.length,
+          unlockedBadgesCount: badges.filter((b) => b.isUnlocked).length,
         },
-        habits,
-        logs,
+        habits: userHabits,
+        logs: userLogs,
         dailyFocuses,
-        categories,
+        badges: badges
+          .filter((b) => b.isUnlocked)
+          .map((b) => ({
+            id: b.definition.id,
+            name: b.definition.name,
+            tier: b.definition.tier,
+            unlockedAt: b.unlockedAt,
+            qualifyingHabitTitle: b.qualifyingHabitTitle,
+          })),
+        categories: allCategories,
       };
 
       const jsonString = JSON.stringify(backupPayload, null, 2);
@@ -102,7 +137,7 @@ export const ProfileView: React.FC<Props> = ({
       const safeName = user.fullName.toLowerCase().replace(/[^a-z0-9]/g, '_');
       const dateTag = new Date().toISOString().slice(0, 10);
       a.href = url;
-      a.download = `luminous_habits_backup_${safeName}_${dateTag}.json`;
+      a.download = `impulso_diario_backup_${safeName}_${dateTag}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -116,90 +151,107 @@ export const ProfileView: React.FC<Props> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-8 max-w-4xl">
       {/* Header */}
-      <div className="pb-2 border-b border-white/[0.06]">
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-          Perfil & Configuración
+      <div className="pb-6 border-b border-[#ececec]">
+        <span className="text-[14px] text-[#979799] block">Cuenta &amp; preferencias</span>
+        <h1 className="font-signifier font-normal text-[36px] md:text-[44px] leading-[1.2] tracking-[-0.015em] text-[#17191c] mt-1">
+          Perfil &amp; <em className="italic font-normal">configuración</em>
         </h1>
-        <p className="text-sm text-slate-400 mt-0.5">
-          Ajustes de cuenta, zona horaria IANA para cortes de medianoche y recordatorios diarios.
+        <p className="text-[16px] text-[#777b86] mt-1">
+          Ajustes de cuenta, categorías personalizadas, zona horaria IANA y recordatorios diarios.
         </p>
       </div>
 
+      {/* Streak Badges Showcase */}
+      <BadgesModule badges={badges} />
+
+      {/* Category Manager */}
+      <CategoryManager
+        categories={categories}
+        habits={habits}
+        onCreateCategory={onCreateCategory}
+        onUpdateCategory={onUpdateCategory}
+        onDeleteCategory={onDeleteCategory}
+      />
+
       <form onSubmit={handleSave} className="space-y-6">
         {/* User Card */}
-        <div className="rounded-xl p-5 md:p-6 bg-[#0F172A] border border-white/[0.08]">
+        <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-600 to-emerald-400 text-[#003824] flex items-center justify-center font-extrabold text-2xl shrink-0 shadow-[0_0_16px_rgba(16,185,129,0.4)]">
+            <div className="w-16 h-16 rounded-full bg-[#17191c] text-white flex items-center justify-center font-signifier text-[28px] shrink-0">
               {user.fullName.charAt(0)}
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white">{user.fullName}</h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
-                  {user.role}
-                </span>
+              <div className="flex items-center gap-2.5">
+                <h3 className="text-[18px] font-medium text-[#17191c]">{user.fullName}</h3>
+                <span className="text-[12px] text-[#979799]">· {user.role}</span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">{user.email}</p>
-              <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-1">
-                <span>Miembro desde {new Date(user.createdAt).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' })}</span>
+              <p className="text-[14px] text-[#777b86] mt-0.5">{user.email}</p>
+              <div className="flex items-center gap-2 text-[12px] text-[#979799] mt-1">
+                <span>
+                  Miembro desde{' '}
+                  {new Date(user.createdAt).toLocaleDateString('es-ES', {
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </span>
                 <span>·</span>
-                <span className="text-emerald-400 font-mono">Modo Activo</span>
+                <span className="text-[#5d2a1a] font-medium">Modo activo</span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-5 border-t border-white/[0.06]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-5 border-t border-[#ececec]">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Nombre Completo
+              <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                Nombre completo
               </label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-[#090D16] border border-white/15 text-white text-sm focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981]/20"
+                className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Correo Electrónico
+              <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                Correo electrónico
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-[#090D16] border border-white/15 text-white text-sm focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981]/20"
+                className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c]"
               />
             </div>
           </div>
         </div>
 
-        {/* Timezone Configuration (Critical for 00:00 midnight resets) */}
-        <div className="rounded-xl p-5 md:p-6 bg-[#0F172A] border border-white/[0.08]">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
-              <Globe className="w-5 h-5" />
+        {/* Timezone Configuration */}
+        <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-[14px] bg-[#f2f2f3] text-[#17191c] flex items-center justify-center shrink-0">
+              <Globe className="w-4 h-4" />
             </div>
             <div className="flex-1">
-              <h3 className="text-base font-bold text-white tracking-tight">
-                Zona Horaria (Corte de Medianoche 00:00)
+              <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em]">
+                Zona horaria (corte de medianoche 00:00)
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+              <p className="text-[13px] text-[#777b86] mt-1 leading-relaxed">
                 Tus hábitos y rachas se reinician exactamente a las 00:00 de tu hora local. Esta zona horaria fue autodetectada y previene desfasajes de días en tus registros.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 items-end">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                    Zona Horaria IANA
+                  <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                    Zona horaria IANA
                   </label>
                   <select
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#090D16] border border-white/15 text-white text-sm focus:outline-none focus:border-[#10B981] cursor-pointer"
+                    className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c] cursor-pointer"
                   >
                     {!COMMON_TIMEZONES.includes(timezone) && (
                       <option value={timezone}>{timezone} (Detectada)</option>
@@ -212,13 +264,13 @@ export const ProfileView: React.FC<Props> = ({
                   </select>
                 </div>
 
-                <div className="flex items-center gap-3 pt-6">
+                <div>
                   <button
                     type="button"
                     onClick={() => setTimezone(detectBrowserTimezone())}
-                    className="px-3.5 py-2 rounded-lg bg-[#1E293B] hover:bg-[#27354A] border border-white/10 text-xs font-semibold text-slate-300 transition-colors cursor-pointer"
+                    className="px-4 py-2.5 rounded-full bg-transparent hover:bg-[#fafafb] border border-[#17191c]/25 hover:border-[#17191c] text-[13px] text-[#17191c] transition-colors cursor-pointer"
                   >
-                    Autodetectar del Navegador
+                    Autodetectar del navegador
                   </button>
                 </div>
               </div>
@@ -227,56 +279,56 @@ export const ProfileView: React.FC<Props> = ({
         </div>
 
         {/* Reminders / Notifications */}
-        <div className="rounded-xl p-5 md:p-6 bg-[#0F172A] border border-white/[0.08]">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
-              <Bell className="w-5 h-5" />
+        <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-[14px] bg-[#fbe1d1] text-[#5d2a1a] flex items-center justify-center shrink-0">
+              <Bell className="w-4 h-4" />
             </div>
             <div className="flex-1">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-base font-bold text-white tracking-tight">
-                    Recordatorios Diarios
+                  <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em]">
+                    Recordatorios diarios
                   </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Notificaciones en tu dispositivo para arrancar tu mañana y cerrar tu día.
+                  <p className="text-[13px] text-[#777b86] mt-0.5">
+                    Avisos inteligentes para arrancar tu mañana y proteger tus rachas antes de dormir.
                   </p>
                 </div>
 
-                <label className="relative inline-flex items-center cursor-pointer">
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
                   <input
                     type="checkbox"
                     checked={reminderEnabled}
                     onChange={(e) => setReminderEnabled(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-[#1E293B] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#10B981]"></div>
+                  <div className="w-11 h-6 bg-[#f2f2f3] border border-[#ececec] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:shadow-xs after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-[#17191c] peer-checked:border-[#17191c]"></div>
                 </label>
               </div>
 
               {reminderEnabled && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/[0.06]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5 pt-4 border-t border-[#ececec]">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                      Recordatorio Matutino (Inicio de jornada)
+                    <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                      Recordatorio matutino (inicio de jornada)
                     </label>
                     <input
                       type="time"
                       value={morningTime}
                       onChange={(e) => setMorningTime(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-lg bg-[#090D16] border border-white/15 text-white text-sm focus:outline-none focus:border-[#10B981]"
+                      className="w-full px-4 py-2 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                      Revisión Nocturna (Cierre de rachas)
+                    <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                      Revisión nocturna (cierre de rachas)
                     </label>
                     <input
                       type="time"
                       value={eveningTime}
                       onChange={(e) => setEveningTime(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-lg bg-[#090D16] border border-white/15 text-white text-sm focus:outline-none focus:border-[#10B981]"
+                      className="w-full px-4 py-2 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c]"
                     />
                   </div>
                 </div>
@@ -285,18 +337,18 @@ export const ProfileView: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Theme Information */}
-        <div className="rounded-xl p-5 md:p-6 bg-[#0F172A] border border-white/[0.08]">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
-              <Palette className="w-5 h-5" />
+        {/* Editorial Theme Information */}
+        <div className="steep-card-mist p-6">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-[14px] bg-white border border-[#ececec] text-[#17191c] flex items-center justify-center shrink-0">
+              <Palette className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight">
-                Tema Visual: Luminous Momentum
+              <h3 className="text-[16px] font-medium text-[#17191c] tracking-[-0.01em]">
+                Sistema visual editorial · Papel cálido
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Diseño dark mode de alto rendimiento con bioluminiscencia esmeralda (#10B981) y fuego ámbar (#F59E0B) para mínima fatiga visual y máxima recompensa sensorial.
+              <p className="text-[13px] text-[#777b86] mt-0.5 leading-relaxed">
+                Tipografía Signifier sobre papel blanco (#ffffff), tarjetas suaves (#f2f2f3), acentos durazno (#fbe1d1) y halos de categoría adaptativos para lectura serena sin fatiga visual.
               </p>
             </div>
           </div>
@@ -305,7 +357,7 @@ export const ProfileView: React.FC<Props> = ({
         {/* Save button */}
         <div className="flex items-center justify-between pt-2">
           {savedSuccess ? (
-            <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+            <span className="text-[13px] font-medium text-[#5d2a1a] flex items-center gap-1.5">
               <Check className="w-4 h-4" /> Configuración guardada correctamente
             </span>
           ) : (
@@ -314,31 +366,29 @@ export const ProfileView: React.FC<Props> = ({
 
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-lg bg-[#10B981] hover:bg-[#34D399] text-[#003824] text-xs font-bold transition-all shadow-[0_0_16px_rgba(16,185,129,0.35)] cursor-pointer"
+            className="px-6 py-2.5 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[14px] transition-colors cursor-pointer"
           >
-            Guardar Cambios
+            Guardar cambios
           </button>
         </div>
       </form>
 
       {/* Dedicated Local Backup & Data Export Card */}
-      <div className="rounded-xl p-5 md:p-6 bg-[#0F172A] border border-white/[0.08] relative overflow-hidden">
+      <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex items-start gap-3.5 flex-1">
-            <div className="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center shrink-0">
-              <Download className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-[14px] bg-[#f2f2f3] text-[#17191c] flex items-center justify-center shrink-0">
+              <Download className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white tracking-tight">
-                  Copia de Seguridad Local (Exportar JSON)
+                <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em]">
+                  Copia de seguridad local (JSON)
                 </h3>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-wider">
-                  Backup Local
-                </span>
+                <span className="text-[12px] text-[#979799]">· Backup local</span>
               </div>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed max-w-xl">
-                Descarga un archivo JSON estructurado con tu perfil, hábitos activos, metas, días programados y el historial cronológico de todos tus registros diarios (check-ins) para respaldo local en tu equipo.
+              <p className="text-[13px] text-[#777b86] mt-1 leading-relaxed max-w-xl">
+                Descarga un archivo JSON estructurado con tu perfil, hábitos activos, metas, días programados y el historial cronológico completo de tus check-ins.
               </p>
             </div>
           </div>
@@ -347,46 +397,67 @@ export const ProfileView: React.FC<Props> = ({
             <button
               type="button"
               onClick={handleExportJSON}
-              className="px-4 py-2.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold transition-all shadow-[0_0_16px_rgba(56,189,248,0.3)] flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 rounded-full bg-transparent hover:bg-[#fafafb] border border-[#17191c]/25 hover:border-[#17191c] text-[#17191c] text-[13px] transition-colors inline-flex items-center gap-2 cursor-pointer"
             >
-              <Download className="w-4 h-4 stroke-[2.5]" />
-              <span>Exportar Datos a JSON</span>
+              <Download className="w-4 h-4" />
+              <span>Exportar datos JSON</span>
             </button>
           </div>
         </div>
 
         {exportSuccess && (
-          <div className="mt-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2 font-medium">
-            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="mt-4 p-3 rounded-[14px] bg-[#fbe1d1] text-[13px] text-[#5d2a1a] flex items-center gap-2 font-medium">
+            <Check className="w-4 h-4 shrink-0" />
             <span>Archivo JSON de respaldo generado y descargado exitosamente.</span>
           </div>
         )}
       </div>
 
-      {/* Danger & Reset Section */}
-      <div className="rounded-xl p-5 md:p-6 bg-[#0F172A]/70 border border-white/[0.08]">
-        <h3 className="text-base font-bold text-white tracking-tight mb-4">
-          Gestión de Sesión & Datos
+      {/* Session & Reset Section */}
+      <div className="rounded-[24px] p-6 bg-[#fafafb] border border-[#ececec]">
+        <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em] mb-4">
+          Gestión de sesión &amp; datos
         </h3>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              if (window.confirm('¿Deseas reiniciar los datos a la demostración inicial?')) {
-                onResetData();
-              }
-            }}
-            className="px-3.5 py-2 rounded-lg bg-[#1E293B] hover:bg-[#27354A] border border-white/10 text-xs font-semibold text-slate-300 transition-colors flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-          >
-            <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-            <span>Reiniciar datos a demostración inicial</span>
-          </button>
+          {confirmReset ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[13px] text-[#5d2a1a]">
+                ¿Reiniciar a la demostración inicial?
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  onResetData();
+                  setConfirmReset(false);
+                }}
+                className="px-4 py-2 rounded-full bg-[#b91c1c] hover:bg-[#991b1b] text-white text-[13px] transition-colors cursor-pointer"
+              >
+                Confirmar reinicio
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmReset(false)}
+                className="px-4 py-2 rounded-full bg-white border border-[#ececec] text-[13px] text-[#17191c] transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmReset(true)}
+              className="px-4 py-2 rounded-full bg-white hover:bg-[#f2f2f3] border border-[#ececec] text-[13px] text-[#17191c] transition-colors inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-[#5d2a1a]" />
+              <span>Reiniciar datos a demostración inicial</span>
+            </button>
+          )}
 
           <button
             type="button"
             onClick={onLogout}
-            className="px-3.5 py-2 rounded-lg bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-xs font-semibold text-red-300 transition-colors flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+            className="px-4 py-2 rounded-full bg-white hover:bg-[#fbe1d1]/50 border border-[#ececec] hover:border-[#b91c1c]/40 text-[13px] text-[#b91c1c] transition-colors inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Cerrar sesión</span>

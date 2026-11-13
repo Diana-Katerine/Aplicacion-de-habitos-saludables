@@ -1,13 +1,81 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  /* Colors — Steep Palette */
+  --color-ink-black: #17191c;
+  --color-paper-white: #ffffff;
+  --color-mist-gray: #f2f2f3;
+  --color-fog-white: #fafafb;
+  --color-slate-gray: #777b86;
+  --color-ash-gray: #979799;
+  --color-smoke-gray: #a3a6af;
+  --color-blush-peach: #fbe1d1;
+  --color-sienna-brown: #5d2a1a;
+
+  /* Typography */
+  --font-signifier: 'Signifier', 'Source Serif 4', Georgia, serif;
+  --font-sohne: 'Sohne', 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Typography — Scale */
+  --text-caption: 15px;
+  --leading-caption: 1.5;
+  --text-body: 17px;
+  --leading-body: 1.35;
+  --text-body-lg: 20px;
+  --leading-body-lg: 1.35;
+  --text-subheading: 22px;
+  --leading-subheading: 1.5;
+  --text-heading-sm: 26px;
+  --leading-heading-sm: 1.18;
+  --tracking-heading-sm: -0.23px;
+  --text-heading: 44px;
+  --leading-heading: 1.3;
+  --tracking-heading: -0.66px;
+  --text-heading-lg: 64px;
+  --leading-heading-lg: 1.3;
+  --tracking-heading-lg: -0.96px;
+  --text-display: 90px;
+  --leading-display: 1.3;
+  --tracking-display: -2.25px;
+
+  /* Spacing */
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-28: 28px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+  --spacing-96: 96px;
+  --spacing-124: 124px;
+  --spacing-128: 128px;
+  --spacing-160: 160px;
+
+  /* Border Radius */
+  --radius-sm: 0.01px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-2xl-2: 20px;
+  --radius-3xl: 24px;
+
+  /* Shadows */
+  --shadow-subtle: oklab(0 0 0 / 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.08) 0px 4px 24px 0px;
+  --shadow-subtle-2: oklab(0 0 0 / 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 8px 40px 0px;
+  --shadow-subtle-3: rgba(4, 23, 43, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.1) 0px 8px 10px -6px;
+}
 
 @layer base {
   :root {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: var(--font-sohne);
+    color: #17191c;
+    background-color: #ffffff;
   }
 
-  /* Custom subtle scrollbar */
+  /* Custom subtle scrollbar for light editorial canvas */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -16,46 +84,94 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(23, 25, 28, 0.14);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(23, 25, 28, 0.28);
   }
+}
+
+.font-signifier {
+  font-family: var(--font-signifier);
+  font-weight: 400;
+}
+
+.font-sohne {
+  font-family: var(--font-sohne);
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-.glow-emerald {
-  box-shadow: 0 0 20px -2px rgba(16, 185, 129, 0.35);
+/* Steep Surfaces & Elevations */
+.steep-card-mist {
+  background-color: #f2f2f3;
+  border-radius: 24px;
 }
 
-.glow-emerald-node {
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.45);
+.steep-card-peach {
+  background-color: #fbe1d1;
+  color: #5d2a1a;
+  border-radius: 24px;
 }
 
-.glow-amber-flame {
-  box-shadow: 0 0 16px -1px rgba(245, 158, 11, 0.30);
+.steep-artifact {
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow:
+    rgba(4, 23, 43, 0.05) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
+    rgba(0, 0, 0, 0.1) 0px 8px 10px -6px;
 }
 
-.border-subtle {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.steep-modal {
+  background-color: #ffffff;
+  border-radius: 24px;
+  box-shadow:
+    oklab(0 0 0 / 0.05) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.1) 0px 8px 40px 0px;
 }
 
-.surface-canvas {
-  background-color: #090D16;
+.steep-popover {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    oklab(0 0 0 / 0.05) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.08) 0px 4px 24px 0px;
 }
 
-.surface-elevated-1 {
-  background-color: #0F172A;
+/* Dynamic category halo adapted for Steep warm-paper editorial discipline */
+.bioluminescent-card {
+  background-color: #ffffff;
+  border: 1px solid #ececec;
+  background-image: radial-gradient(
+    ellipse at top left,
+    rgba(var(--bio-rgb, 93, 42, 26), 0.075),
+    transparent 58%
+  );
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.surface-elevated-2 {
-  background-color: #111827;
+.bioluminescent-card:hover {
+  border-color: rgba(var(--bio-rgb, 93, 42, 26), 0.34);
+  background-image: radial-gradient(
+    ellipse at top left,
+    rgba(var(--bio-rgb, 93, 42, 26), 0.115),
+    transparent 62%
+  );
+  box-shadow:
+    0 0 0 1px rgba(var(--bio-rgb, 93, 42, 26), 0.08),
+    0 8px 24px -10px rgba(var(--bio-rgb, 93, 42, 26), 0.18);
 }
 
-.surface-elevated-3 {
-  background-color: #1E293B;
+.bioluminescent-card[data-completed='true'] {
+  background-color: #fafafb;
+  border-color: rgba(var(--bio-rgb, 93, 42, 26), 0.38);
+  background-image: radial-gradient(
+    ellipse at top left,
+    rgba(var(--bio-rgb, 93, 42, 26), 0.13),
+    transparent 64%
+  );
 }

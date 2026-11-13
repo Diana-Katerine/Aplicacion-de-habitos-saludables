@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Flame,
   Plus,
   Calendar,
   CheckSquare,
@@ -8,8 +7,6 @@ import {
   BookOpen,
   Trophy,
   User as UserIcon,
-  LogIn,
-  LogOut,
   Menu,
   X,
 } from 'lucide-react';
@@ -30,240 +27,174 @@ export const Navbar: React.FC<Props> = ({
   onNavigate,
   onOpenCreateModal,
   onOpenAuth,
-  onLogout,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
+  const navItems: { route: ViewRoute; label: string }[] = [
+    { route: 'today', label: 'Hoy' },
+    { route: 'habits', label: 'Hábitos' },
+    { route: 'challenges', label: 'Retos' },
+    { route: 'stats', label: 'Estadísticas' },
+    { route: 'templates', label: 'Plantillas' },
+    { route: 'profile', label: 'Perfil' },
+  ];
+
   return (
-    <>
-      {/* 3-Zone Top Bar Contract */}
-      <header className="sticky top-0 z-40 w-full bg-[#090D16]/95 backdrop-blur-md border-b border-white/[0.08]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
-          {/* Zone 1: Brand Wordmark (single text element) */}
-          <button
-            onClick={() => onNavigate(user ? 'today' : 'landing')}
-            className="flex items-center gap-2.5 text-left text-white whitespace-nowrap shrink-0 cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#10B981] to-[#34D399] flex items-center justify-center text-[#003824] shadow-[0_0_12px_rgba(16,185,129,0.4)]">
-              <Flame className="w-5 h-5 fill-[#003824]" />
-            </div>
-            <span className="text-lg font-extrabold tracking-tight text-white whitespace-nowrap">
-              Luminous Momentum
-            </span>
-          </button>
+    <header
+      className={`sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md ${
+        user ? 'border-b border-[#ececec]' : ''
+      }`}
+    >
+      <div className="max-w-[1200px] mx-auto px-5 sm:px-6 h-[72px] flex items-center justify-between gap-8">
+        {/* Zone 1: Brand Wordmark */}
+        <button
+          type="button"
+          onClick={() => onNavigate(user ? 'today' : 'landing')}
+          className="flex items-center gap-2.5 text-left text-[#17191c] whitespace-nowrap shrink-0 cursor-pointer"
+        >
+          <span className="font-signifier text-[24px] leading-none tracking-[-0.02em] text-[#17191c]">
+            Impulso
+          </span>
+        </button>
 
-          {/* Zone 2: Navigation Links (single-line, whitespace-nowrap) */}
-          {user && (
-            <nav className="hidden md:flex items-center gap-5 text-sm font-semibold text-slate-300">
-              <button
-                onClick={() => onNavigate('today')}
-                className={`transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5 ${
-                  currentRoute === 'today'
-                    ? 'text-white border-b-2 border-[#10B981]'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+        {/* Zone 2: Whisper-quiet Navigation Links */}
+        {user ? (
+          <nav className="hidden md:flex items-center gap-7 text-[15px] font-normal">
+            {navItems.map((item) => {
+              const active = currentRoute === item.route;
+              return (
+                <button
+                  key={item.route}
+                  type="button"
+                  onClick={() => onNavigate(item.route)}
+                  className={`py-0.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                    active
+                      ? 'text-[#17191c] underline decoration-[#17191c] underline-offset-[6px]'
+                      : 'text-[#777b86] hover:text-[#17191c] hover:underline hover:underline-offset-[6px]'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </nav>
+        ) : (
+          <nav className="hidden md:flex items-center gap-7 text-[15px] font-normal">
+            {[
+              { href: '#que-ofrecemos', label: 'Qué ofrecemos' },
+              { href: '#como-funciona', label: 'Cómo funciona' },
+              { href: '#historia', label: 'Testimonio' },
+            ].map((anchor) => (
+              <a
+                key={anchor.href}
+                href={anchor.href}
+                className="py-0.5 text-[#777b86] hover:text-[#17191c] hover:underline hover:underline-offset-[6px] transition-colors whitespace-nowrap shrink-0"
               >
-                Hoy
+                {anchor.label}
+              </a>
+            ))}
+          </nav>
+        )}
+
+        {/* Zone 3: Pill CTA / User Action */}
+        <div className="flex items-center gap-3 shrink-0">
+          {user ? (
+            <>
+              <button
+                type="button"
+                onClick={onOpenCreateModal}
+                className="hidden sm:inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[14px] leading-none font-normal transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Nuevo hábito</span>
               </button>
 
               <button
-                onClick={() => onNavigate('habits')}
-                className={`transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5 ${
-                  currentRoute === 'habits'
-                    ? 'text-white border-b-2 border-[#10B981]'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Mis Hábitos
-              </button>
-
-              <button
-                onClick={() => onNavigate('challenges')}
-                className={`transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5 ${
-                  currentRoute === 'challenges'
-                    ? 'text-white border-b-2 border-[#10B981]'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Retos
-              </button>
-
-              <button
-                onClick={() => onNavigate('stats')}
-                className={`transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5 ${
-                  currentRoute === 'stats'
-                    ? 'text-white border-b-2 border-[#10B981]'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Estadísticas
-              </button>
-
-              <button
-                onClick={() => onNavigate('templates')}
-                className={`transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5 ${
-                  currentRoute === 'templates'
-                    ? 'text-white border-b-2 border-[#10B981]'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Plantillas
-              </button>
-
-              <button
+                type="button"
                 onClick={() => onNavigate('profile')}
-                className={`transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5 ${
-                  currentRoute === 'profile'
-                    ? 'text-white border-b-2 border-[#10B981]'
-                    : 'text-slate-400 hover:text-white'
+                className="w-9 h-9 rounded-full bg-[#f2f2f3] hover:bg-[#fbe1d1] text-[13px] font-medium text-[#17191c] hover:text-[#5d2a1a] flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+                title="Ver perfil"
+              >
+                {user.fullName.charAt(0).toUpperCase()}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Abrir menú"
+                className="md:hidden p-2 rounded-full text-[#17191c] hover:bg-[#f2f2f3] cursor-pointer"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-5">
+              <button
+                type="button"
+                onClick={() => onOpenAuth('login')}
+                className="text-[15px] font-normal text-[#17191c] hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                Iniciar sesión
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenAuth('register')}
+                className="px-5 py-2.5 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[15px] leading-none font-normal transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                Comenzar
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile dropdown menu */}
+      {user && mobileMenuOpen && (
+        <div className="md:hidden border-t border-[#ececec] bg-white px-5 py-4 space-y-1">
+          {[
+            { route: 'today' as ViewRoute, label: 'Hoy', icon: Calendar },
+            { route: 'habits' as ViewRoute, label: 'Mis Hábitos', icon: CheckSquare },
+            { route: 'challenges' as ViewRoute, label: 'Retos', icon: Trophy },
+            { route: 'stats' as ViewRoute, label: 'Estadísticas', icon: BarChart3 },
+            { route: 'templates' as ViewRoute, label: 'Plantillas', icon: BookOpen },
+            { route: 'profile' as ViewRoute, label: 'Perfil & Zona Horaria', icon: UserIcon },
+          ].map((item) => {
+            const Icon = item.icon;
+            const active = currentRoute === item.route;
+            return (
+              <button
+                key={item.route}
+                type="button"
+                onClick={() => {
+                  onNavigate(item.route);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full text-left px-4 py-2.5 rounded-full text-[15px] flex items-center gap-3 transition-colors cursor-pointer ${
+                  active
+                    ? 'bg-[#f2f2f3] text-[#17191c] font-medium'
+                    : 'text-[#777b86] hover:text-[#17191c] hover:bg-[#fafafb]'
                 }`}
               >
-                Perfil
+                <Icon className="w-4 h-4" />
+                <span>{item.label}</span>
               </button>
-            </nav>
-          )}
+            );
+          })}
 
-          {/* Zone 3: 1 Primary Action */}
-          <div className="flex items-center gap-3 shrink-0">
-            {user ? (
-              <>
-                <button
-                  onClick={onOpenCreateModal}
-                  className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#10B981] hover:bg-[#34D399] text-[#003824] text-xs font-bold transition-all shadow-[0_0_14px_rgba(16,185,129,0.35)] whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <Plus className="w-4 h-4 stroke-[2.5]" />
-                  <span>Nuevo Hábito</span>
-                </button>
-
-                <button
-                  onClick={() => onNavigate('profile')}
-                  className="w-8 h-8 rounded-full bg-[#1E293B] hover:bg-[#27354A] border border-white/10 text-xs font-bold text-emerald-400 flex items-center justify-center cursor-pointer"
-                  title="Ver perfil"
-                >
-                  {user.fullName.charAt(0)}
-                </button>
-
-                <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer"
-                >
-                  {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                </button>
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onOpenAuth('login')}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
-                >
-                  Iniciar sesión
-                </button>
-                <button
-                  onClick={() => onOpenAuth('register')}
-                  className="px-3.5 py-1.5 rounded-lg bg-[#10B981] hover:bg-[#34D399] text-[#003824] text-xs font-bold transition-all shadow-[0_0_12px_rgba(16,185,129,0.35)] cursor-pointer"
-                >
-                  Registrarse
-                </button>
-              </div>
-            )}
+          <div className="pt-3 mt-2 border-t border-[#ececec]">
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenCreateModal();
+              }}
+              className="w-full py-3 rounded-full bg-[#17191c] text-white text-[14px] font-normal text-center cursor-pointer"
+            >
+              + Nuevo hábito
+            </button>
           </div>
         </div>
-
-        {/* Mobile dropdown menu */}
-        {user && mobileMenuOpen && (
-          <div className="md:hidden border-t border-white/[0.08] bg-[#0F172A] px-4 py-3 space-y-1">
-            <button
-              onClick={() => {
-                onNavigate('today');
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2.5 ${
-                currentRoute === 'today' ? 'bg-[#1E293B] text-emerald-400' : 'text-slate-300'
-              }`}
-            >
-              <Calendar className="w-4 h-4" />
-              <span>Hoy</span>
-            </button>
-
-            <button
-              onClick={() => {
-                onNavigate('habits');
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2.5 ${
-                currentRoute === 'habits' ? 'bg-[#1E293B] text-emerald-400' : 'text-slate-300'
-              }`}
-            >
-              <CheckSquare className="w-4 h-4" />
-              <span>Mis Hábitos</span>
-            </button>
-
-            <button
-              onClick={() => {
-                onNavigate('challenges');
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2.5 ${
-                currentRoute === 'challenges' ? 'bg-[#1E293B] text-emerald-400' : 'text-slate-300'
-              }`}
-            >
-              <Trophy className="w-4 h-4" />
-              <span>Retos</span>
-            </button>
-
-            <button
-              onClick={() => {
-                onNavigate('stats');
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2.5 ${
-                currentRoute === 'stats' ? 'bg-[#1E293B] text-emerald-400' : 'text-slate-300'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Estadísticas</span>
-            </button>
-
-            <button
-              onClick={() => {
-                onNavigate('templates');
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2.5 ${
-                currentRoute === 'templates' ? 'bg-[#1E293B] text-emerald-400' : 'text-slate-300'
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>Plantillas</span>
-            </button>
-
-            <button
-              onClick={() => {
-                onNavigate('profile');
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2.5 ${
-                currentRoute === 'profile' ? 'bg-[#1E293B] text-emerald-400' : 'text-slate-300'
-              }`}
-            >
-              <UserIcon className="w-4 h-4" />
-              <span>Perfil & Zona Horaria</span>
-            </button>
-
-            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenCreateModal();
-                }}
-                className="w-full py-2 rounded-lg bg-[#10B981] text-[#003824] text-xs font-bold text-center"
-              >
-                + Crear Hábito
-              </button>
-            </div>
-          </div>
-        )}
-      </header>
-    </>
+      )}
+    </header>
   );
 };
