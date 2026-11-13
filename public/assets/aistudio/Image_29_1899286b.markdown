@@ -1,0 +1,220 @@
+---
+name: Luminous Momentum
+colors:
+  surface: '#0f131c'
+  surface-dim: '#0f131c'
+  surface-bright: '#353943'
+  surface-container-lowest: '#0a0e17'
+  surface-container-low: '#181b25'
+  surface-container: '#1c1f29'
+  surface-container-high: '#262a34'
+  surface-container-highest: '#31353f'
+  on-surface: '#dfe2ef'
+  on-surface-variant: '#bbcabf'
+  inverse-surface: '#dfe2ef'
+  inverse-on-surface: '#2c303a'
+  outline: '#86948a'
+  outline-variant: '#3c4a42'
+  surface-tint: '#4edea3'
+  primary: '#4edea3'
+  on-primary: '#003824'
+  primary-container: '#10b981'
+  on-primary-container: '#00422b'
+  inverse-primary: '#006c49'
+  secondary: '#ffb95f'
+  on-secondary: '#472a00'
+  secondary-container: '#ee9800'
+  on-secondary-container: '#5b3800'
+  tertiary: '#bec6e0'
+  on-tertiary: '#283044'
+  tertiary-container: '#9ba2bb'
+  on-tertiary-container: '#31394d'
+  error: '#ffb4ab'
+  on-error: '#690005'
+  error-container: '#93000a'
+  on-error-container: '#ffdad6'
+  primary-fixed: '#6ffbbe'
+  primary-fixed-dim: '#4edea3'
+  on-primary-fixed: '#002113'
+  on-primary-fixed-variant: '#005236'
+  secondary-fixed: '#ffddb8'
+  secondary-fixed-dim: '#ffb95f'
+  on-secondary-fixed: '#2a1700'
+  on-secondary-fixed-variant: '#653e00'
+  tertiary-fixed: '#dae2fd'
+  tertiary-fixed-dim: '#bec6e0'
+  on-tertiary-fixed: '#131b2e'
+  on-tertiary-fixed-variant: '#3f465c'
+  background: '#0f131c'
+  on-background: '#dfe2ef'
+  surface-variant: '#31353f'
+typography:
+  display-lg:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 3rem
+    fontWeight: '800'
+    lineHeight: 3.5rem
+    letterSpacing: -0.03em
+  display-lg-mobile:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 2.25rem
+    fontWeight: '800'
+    lineHeight: 2.75rem
+    letterSpacing: -0.025em
+  headline-lg:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 2rem
+    fontWeight: '700'
+    lineHeight: 2.5rem
+    letterSpacing: -0.02em
+  headline-lg-mobile:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 1.5rem
+    fontWeight: '700'
+    lineHeight: 2rem
+    letterSpacing: -0.015em
+  headline-md:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 1.25rem
+    fontWeight: '600'
+    lineHeight: 1.75rem
+    letterSpacing: -0.01em
+  title-sm:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 1rem
+    fontWeight: '600'
+    lineHeight: 1.5rem
+    letterSpacing: '0'
+  body-lg:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 1rem
+    fontWeight: '400'
+    lineHeight: 1.625rem
+    letterSpacing: '0'
+  body-md:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 0.875rem
+    fontWeight: '400'
+    lineHeight: 1.375rem
+    letterSpacing: '0'
+  label-md:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 0.8125rem
+    fontWeight: '500'
+    lineHeight: 1.125rem
+    letterSpacing: 0.01em
+  label-sm:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 0.6875rem
+    fontWeight: '700'
+    lineHeight: 0.875rem
+    letterSpacing: 0.06em
+rounded:
+  sm: 0.25rem
+  DEFAULT: 0.5rem
+  md: 0.75rem
+  lg: 1rem
+  xl: 1.5rem
+  full: 9999px
+spacing:
+  gutter: 1.5rem
+  gutter-mobile: 1rem
+  margin: 2rem
+  margin-mobile: 1rem
+  space-xs: 0.25rem
+  space-sm: 0.5rem
+  space-md: 1rem
+  space-lg: 1.5rem
+  space-xl: 2.5rem
+---
+
+## Brand & Style
+
+This design system delivers a focused, high-performance atmosphere engineered for intentional habit tracking, ritual formation, and daily momentum. The aesthetic merges precision productivity software with luminous, tactile reward cues. Designed for professionals, creators, and disciplined individuals, the experience balances focused calm with rewarding visual feedback for completed actions.
+
+The stylistic foundation combines modern dark-canvas minimalism with luminous accent layers and subtle glassmorphic elements:
+- **Foundational Darkness:** Recessed, velvet slate and deep obsidian planes that reduce optical fatigue during morning and nocturnal check-ins.
+- **Bioluminescent Feedback:** Radiating emerald emerald highlights for progress completion and ember-hot flame accents for unbroken streaks, generating visceral satisfaction on task execution.
+- **Crisp Structural Discipline:** Subtle translucent borders (`rgba(255, 255, 255, 0.08)`), micro-surfaces, and deliberate grouping rather than heavy drop shadows or cluttered divisions.
+
+## Colors
+
+The palette operates on calibrated contrast tiers built specifically for true dark mode utility:
+
+### Background & Surface Hierarchy
+- **Canvas Base (`#090D16`):** The primary recessed foundation behind grids and page frames.
+- **Surface Elevation 1 (`#0F172A`):** The default card and sidebar container surface.
+- **Surface Elevation 2 (`#111827`):** Elevated modules, popovers, and interactive panel layers.
+- **Surface Elevation 3 (`#1E293B`):** Hover states, active segment tabs, and inner recessed wells.
+
+### Accent & Feedback Tokens
+- **Core Momentum (Primary Emerald):** `#10B981` (Base action and 100% completion), `#34D399` (Luminous hover / glow accent), `#059669` (Pressed and active border tone).
+- **Streak & Fire (Secondary Amber):** `#F59E0B` (Active streaks, momentum counters, burning badge glows), with `#EF4444` reserved for critical streak recovery or urgent resets.
+- **Structural Stroke:** `rgba(255, 255, 255, 0.08)` applied across cards, inputs, and dividers to retain distinct geometric form without heavy visual weight.
+- **Typography Tiers:** Primary headers in pure white (`#FFFFFF`), secondary meta in cool muted slate (`#94A3B8`), and disabled or baseline ticks in muted charcoal (`#475569`).
+
+## Typography
+
+The typographic hierarchy utilizes **Plus Jakarta Sans** uniformly to preserve structural cohesion and modern technical clarity. 
+
+- **Weight Intent:** Display headlines and major metrics employ extra-bold (`800`) weights with tight tracking (`-0.02em` to `-0.03em`) to anchor dashboards with definitive presence.
+- **Numbers & Metrics:** Quantitative readouts (completion percentages, consecutive streaks, and completion counts) leverage tabular figures (`font-variant-numeric: tabular-nums`) to prevent optical shifting across dynamic counter state transitions.
+- **Labels & Micro-Copy:** Small badges and category tags apply uppercase formatting at `0.6875rem` with generous tracking (`0.06em`) to ensure legibility against deep dark surfaces.
+
+## Layout & Spacing
+
+The dashboard employs a fluid 12-column grid constrained to a maximum width of `1440px` with an 8pt rhythm throughout.
+
+- **Desktop (1024px+):** 12-column architecture, standard `2rem` screen edge margins, and `1.5rem` gutters. Layout distributes into persistent side navigation, primary weekly cadence board, and auxiliary streak summary panels.
+- **Tablet (768px - 1023px):** 8-column layout. Navigation folds into an expandable off-canvas rail or top action row; gutters shift to `1.25rem`.
+- **Mobile (<768px):** 4-column single-stack structure with `1rem` lateral canvas margins. Habit matrix rows adapt into touch-friendly horizontal swipe sequences or collapsible daily cards.
+- **Interior Rhythm:** Content density favors breathing room over compaction; inner card padding adheres strictly to `space-md` (`1rem`) on compact elements and `space-lg` (`1.5rem`) on summary containers.
+
+## Elevation & Depth
+
+Visual hierarchy does not rely on opaque cast shadows. Instead, it utilizes surface brightness stratification combined with localized luminous radiance:
+
+- **Border Enclosure:** Surfaces sit inside a crisp, hairline translucent ring (`1px solid rgba(255, 255, 255, 0.08)`).
+- **Surface Elevation:**
+  - **Flat Canvas:** `#090D16` without elevation or borders.
+  - **Level 1 (Cards, Modules):** `#0F172A` with standard hairline stroke.
+  - **Level 2 (Modals, Active Flyouts):** `#111827` featuring a subtle directional halo: `box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)`.
+- **Luminous Radiance (Atmospheric Glows):**
+  - **Emerald Completion Pulse:** Interactive progress triggers emit a concentrated neon halo: `box-shadow: 0 0 20px -2px rgba(16, 185, 129, 0.35)`.
+  - **Flame Streak Indicator:** Active unbroken streaks generate a warm ember glow: `box-shadow: 0 0 16px -1px rgba(245, 158, 11, 0.30)`.
+
+## Shapes
+
+The design uses balanced, modern curvature to soften the geometric density of tracker grids:
+
+- **Cards and Major Panels:** Standardized on `rounded-xl` (`1rem` / `16px`) for standard tracking modules and `rounded-2xl` (`1.5rem` / `24px`) for primary dashboard hero cards.
+- **Interactive Controls:** Buttons, text fields, and dropdown elements leverage a disciplined `0.5rem` (`8px`) corner radius.
+- **Badges and Habit Check-Nodes:** Day-completion toggles and streak badges use circular or full pill-shaped radii (`9999px`) to emphasize completion states.
+
+## Components
+
+### Habit Completion Nodes (Check-Boxes)
+- **Resting:** 32x32px circular pill with `#1E293B` background and `1px solid rgba(255, 255, 255, 0.12)`.
+- **Completed:** Smooth transition into `#10B981`, containing a crisp white icon, framed by `0 0 16px rgba(16, 185, 129, 0.45)`.
+- **Interaction:** Spring scale animation on click (scale from `0.9` to `1.05` then resting `1.0`).
+
+### Buttons
+- **Primary:** Background `#10B981` text `#090D16` with font weight `700`. Hover transitions to `#34D399` with localized emerald underglow.
+- **Secondary:** Surface `#1E293B`, stroke `rgba(255, 255, 255, 0.08)`, text `#FFFFFF`. Hover changes background to `#27354A`.
+- **Destructive/Reset:** Transparent surface, red text `#EF4444`, hover stroke `rgba(239, 68, 68, 0.3)`.
+
+### Streak Badges
+- High-visibility pill component featuring an orange flame glyph, numeral value, and subtle ember tinting (`background: rgba(245, 158, 11, 0.12)`, `border: 1px solid rgba(245, 158, 11, 0.3)`, `color: #F59E0B`).
+
+### Habit Cards & Progress Rows
+- Elevated container (`#0F172A`) framed with `1px solid rgba(255, 255, 255, 0.08)`.
+- Features an inline horizontal matrix showing the 7-day trailing frequency.
+- Incomplete states show muted gray pips; achieved days burst into emerald.
+
+### Input Fields
+- Dark slate fill (`#090D16`), border `1px solid rgba(255, 255, 255, 0.12)`, placeholder text `#475569`.
+- **Focus State:** Border shifts cleanly to `#10B981` with a diffuse emerald outer ring (`box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15)`).
+
+### Weekly Matrix Heatmap Grid
+- Modular square cells with `rounded-sm` (4px).
+- Shading scales systematically across 4 intervals: Level 0 (`#1E293B`), Level 1 (`#065F46`), Level 2 (`#059669`), Level 3 (`#10B981`), Level 4 (`#34D399` with glow).

@@ -1,0 +1,6 @@
+{
+  "name": "Luminous Momentum - Habit Tracker",
+  "description": "Precision habit tracking and ritual formation with bioluminescent feedback, streak momentum, and responsive daily routines.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
