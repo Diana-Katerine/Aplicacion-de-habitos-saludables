@@ -26,27 +26,40 @@ const TIER_STYLES: Record<
     label: string;
     medallionUnlocked: string;
     tierLabelColor: string;
+    cardTint: string;
   }
 > = {
   bronze: {
     label: 'Bronce',
-    medallionUnlocked: 'bg-[#f2f2f3] border-[#ececec] text-[#5d2a1a]',
-    tierLabelColor: 'text-[#777b86]',
+    medallionUnlocked:
+      'bg-[#FFF7ED] border-[#FDBA74] text-[#C2410C] dark:bg-[#EA580C]/18 dark:border-[#FB923C]/35 dark:text-[#fb923c]',
+    tierLabelColor: 'text-[#C2410C] dark:text-[#fb923c]',
+    cardTint:
+      'bg-[#FFF7ED]/30 border-[#FDBA74]/45 dark:bg-[#EA580C]/10 dark:border-[#FB923C]/30',
   },
   silver: {
     label: 'Plata',
-    medallionUnlocked: 'bg-[#f2f2f3] border-[#d4d4d8] text-[#17191c]',
-    tierLabelColor: 'text-[#17191c]',
+    medallionUnlocked:
+      'bg-[#E0F2FE] border-[#7DD3FC] text-[#0369A1] dark:bg-[#0284C7]/18 dark:border-[#38BDF8]/35 dark:text-[#38bdf8]',
+    tierLabelColor: 'text-[#0369A1] dark:text-[#38bdf8]',
+    cardTint:
+      'bg-[#E0F2FE]/30 border-[#7DD3FC]/45 dark:bg-[#0284C7]/10 dark:border-[#38BDF8]/30',
   },
   gold: {
     label: 'Oro',
-    medallionUnlocked: 'bg-[#fbe1d1] border-[#e5b89e] text-[#5d2a1a]',
-    tierLabelColor: 'text-[#5d2a1a]',
+    medallionUnlocked:
+      'bg-[#FEF3C7] border-[#FCD34D] text-[#B45309] dark:bg-[#D97706]/18 dark:border-[#FBBF24]/35 dark:text-[#fbbf24]',
+    tierLabelColor: 'text-[#B45309] dark:text-[#fbbf24]',
+    cardTint:
+      'bg-[#FEF3C7]/35 border-[#FCD34D]/50 dark:bg-[#D97706]/10 dark:border-[#FBBF24]/30',
   },
   platinum: {
     label: 'Platino',
-    medallionUnlocked: 'bg-[#17191c] border-[#17191c] text-white',
-    tierLabelColor: 'text-[#17191c]',
+    medallionUnlocked:
+      'bg-[#EEF2FF] border-[#A5B4FC] text-[#4338CA] dark:bg-[#4F46E5]/18 dark:border-[#818CF8]/35 dark:text-[#a5b4fc]',
+    tierLabelColor: 'text-[#4338CA] dark:text-[#a5b4fc]',
+    cardTint:
+      'bg-[#EEF2FF]/40 border-[#A5B4FC]/50 dark:bg-[#4F46E5]/12 dark:border-[#818CF8]/30',
   },
 };
 
@@ -74,7 +87,7 @@ function renderBadgeIcon(iconName: BadgeDefinition['iconName'], className: strin
 export const BadgesModule: React.FC<Props> = ({
   badges,
   title = 'Insignias de racha',
-  subtitle = 'Hitos asignados automáticamente según tus rachas consecutivas y disciplina acumulada.',
+  subtitle,
 }) => {
   const [filter, setFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
 
@@ -92,30 +105,32 @@ export const BadgesModule: React.FC<Props> = ({
   return (
     <section
       aria-label="Módulo de Insignias"
-      className="rounded-[24px] p-6 bg-white border border-[#ececec] space-y-6"
+      className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a] space-y-6"
     >
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Award className="w-4 h-4 text-[#5d2a1a] shrink-0" />
-            <h2 className="text-[18px] font-medium text-[#17191c] tracking-[-0.01em]">
+            <Award className="w-4 h-4 text-[#D97706] dark:text-[#fbbf24] shrink-0" />
+            <h2 className="text-[18px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em]">
               {title}
             </h2>
           </div>
-          <p className="text-[14px] text-[#777b86] mt-1">{subtitle}</p>
-          <div className="flex flex-wrap items-center gap-2 text-[13px] text-[#777b86] mt-2">
+          {subtitle && (
+            <p className="text-[14px] text-[#777b86] dark:text-[#9aa4b2] mt-1">{subtitle}</p>
+          )}
+          <div className="flex flex-wrap items-center gap-2 text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-1.5">
             <span>
-              <strong className="font-medium text-[#17191c] tabular-nums">{unlockedCount}</strong> de{' '}
-              <strong className="font-medium text-[#17191c] tabular-nums">{badges.length}</strong> insignias desbloqueadas
+              <strong className="font-medium text-[#059669] dark:text-[#34d399] tabular-nums">{unlockedCount}</strong> de{' '}
+              <strong className="font-medium text-[#17191c] dark:text-[#f1f5f9] tabular-nums">{badges.length}</strong> insignias desbloqueadas
             </span>
             {nextClosest && (
               <>
-                <span aria-hidden="true" className="text-[#a3a6af]">·</span>
+                <span aria-hidden="true" className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
                 <span>
                   Próximo hito:{' '}
-                  <strong className="font-medium text-[#5d2a1a]">{nextClosest.definition.name}</strong>{' '}
-                  <span className="tabular-nums text-[#777b86]">
+                  <strong className="font-medium text-[#B45309] dark:text-[#fbbf24]">{nextClosest.definition.name}</strong>{' '}
+                  <span className="tabular-nums text-[#777b86] dark:text-[#9aa4b2]">
                     ({nextClosest.currentValue}/{nextClosest.targetValue})
                   </span>
                 </span>
@@ -125,14 +140,14 @@ export const BadgesModule: React.FC<Props> = ({
         </div>
 
         {/* Filter Segmented Control */}
-        <div className="inline-flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] self-start lg:self-auto shrink-0">
+        <div className="inline-flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] self-start lg:self-auto max-w-full overflow-x-auto">
           <button
             type="button"
             onClick={() => setFilter('all')}
             className={`px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
               filter === 'all'
-                ? 'bg-white text-[#17191c] font-medium shadow-xs'
-                : 'text-[#777b86] hover:text-[#17191c]'
+                ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
             }`}
           >
             Todas ({badges.length})
@@ -142,8 +157,8 @@ export const BadgesModule: React.FC<Props> = ({
             onClick={() => setFilter('unlocked')}
             className={`px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
               filter === 'unlocked'
-                ? 'bg-white text-[#17191c] font-medium shadow-xs'
-                : 'text-[#777b86] hover:text-[#17191c]'
+                ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
             }`}
           >
             Desbloqueadas ({unlockedCount})
@@ -153,8 +168,8 @@ export const BadgesModule: React.FC<Props> = ({
             onClick={() => setFilter('locked')}
             className={`px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
               filter === 'locked'
-                ? 'bg-white text-[#17191c] font-medium shadow-xs'
-                : 'text-[#777b86] hover:text-[#17191c]'
+                ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
             }`}
           >
             En progreso ({badges.length - unlockedCount})
@@ -165,7 +180,7 @@ export const BadgesModule: React.FC<Props> = ({
       {/* Badges Grid */}
       {visibleBadges.length === 0 ? (
         <div className="steep-card-mist p-10 text-center">
-          <p className="text-[14px] text-[#777b86]">
+          <p className="text-[14px] text-[#777b86] dark:text-[#9aa4b2]">
             No hay insignias en esta vista todavía. Sigue sumando días consecutivos para desbloquear nuevos hitos.
           </p>
         </div>
@@ -194,33 +209,33 @@ export const BadgesModule: React.FC<Props> = ({
               <motion.div
                 key={definition.id}
                 layout
-                className={`rounded-[20px] p-5 flex flex-col justify-between transition-colors ${
+                className={`rounded-[20px] p-4 sm:p-5 flex flex-col justify-between transition-colors border ${
                   isUnlocked
-                    ? 'bg-white border border-[#17191c]/15'
-                    : 'bg-[#f2f2f3] border border-transparent'
+                    ? tierStyle.cardTint
+                    : 'bg-[#f2f2f3] dark:bg-[#1b222b] border-transparent dark:border-[#252e3a]/60'
                 }`}
               >
                 <div>
                   {/* Top Row: Medallion + Explicit State */}
                   <div className="flex items-start justify-between gap-2 mb-3.5">
                     <div
-                      className={`w-11 h-11 rounded-[14px] border flex items-center justify-center shrink-0 transition-colors ${
+                      className={`w-12 h-12 rounded-[14px] border flex items-center justify-center shrink-0 transition-colors ${
                         isUnlocked
                           ? tierStyle.medallionUnlocked
-                          : 'bg-white/75 border-[#ececec] text-[#a3a6af]'
+                          : 'bg-white/75 border-[#ececec] text-[#a3a6af] dark:bg-[#141920] dark:border-[#252e3a] dark:text-[#6f7a8a]'
                       }`}
                     >
-                      {renderBadgeIcon(definition.iconName, 'w-5 h-5')}
+                      {renderBadgeIcon(definition.iconName, 'w-6 h-6')}
                     </div>
 
                     <div className="flex items-center gap-1 text-[11px] font-medium">
                       {isUnlocked ? (
-                        <span className="text-[#17191c] inline-flex items-center gap-1">
+                        <span className="text-[#059669] dark:text-[#34d399] inline-flex items-center gap-1">
                           <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                           <span>Obtenida</span>
                         </span>
                       ) : (
-                        <span className="text-[#979799] inline-flex items-center gap-1">
+                        <span className="text-[#979799] dark:text-[#6f7a8a] inline-flex items-center gap-1">
                           <Lock className="w-3 h-3" />
                           <span>Pendiente</span>
                         </span>
@@ -229,9 +244,15 @@ export const BadgesModule: React.FC<Props> = ({
                   </div>
 
                   {/* Quiet Metadata Line */}
-                  <div className="flex items-center gap-1.5 text-[12px] text-[#979799]">
-                    <span className={isUnlocked ? `${tierStyle.tierLabelColor} font-medium` : 'text-[#979799]'}>
-                      Nivel {tierStyle.label}
+                  <div className="flex items-center gap-1.5 text-[12px] text-[#979799] dark:text-[#6f7a8a]">
+                    <span
+                      className={
+                        isUnlocked
+                          ? `${tierStyle.tierLabelColor} font-medium`
+                          : 'text-[#979799] dark:text-[#6f7a8a]'
+                      }
+                    >
+                      {tierStyle.label}
                     </span>
                     <span aria-hidden="true">·</span>
                     <span className="truncate">{definition.subtitle}</span>
@@ -239,28 +260,33 @@ export const BadgesModule: React.FC<Props> = ({
 
                   <h3
                     className={`text-[16px] font-medium tracking-[-0.01em] mt-1 ${
-                      isUnlocked ? 'text-[#17191c]' : 'text-[#777b86]'
+                      isUnlocked
+                        ? 'text-[#17191c] dark:text-[#f1f5f9]'
+                        : 'text-[#777b86] dark:text-[#9aa4b2]'
                     }`}
                   >
                     {definition.name}
                   </h3>
 
-                  <p className="text-[13px] text-[#777b86] mt-1 leading-relaxed">
+                  <p className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-1 leading-relaxed">
                     {definition.description}
                   </p>
                 </div>
 
                 {/* Footer Progress or Qualifying Habit */}
-                <div className="mt-4 pt-3.5 border-t border-[#ececec]">
+                <div className="mt-4 pt-3.5 border-t border-[#ececec] dark:border-[#252e3a]">
                   {isUnlocked ? (
-                    <div className="text-[12px] text-[#777b86] space-y-0.5">
+                    <div className="text-[12px] text-[#777b86] dark:text-[#9aa4b2] space-y-0.5">
                       {qualifyingHabitTitle && (
                         <p className="truncate">
-                          Hábito: <span className="text-[#17191c] font-medium">{qualifyingHabitTitle}</span>
+                          Hábito:{' '}
+                          <span className="text-[#17191c] dark:text-[#f1f5f9] font-medium">
+                            {qualifyingHabitTitle}
+                          </span>
                         </p>
                       )}
                       {unlockedDateLabel && (
-                        <p className="text-[#979799] tabular-nums">
+                        <p className="text-[#979799] dark:text-[#6f7a8a] tabular-nums">
                           Asignada el {unlockedDateLabel}
                         </p>
                       )}
@@ -268,16 +294,16 @@ export const BadgesModule: React.FC<Props> = ({
                   ) : (
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-[12px]">
-                        <span className="text-[#777b86] tabular-nums font-medium">
+                        <span className="text-[#777b86] dark:text-[#9aa4b2] tabular-nums font-medium">
                           {currentValue} / {targetValue}
                         </span>
-                        <span className="text-[#5d2a1a] font-medium tabular-nums">
+                        <span className="text-[#059669] dark:text-[#34d399] font-medium tabular-nums">
                           {percentage}%
                         </span>
                       </div>
-                      <div className="w-full h-1.5 rounded-full bg-white overflow-hidden">
+                      <div className="w-full h-1.5 rounded-full bg-white dark:bg-[#141920] overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-[#5d2a1a] transition-all duration-300"
+                          className="h-full rounded-full bg-[#059669] transition-all duration-300"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>

@@ -55,13 +55,13 @@ function renderInlineMarkdown(text: string): React.ReactNode[] {
     const token = match[0];
     if (token.startsWith('**') && token.endsWith('**')) {
       tokens.push(
-        <strong key={`b-${keyIdx++}`} className="font-medium text-[#17191c]">
+        <strong key={`b-${keyIdx++}`} className="font-medium text-[#17191c] dark:text-[#f1f5f9]">
           {token.slice(2, -2)}
         </strong>
       );
     } else if (token.startsWith('*') && token.endsWith('*')) {
       tokens.push(
-        <em key={`i-${keyIdx++}`} className="italic text-[#17191c]">
+        <em key={`i-${keyIdx++}`} className="italic text-[#17191c] dark:text-[#f1f5f9]">
           {token.slice(1, -1)}
         </em>
       );
@@ -69,7 +69,7 @@ function renderInlineMarkdown(text: string): React.ReactNode[] {
       tokens.push(
         <code
           key={`c-${keyIdx++}`}
-          className="px-1.5 py-0.5 rounded bg-[#f2f2f3] text-[#17191c] font-mono text-[12px]"
+          className="px-1.5 py-0.5 rounded bg-[#f2f2f3] dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-mono text-[12px]"
         >
           {token.slice(1, -1)}
         </code>
@@ -96,8 +96,8 @@ export const RitualNotesMarkdown: React.FC<MarkdownRendererProps> = ({
     <div
       className={
         compact
-          ? 'space-y-1 text-[13px] text-[#777b86] leading-relaxed'
-          : 'space-y-1.5 text-[14px] text-[#777b86] leading-relaxed'
+          ? 'space-y-1 text-[13px] text-[#777b86] dark:text-[#9aa4b2] leading-relaxed'
+          : 'space-y-1.5 text-[14px] text-[#777b86] dark:text-[#9aa4b2] leading-relaxed'
       }
     >
       {lines.map((rawLine, idx) => {
@@ -109,7 +109,7 @@ export const RitualNotesMarkdown: React.FC<MarkdownRendererProps> = ({
         const headingMatch = /^(#{1,3})\s+(.+)$/.exec(line);
         if (headingMatch) {
           return (
-            <p key={`h-${idx}`} className="font-medium text-[#17191c] text-[13px] pt-0.5">
+            <p key={`h-${idx}`} className="font-medium text-[#17191c] dark:text-[#f1f5f9] text-[13px] pt-0.5">
               {renderInlineMarkdown(headingMatch[2])}
             </p>
           );
@@ -120,7 +120,7 @@ export const RitualNotesMarkdown: React.FC<MarkdownRendererProps> = ({
           return (
             <p
               key={`q-${idx}`}
-              className="pl-3 py-1 text-[#5d2a1a] italic bg-[#fbe1d1]/65 rounded-[10px]"
+              className="pl-3 py-1 text-[#5d2a1a] dark:text-[#fbdac7] italic bg-[#fbe1d1]/65 dark:bg-[#241814] rounded-[10px]"
             >
               “{renderInlineMarkdown(quoteMatch[1])}”
             </p>
@@ -138,14 +138,14 @@ export const RitualNotesMarkdown: React.FC<MarkdownRendererProps> = ({
                 onClick={() => onToggleCheckbox?.(idx)}
                 className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center border shrink-0 transition-colors ${
                   checked
-                    ? 'bg-[#17191c] border-[#17191c] text-white'
-                    : 'bg-white border-[#17191c]/30 text-transparent hover:border-[#17191c]'
+                    ? 'bg-[#17191c] dark:bg-[#059669] border-[#17191c] dark:border-[#059669] text-white'
+                    : 'bg-white dark:bg-[#1b222b] border-[#17191c]/30 dark:border-[#3b4758] text-transparent hover:border-[#17191c] dark:hover:border-[#34d399]'
                 } ${onToggleCheckbox ? 'cursor-pointer' : 'cursor-default'}`}
                 aria-label={checked ? 'Tarea completada' : 'Tarea pendiente'}
               >
                 <Check className="w-2.5 h-2.5 stroke-[2.5]" />
               </button>
-              <span className={checked ? 'line-through text-[#a3a6af]' : 'text-[#17191c]'}>
+              <span className={checked ? 'line-through text-[#a3a6af] dark:text-[#6f7a8a]' : 'text-[#17191c] dark:text-[#f1f5f9]'}>
                 {renderInlineMarkdown(taskMatch[2])}
               </span>
             </div>
@@ -156,14 +156,14 @@ export const RitualNotesMarkdown: React.FC<MarkdownRendererProps> = ({
         if (listMatch) {
           return (
             <div key={`l-${idx}`} className="flex items-start gap-2 pl-0.5">
-              <span className="text-[#5d2a1a] font-medium select-none leading-5">•</span>
-              <span className="text-[#17191c]">{renderInlineMarkdown(listMatch[1])}</span>
+              <span className="text-[#5d2a1a] dark:text-[#fbbf24] font-medium select-none leading-5">•</span>
+              <span className="text-[#17191c] dark:text-[#f1f5f9]">{renderInlineMarkdown(listMatch[1])}</span>
             </div>
           );
         }
 
         return (
-          <p key={`p-${idx}`} className="text-[#17191c]">
+          <p key={`p-${idx}`} className="text-[#17191c] dark:text-[#f1f5f9]">
             {renderInlineMarkdown(line)}
           </p>
         );
@@ -296,10 +296,10 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
   };
 
   return (
-    <div className="rounded-[16px] border border-[#ececec] bg-white overflow-hidden focus-within:border-[#17191c] transition-colors">
+    <div className="rounded-[16px] border border-[#ececec] dark:border-[#252e3a] bg-white dark:bg-[#141920] overflow-hidden focus-within:border-[#17191c] dark:focus-within:border-[#34d399] transition-colors">
       {/* Toolbar Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 border-b border-[#ececec] bg-[#fafafb]">
-        <div className="flex items-center gap-0.5">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 border-b border-[#ececec] dark:border-[#252e3a] bg-[#fafafb] dark:bg-[#1b222b]">
+        <div className="flex flex-wrap items-center gap-0.5">
           <button
             type="button"
             onClick={() => {
@@ -307,7 +307,7 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
               applyWrapFormat('**', '**', 'destacado');
             }}
             title="Negrita (Ctrl+B)"
-            className="p-1.5 rounded-full text-[#777b86] hover:text-[#17191c] hover:bg-[#f2f2f3] transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:bg-[#f2f2f3] dark:hover:bg-[#252e3a] transition-colors cursor-pointer"
           >
             <Bold className="w-3.5 h-3.5" />
           </button>
@@ -318,7 +318,7 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
               applyWrapFormat('*', '*', 'nota');
             }}
             title="Cursiva (Ctrl+I)"
-            className="p-1.5 rounded-full text-[#777b86] hover:text-[#17191c] hover:bg-[#f2f2f3] transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:bg-[#f2f2f3] dark:hover:bg-[#252e3a] transition-colors cursor-pointer"
           >
             <Italic className="w-3.5 h-3.5" />
           </button>
@@ -329,7 +329,7 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
               applyLinePrefix('- ', 'Paso del ritual');
             }}
             title="Lista con viñetas"
-            className="p-1.5 rounded-full text-[#777b86] hover:text-[#17191c] hover:bg-[#f2f2f3] transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:bg-[#f2f2f3] dark:hover:bg-[#252e3a] transition-colors cursor-pointer"
           >
             <List className="w-3.5 h-3.5" />
           </button>
@@ -340,7 +340,7 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
               applyLinePrefix('- [ ] ', 'Micro-paso');
             }}
             title="Lista de verificación"
-            className="p-1.5 rounded-full text-[#777b86] hover:text-[#17191c] hover:bg-[#f2f2f3] transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:bg-[#f2f2f3] dark:hover:bg-[#252e3a] transition-colors cursor-pointer"
           >
             <ListChecks className="w-3.5 h-3.5" />
           </button>
@@ -351,18 +351,18 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
               applyLinePrefix('> ', 'Aprendizaje clave al completar');
             }}
             title="Cita o reflexión"
-            className="p-1.5 rounded-full text-[#777b86] hover:text-[#17191c] hover:bg-[#f2f2f3] transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:bg-[#f2f2f3] dark:hover:bg-[#252e3a] transition-colors cursor-pointer"
           >
             <Quote className="w-3.5 h-3.5" />
           </button>
 
-          <span aria-hidden="true" className="mx-1.5 h-4 w-px bg-[#ececec]" />
+          <span aria-hidden="true" className="mx-1.5 h-4 w-px bg-[#ececec] dark:bg-[#252e3a]" />
 
           <button
             type="button"
             onClick={insertTodayInsightBlock}
             title="Añadir aprendizaje con la fecha de hoy"
-            className="px-2.5 py-1 rounded-full text-[12px] text-[#17191c] hover:bg-[#f2f2f3] inline-flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="px-2.5 py-1 rounded-full text-[12px] text-[#17191c] dark:text-[#f1f5f9] hover:bg-[#f2f2f3] dark:hover:bg-[#252e3a] inline-flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             <CalendarPlus className="w-3.5 h-3.5 shrink-0" />
             <span>+ Insight de hoy</span>
@@ -370,12 +370,12 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
         </div>
 
         {/* Edit / Preview Segmented Control */}
-        <div className="flex items-center gap-0.5 p-0.5 rounded-full bg-[#f2f2f3] shrink-0">
+        <div className="flex items-center gap-0.5 p-0.5 rounded-full bg-[#f2f2f3] dark:bg-[#141920] shrink-0">
           <button
             type="button"
             onClick={() => setMode('edit')}
             className={`px-2.5 py-1 rounded-full text-[11px] inline-flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-              mode === 'edit' ? 'bg-white text-[#17191c] font-medium shadow-xs' : 'text-[#777b86] hover:text-[#17191c]'
+              mode === 'edit' ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs' : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
             }`}
           >
             <Edit3 className="w-3 h-3" />
@@ -385,7 +385,7 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
             type="button"
             onClick={() => setMode('preview')}
             className={`px-2.5 py-1 rounded-full text-[11px] inline-flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-              mode === 'preview' ? 'bg-white text-[#17191c] font-medium shadow-xs' : 'text-[#777b86] hover:text-[#17191c]'
+              mode === 'preview' ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs' : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
             }`}
           >
             <Eye className="w-3 h-3" />
@@ -404,18 +404,18 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={`Anota señales, aprendizajes o pasos del ritual en Markdown:\n- [ ] Preparar entorno la noche anterior\n> Me siento con más claridad cuando lo hago antes de las 09:00`}
-          className="w-full px-4 py-3 bg-white text-[#17191c] placeholder-[#a3a6af] text-[14px] leading-relaxed focus:outline-none resize-y min-h-[120px]"
+          className="w-full px-4 py-3 bg-white dark:bg-[#141920] text-[#17191c] dark:text-[#f1f5f9] placeholder-[#a3a6af] dark:placeholder-[#6f7a8a] text-[14px] leading-relaxed focus:outline-none resize-y min-h-[120px]"
         />
       ) : (
-        <div className="px-4 py-3 min-h-[120px] max-h-56 overflow-y-auto bg-white">
+        <div className="px-4 py-3 min-h-[120px] max-h-56 overflow-y-auto bg-white dark:bg-[#141920]">
           {value.trim() ? (
             <RitualNotesMarkdown
               content={value}
               onToggleCheckbox={handleToggleCheckboxInPreview}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center py-6 text-center text-[#979799] text-[13px]">
-              <FileText className="w-4 h-4 mb-1.5 text-[#a3a6af]" />
+            <div className="flex flex-col items-center justify-center py-6 text-center text-[#979799] dark:text-[#6f7a8a] text-[13px]">
+              <FileText className="w-4 h-4 mb-1.5 text-[#a3a6af] dark:text-[#6f7a8a]" />
               <span>Sin notas del ritual todavía. Cambia a Editar para registrar un aprendizaje.</span>
             </div>
           )}
@@ -423,7 +423,7 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
       )}
 
       {/* Footer Meta */}
-      <div className="flex items-center justify-between px-4 py-2 border-t border-[#ececec] bg-[#fafafb] text-[11px] text-[#979799]">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-4 py-2 border-t border-[#ececec] dark:border-[#252e3a] bg-[#fafafb] dark:bg-[#1b222b] text-[11px] text-[#979799] dark:text-[#6f7a8a]">
         <span>Soporta Markdown: **negrita**, *cursiva*, - listas, - [ ] pasos, &gt; cita</span>
         <span className="tabular-nums shrink-0">
           {value.length}/{maxLength}

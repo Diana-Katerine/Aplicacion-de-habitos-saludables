@@ -1,13 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import {
   Flame,
-  Award,
-  TrendingUp,
-  CheckCircle2,
   Activity,
   FileDown,
   Check,
-  Trophy,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -24,11 +20,12 @@ import { Habit, HabitLog, Category, DayOfWeek, EvaluatedBadge } from '../../type
 import { formatDate, getDayOfWeek } from '../../services/storage';
 import { buildWeeklyReportSummary, generateWeeklyStatsPdf } from '../../services/pdfReport';
 import { CategoryIcon } from '../common/CategoryIcon';
-import { BadgesModule } from '../badges/BadgesModule';
 import { HistoricalStreaksHeatmap } from './HistoricalStreaksHeatmap';
 import { MonthlyComparator } from './MonthlyComparator';
 import { MomentumForecast } from './MomentumForecast';
 import { ContextualJournalStats } from './ContextualJournalStats';
+import { WeeklyAdherenceD3Chart } from './WeeklyAdherenceD3Chart';
+import { StreakComparisonBarChart } from './StreakComparisonBarChart';
 
 interface Props {
   habits: Habit[];
@@ -39,6 +36,7 @@ interface Props {
   timezone?: string;
   onReportExported?: (filename: string, topCategoryName?: string, weeklyRate?: number) => void;
   onApplyReminderTime?: (habitId: string, newReminderTime: string) => void;
+  isDark?: boolean;
 }
 
 export const StatsView: React.FC<Props> = ({
@@ -50,8 +48,10 @@ export const StatsView: React.FC<Props> = ({
   timezone,
   onReportExported,
   onApplyReminderTime,
+  isDark = false,
 }) => {
   const [selectedHabitId, setSelectedHabitId] = useState<string | 'all'>('all');
+  const [activeTab, setActiveTab] = useState<'overview' | 'compare' | 'forecast' | 'journal'>('overview');
   const [trendMetric, setTrendMetric] = useState<'count' | 'rate'>('count');
   const [trendChartType, setTrendChartType] = useState<'area' | 'bar'>('area');
   const [pdfExported, setPdfExported] = useState(false);
@@ -134,8 +134,6 @@ export const StatsView: React.FC<Props> = ({
   const avg30DayFrequency = (total30DayCompletions / 30).toFixed(1);
   const peak30DayCount = past30Days.reduce((max, d) => Math.max(max, d.completed), 0);
 
-  const past14Days = past30Days.slice(-14);
-
   const weeklySummary = useMemo(
     () =>
       buildWeeklyReportSummary({
@@ -171,178 +169,179 @@ export const StatsView: React.FC<Props> = ({
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-6 border-b border-[#ececec]">
-        <div>
-          <span className="text-[14px] text-[#979799] block">Analítica personal</span>
-          <h1 className="font-signifier font-normal text-[36px] md:text-[44px] leading-[1.2] tracking-[-0.015em] text-[#17191c] mt-1">
-            Estadísticas <em className="italic font-normal">&amp; Inercia</em>
-          </h1>
-          <p className="text-[16px] text-[#777b86] mt-1">
-            Métricas de cumplimiento, mapa de calor de constancia y pronóstico de impulso.
-          </p>
-        </div>
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-5 border-b border-[#ececec] dark:border-[#252e3a]">
+        <h1 className="font-signifier font-normal text-[36px] md:text-[42px] leading-[1.15] tracking-[-0.015em] text-[#17191c] dark:text-[#f1f5f9]">
+          Estadísticas <em className="italic font-normal chromatic-gradient-text">&amp; Inercia</em>
+        </h1>
 
-        {/* Controls: Habit filter & Weekly PDF Report button */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] text-[#777b86] whitespace-nowrap">Ver hábito:</span>
-            <select
-              value={selectedHabitId}
-              onChange={(e) => setSelectedHabitId(e.target.value)}
-              className="px-4 py-2 rounded-full bg-white border border-[#ececec] text-[#17191c] text-[13px] focus:outline-none focus:border-[#17191c] cursor-pointer"
-            >
-              <option value="all">Todos los hábitos combinados</option>
-              {habits.map((h) => (
-                <option key={h.id} value={h.id}>
-                  {h.title}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+          <select
+            aria-label="Filtrar por hábito"
+            value={selectedHabitId}
+            onChange={(e) => setSelectedHabitId(e.target.value)}
+            className="w-full sm:w-auto max-w-full min-w-0 px-4 py-2 rounded-full bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] text-[13px] focus:outline-none focus:border-[#0284C7] dark:focus:border-[#38bdf8] cursor-pointer"
+          >
+            <option value="all">Todos los hábitos</option>
+            {habits.map((h) => (
+              <option key={h.id} value={h.id}>
+                {h.title}
+              </option>
+            ))}
+          </select>
 
           <button
             type="button"
             onClick={handleExportWeeklyPdf}
-            className={`px-5 py-2.5 rounded-full text-[13px] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+            className={`px-4 py-2 rounded-full text-[13px] font-medium inline-flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 cursor-pointer ${
               pdfExported
-                ? 'bg-[#fbe1d1] text-[#5d2a1a]'
-                : 'bg-[#17191c] hover:bg-[#2a2d32] text-white'
+                ? 'bg-[#D1FAE5] dark:bg-[#059669]/20 text-[#047857] dark:text-[#34d399]'
+                : 'bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] hover:from-[#4338CA] hover:to-[#6D28D9] text-white shadow-sm shadow-[#4F46E5]/25'
             }`}
           >
             {pdfExported ? (
               <>
-                <Check className="w-3.5 h-3.5 shrink-0" />
+                <Check className="w-4 h-4 shrink-0" />
                 <span>PDF descargado</span>
               </>
             ) : (
               <>
-                <FileDown className="w-3.5 h-3.5 shrink-0" />
-                <span>Reporte semanal PDF</span>
+                <FileDown className="w-4 h-4 shrink-0" />
+                <span>Reporte PDF</span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Weekly Report & Top Category Summary Strip */}
-      <div className="rounded-[24px] px-6 py-4 bg-[#fafafb] border border-[#ececec] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px]">
-          <span className="font-medium text-[#17191c] inline-flex items-center gap-1.5">
-            <Trophy className="w-4 h-4 text-[#5d2a1a] shrink-0" />
-            Resumen de los últimos 7 días
-          </span>
-          <span className="text-[#a3a6af]">·</span>
-          <span className="text-[#777b86] tabular-nums">
-            Adherencia semanal:{' '}
-            <strong className="font-medium text-[#17191c]">{weeklySummary.weeklyRate}%</strong>{' '}
-            <span className="text-[#979799]">
-              ({weeklySummary.totalCompleted}/{weeklySummary.totalScheduled} check-ins)
-            </span>
-          </span>
-          {topCategory && (
-            <>
-              <span className="text-[#a3a6af]">·</span>
-              <span className="text-[#777b86] tabular-nums">
-                Top categoría:{' '}
-                <strong className="font-medium text-[#17191c]">{topCategory.category.name}</strong>{' '}
-                <span>({topCategory.weeklyRate}%)</span>
+      {/* Unified 4-Column Hairline KPI Strip */}
+      <div className="rounded-[24px] bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a] overflow-hidden">
+        <div className="h-1 w-full chromatic-accent-bar" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[#ececec] dark:bg-[#252e3a]">
+          <div className="bg-white dark:bg-[#141920] px-4 sm:px-5 py-3.5 sm:py-4 min-w-0">
+            <span className="text-[12px] text-[#777b86] dark:text-[#9aa4b2] block">Adherencia 7 días</span>
+            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="text-[24px] sm:text-[26px] leading-none font-medium text-[#059669] dark:text-[#34d399] tabular-nums">
+                {weeklySummary.weeklyRate}%
               </span>
-            </>
-          )}
+              <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] tabular-nums">
+                {weeklySummary.totalCompleted}/{weeklySummary.totalScheduled}
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-[#141920] px-4 sm:px-5 py-3.5 sm:py-4 min-w-0">
+            <span className="text-[12px] text-[#777b86] dark:text-[#9aa4b2] block">Tasa 30 días</span>
+            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="text-[24px] sm:text-[26px] leading-none font-medium text-[#0284C7] dark:text-[#38bdf8] tabular-nums">
+                {avg30DayRate}%
+              </span>
+              <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] tabular-nums">
+                {totalCompletedChecks} totales
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-[#141920] px-4 sm:px-5 py-3.5 sm:py-4 min-w-0">
+            <span className="text-[12px] text-[#777b86] dark:text-[#9aa4b2] block">Racha actual</span>
+            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="text-[24px] sm:text-[26px] leading-none font-medium text-[#EA580C] dark:text-[#fb923c] tabular-nums inline-flex items-center gap-1">
+                <Flame className="w-4 h-4 text-[#EA580C] dark:text-[#fb923c] shrink-0" />
+                {currentStreakOverall}d
+              </span>
+              <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] tabular-nums">
+                récord {bestStreakOverall}d
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-[#141920] px-4 sm:px-5 py-3.5 sm:py-4 min-w-0">
+            <span className="text-[12px] text-[#777b86] dark:text-[#9aa4b2] block">Top categoría (7d)</span>
+            <div className="mt-1.5 flex items-baseline gap-2 min-w-0">
+              <span className="text-[17px] sm:text-[18px] leading-tight font-medium text-[#7C3AED] dark:text-[#c084fc] truncate">
+                {topCategory ? topCategory.category.name : '—'}
+              </span>
+              {topCategory && (
+                <span className="text-[12px] font-medium text-[#4F46E5] dark:text-[#a5b4fc] tabular-nums shrink-0">
+                  {topCategory.weeklyRate}%
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-        <span className="text-[13px] text-[#979799] whitespace-nowrap shrink-0">
-          {weeklySummary.periodLabel}
-        </span>
       </div>
 
-      {/* KPI Cards Row — Steep Mist Gray 24px cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="steep-card-mist p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] text-[#979799]">Racha máxima</span>
-            <Flame className="w-4 h-4 text-[#5d2a1a]" />
-          </div>
-          <div className="mt-2.5 flex items-baseline gap-1.5">
-            <span className="text-[30px] leading-none font-medium text-[#17191c] tabular-nums">
-              {bestStreakOverall}
-            </span>
-            <span className="text-[13px] text-[#777b86]">días</span>
-          </div>
-          <span className="text-[12px] text-[#777b86] mt-2 block">Récord histórico</span>
-        </div>
-
-        <div className="steep-card-mist p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] text-[#979799]">Racha actual</span>
-            <Award className="w-4 h-4 text-[#17191c]" />
-          </div>
-          <div className="mt-2.5 flex items-baseline gap-1.5">
-            <span className="text-[30px] leading-none font-medium text-[#17191c] tabular-nums">
-              {currentStreakOverall}
-            </span>
-            <span className="text-[13px] text-[#777b86]">días</span>
-          </div>
-          <span className="text-[12px] text-[#777b86] mt-2 block">Inercia activa</span>
-        </div>
-
-        <div className="steep-card-mist p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] text-[#979799]">Total check-ins</span>
-            <CheckCircle2 className="w-4 h-4 text-[#17191c]" />
-          </div>
-          <div className="mt-2.5 flex items-baseline gap-1.5">
-            <span className="text-[30px] leading-none font-medium text-[#17191c] tabular-nums">
-              {totalCompletedChecks}
-            </span>
-            <span className="text-[13px] text-[#777b86]">veces</span>
-          </div>
-          <span className="text-[12px] text-[#777b86] mt-2 block">Registros completados</span>
-        </div>
-
-        <div className="steep-card-mist p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] text-[#979799]">Tasa promedio</span>
-            <TrendingUp className="w-4 h-4 text-[#5d2a1a]" />
-          </div>
-          <div className="mt-2.5 flex items-baseline gap-1.5">
-            <span className="text-[30px] leading-none font-medium text-[#17191c] tabular-nums">
-              {avg30DayRate}%
-            </span>
-            <span className="text-[13px] text-[#777b86]">adherencia</span>
-          </div>
-          <span className="text-[12px] text-[#777b86] mt-2 block">Últimos 30 días</span>
-        </div>
+      {/* Segmented Analytics Navigation */}
+      <div className="inline-flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] max-w-full overflow-x-auto">
+        {(
+          [
+            { id: 'overview', label: 'Resumen' },
+            { id: 'compare', label: 'Comparativa mensual' },
+            { id: 'forecast', label: 'Pronóstico IA' },
+            { id: 'journal', label: 'Diario contextual' },
+          ] as const
+        ).map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+              activeTab === tab.id
+                ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
+
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          {/* Current Week Adherence Line Chart (D3) */}
+          <WeeklyAdherenceD3Chart
+            habits={habits}
+            logs={logs}
+            selectedHabitId={selectedHabitId}
+            timezone={timezone}
+            isDark={isDark}
+          />
+
+          {/* Current vs Longest Historical Streak Bar Chart (D3) */}
+          <StreakComparisonBarChart
+            habits={habits}
+            selectedHabitId={selectedHabitId}
+            isDark={isDark}
+          />
 
       {/* Trends Section (Last 30 Days with Recharts) */}
       <section
         aria-label="Tendencias de los últimos 30 días"
-        className="rounded-[24px] p-6 bg-white border border-[#ececec]"
+        className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]"
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[#5d2a1a] shrink-0" />
-              <h2 className="text-[18px] font-medium text-[#17191c] tracking-[-0.01em]">
+              <Activity className="w-4 h-4 text-[#059669] dark:text-[#34d399] shrink-0" />
+              <h2 className="text-[18px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em]">
                 Tendencias · Frecuencia de cumplimiento (30 días)
               </h2>
             </div>
-            <p className="text-[14px] text-[#777b86] mt-1">
-              Promedio de <strong className="font-medium text-[#17191c] tabular-nums">{avg30DayFrequency}</strong> hábitos/día ·{' '}
-              <strong className="font-medium text-[#17191c] tabular-nums">{total30DayCompletions}</strong> completados en 30d · Pico diario de{' '}
-              <strong className="font-medium text-[#5d2a1a] tabular-nums">{peak30DayCount}</strong>
+            <p className="text-[14px] text-[#777b86] dark:text-[#9aa4b2] mt-1">
+              Promedio de <strong className="font-medium text-[#17191c] dark:text-[#f1f5f9] tabular-nums">{avg30DayFrequency}</strong> hábitos/día ·{' '}
+              <strong className="font-medium text-[#17191c] dark:text-[#f1f5f9] tabular-nums">{total30DayCompletions}</strong> completados en 30d · Pico diario de{' '}
+              <strong className="font-medium text-[#059669] dark:text-[#34d399] tabular-nums">{peak30DayCount}</strong>
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <div className="flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3]">
+          <div className="flex flex-wrap items-center gap-2 max-w-full">
+            <div className="flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] max-w-full overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setTrendMetric('count')}
                 className={`px-3.5 py-1 rounded-full text-[12px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                   trendMetric === 'count'
-                    ? 'bg-white text-[#17191c] font-medium shadow-xs'
-                    : 'text-[#777b86] hover:text-[#17191c]'
+                    ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                    : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
                 }`}
               >
                 Frecuencia diaria
@@ -352,22 +351,22 @@ export const StatsView: React.FC<Props> = ({
                 onClick={() => setTrendMetric('rate')}
                 className={`px-3.5 py-1 rounded-full text-[12px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                   trendMetric === 'rate'
-                    ? 'bg-white text-[#17191c] font-medium shadow-xs'
-                    : 'text-[#777b86] hover:text-[#17191c]'
+                    ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                    : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
                 }`}
               >
                 Tasa (%)
               </button>
             </div>
 
-            <div className="flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3]">
+            <div className="flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b]">
               <button
                 type="button"
                 onClick={() => setTrendChartType('area')}
                 className={`px-3 py-1 rounded-full text-[12px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                   trendChartType === 'area'
-                    ? 'bg-white text-[#17191c] font-medium shadow-xs'
-                    : 'text-[#777b86] hover:text-[#17191c]'
+                    ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                    : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
                 }`}
               >
                 Área
@@ -377,8 +376,8 @@ export const StatsView: React.FC<Props> = ({
                 onClick={() => setTrendChartType('bar')}
                 className={`px-3 py-1 rounded-full text-[12px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                   trendChartType === 'bar'
-                    ? 'bg-white text-[#17191c] font-medium shadow-xs'
-                    : 'text-[#777b86] hover:text-[#17191c]'
+                    ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                    : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
                 }`}
               >
                 Barras
@@ -390,25 +389,37 @@ export const StatsView: React.FC<Props> = ({
         <div className="w-full h-72">
           <ResponsiveContainer width="100%" height="100%">
             {trendChartType === 'area' ? (
-              <AreaChart data={past30Days} margin={{ top: 10, right: 12, left: -16, bottom: 0 }}>
+              <AreaChart data={past30Days} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="steepTrendGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#fbe1d1" stopOpacity={0.75} />
-                    <stop offset="95%" stopColor="#fbe1d1" stopOpacity={0.05} />
+                    <stop offset="5%" stopColor="#06B6D4" stopOpacity={isDark ? 0.42 : 0.38} />
+                    <stop offset="55%" stopColor="#10B981" stopOpacity={isDark ? 0.16 : 0.14} />
+                    <stop offset="95%" stopColor="#6366F1" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="steepTrendStroke" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor={isDark ? '#34d399' : '#059669'} />
+                    <stop offset="50%" stopColor={isDark ? '#38bdf8' : '#0284C7'} />
+                    <stop offset="100%" stopColor={isDark ? '#c084fc' : '#7C3AED'} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(23,25,28,0.06)" vertical={false} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke={isDark ? 'rgba(241,245,249,0.07)' : 'rgba(23,25,28,0.06)'}
+                  vertical={false}
+                />
                 <XAxis
                   dataKey="shortDate"
-                  stroke="#a3a6af"
-                  tick={{ fill: '#777b86', fontSize: 11 }}
+                  stroke={isDark ? '#6f7a8a' : '#a3a6af'}
+                  tick={{ fill: isDark ? '#9aa4b2' : '#777b86', fontSize: 11 }}
                   tickLine={false}
-                  axisLine={{ stroke: '#ececec' }}
-                  interval={4}
+                  axisLine={{ stroke: isDark ? '#252e3a' : '#ececec' }}
+                  interval="preserveStartEnd"
+                  minTickGap={22}
                 />
                 <YAxis
-                  stroke="#a3a6af"
-                  tick={{ fill: '#777b86', fontSize: 11 }}
+                  width={trendMetric === 'rate' ? 38 : 28}
+                  stroke={isDark ? '#6f7a8a' : '#a3a6af'}
+                  tick={{ fill: isDark ? '#9aa4b2' : '#777b86', fontSize: 11 }}
                   tickLine={false}
                   axisLine={false}
                   allowDecimals={false}
@@ -416,20 +427,20 @@ export const StatsView: React.FC<Props> = ({
                   unit={trendMetric === 'rate' ? '%' : ''}
                 />
                 <Tooltip
-                  cursor={{ stroke: 'rgba(93, 42, 26, 0.3)', strokeWidth: 1 }}
+                  cursor={{ stroke: 'rgba(16, 185, 129, 0.35)', strokeWidth: 1 }}
                   content={({ active, payload }) => {
                     if (!active || !payload || !payload.length) return null;
                     const item = payload[0].payload as (typeof past30Days)[number];
                     return (
                       <div className="steep-popover px-3.5 py-2.5 text-[12px]">
-                        <p className="font-medium text-[#17191c] mb-1">
+                        <p className="font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1">
                           {item.fullDateLabel} ({item.dayLabel})
                         </p>
-                        <p className="text-[#5d2a1a] font-medium tabular-nums">
+                        <p className="text-[#059669] dark:text-[#34d399] font-medium tabular-nums">
                           {item.completed} / {item.scheduled} hábitos completados
                         </p>
-                        <p className="text-[#777b86] tabular-nums mt-0.5">
-                          Cumplimiento diario: <span className="text-[#17191c] font-medium">{item.rate}%</span>
+                        <p className="text-[#777b86] dark:text-[#9aa4b2] tabular-nums mt-0.5">
+                          Cumplimiento diario: <span className="text-[#17191c] dark:text-[#f1f5f9] font-medium">{item.rate}%</span>
                         </p>
                       </div>
                     );
@@ -438,27 +449,38 @@ export const StatsView: React.FC<Props> = ({
                 <Area
                   type="monotone"
                   dataKey={trendMetric === 'count' ? 'completed' : 'rate'}
-                  stroke="#5d2a1a"
-                  strokeWidth={2.2}
+                  stroke="url(#steepTrendStroke)"
+                  strokeWidth={2.6}
                   fillOpacity={1}
                   fill="url(#steepTrendGradient)"
-                  activeDot={{ r: 5, fill: '#5d2a1a', stroke: '#ffffff', strokeWidth: 2 }}
+                  activeDot={{
+                    r: 5,
+                    fill: isDark ? '#38bdf8' : '#0284C7',
+                    stroke: isDark ? '#141920' : '#ffffff',
+                    strokeWidth: 2,
+                  }}
                 />
               </AreaChart>
             ) : (
-              <BarChart data={past30Days} margin={{ top: 10, right: 12, left: -16, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(23,25,28,0.06)" vertical={false} />
+              <BarChart data={past30Days} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke={isDark ? 'rgba(241,245,249,0.07)' : 'rgba(23,25,28,0.06)'}
+                  vertical={false}
+                />
                 <XAxis
                   dataKey="shortDate"
-                  stroke="#a3a6af"
-                  tick={{ fill: '#777b86', fontSize: 11 }}
+                  stroke={isDark ? '#6f7a8a' : '#a3a6af'}
+                  tick={{ fill: isDark ? '#9aa4b2' : '#777b86', fontSize: 11 }}
                   tickLine={false}
-                  axisLine={{ stroke: '#ececec' }}
-                  interval={4}
+                  axisLine={{ stroke: isDark ? '#252e3a' : '#ececec' }}
+                  interval="preserveStartEnd"
+                  minTickGap={22}
                 />
                 <YAxis
-                  stroke="#a3a6af"
-                  tick={{ fill: '#777b86', fontSize: 11 }}
+                  width={trendMetric === 'rate' ? 38 : 28}
+                  stroke={isDark ? '#6f7a8a' : '#a3a6af'}
+                  tick={{ fill: isDark ? '#9aa4b2' : '#777b86', fontSize: 11 }}
                   tickLine={false}
                   axisLine={false}
                   allowDecimals={false}
@@ -466,20 +488,20 @@ export const StatsView: React.FC<Props> = ({
                   unit={trendMetric === 'rate' ? '%' : ''}
                 />
                 <Tooltip
-                  cursor={{ fill: 'rgba(23, 25, 28, 0.04)' }}
+                  cursor={{ fill: 'rgba(16, 185, 129, 0.08)' }}
                   content={({ active, payload }) => {
                     if (!active || !payload || !payload.length) return null;
                     const item = payload[0].payload as (typeof past30Days)[number];
                     return (
                       <div className="steep-popover px-3.5 py-2.5 text-[12px]">
-                        <p className="font-medium text-[#17191c] mb-1">
+                        <p className="font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1">
                           {item.fullDateLabel} ({item.dayLabel})
                         </p>
-                        <p className="text-[#5d2a1a] font-medium tabular-nums">
+                        <p className="text-[#059669] dark:text-[#34d399] font-medium tabular-nums">
                           {item.completed} / {item.scheduled} hábitos completados
                         </p>
-                        <p className="text-[#777b86] tabular-nums mt-0.5">
-                          Cumplimiento diario: <span className="text-[#17191c] font-medium">{item.rate}%</span>
+                        <p className="text-[#777b86] dark:text-[#9aa4b2] tabular-nums mt-0.5">
+                          Cumplimiento diario: <span className="text-[#17191c] dark:text-[#f1f5f9] font-medium">{item.rate}%</span>
                         </p>
                       </div>
                     );
@@ -487,8 +509,8 @@ export const StatsView: React.FC<Props> = ({
                 />
                 <Bar
                   dataKey={trendMetric === 'count' ? 'completed' : 'rate'}
-                  fill="#17191c"
-                  radius={[4, 4, 0, 0]}
+                  fill={isDark ? '#10b981' : '#059669'}
+                  radius={[5, 5, 0, 0]}
                   maxBarSize={18}
                 />
               </BarChart>
@@ -497,201 +519,160 @@ export const StatsView: React.FC<Props> = ({
         </div>
       </section>
 
-      {/* AI Weekly Momentum Zones & Optimal Timing Forecast */}
-      <MomentumForecast
-        habits={habits}
-        logs={logs}
-        categories={categories}
-        selectedHabitId={selectedHabitId}
-        timezone={timezone}
-        onApplyReminderTime={onApplyReminderTime}
-      />
+          {/* 90-Day Historical Streaks Heatmap */}
+          <HistoricalStreaksHeatmap
+            habits={habits}
+            logs={logs}
+            selectedHabitId={selectedHabitId}
+            timezone={timezone}
+          />
 
-      {/* Current Month vs Previous Month Consistency Comparator */}
-      <MonthlyComparator
-        habits={habits}
-        logs={logs}
-        selectedHabitId={selectedHabitId}
-        timezone={timezone}
-      />
-
-      {/* 90-Day GitHub-Style Historical Streaks Heatmap */}
-      <HistoricalStreaksHeatmap
-        habits={habits}
-        logs={logs}
-        selectedHabitId={selectedHabitId}
-        timezone={timezone}
-      />
-
-      {/* Contextual Journaling: Energy Level & Mood Performance Correlation */}
-      <ContextualJournalStats
-        habits={habits}
-        logs={logs}
-        selectedHabitId={selectedHabitId}
-      />
-
-      {/* Trailing 14 Days + Top Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
-          <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em] mb-1">
-            Tendencia de los últimos 14 días
-          </h3>
-          <p className="text-[13px] text-[#777b86] mb-6">
-            Porcentaje de cumplimiento diario en días programados.
-          </p>
-
-          <div className="h-44 flex items-end gap-2 pt-4 px-1 border-b border-[#ececec]">
-            {past14Days.map((d) => (
-              <div key={d.date} className="flex-1 flex flex-col items-center gap-1.5 group h-full justify-end">
-                <span className="text-[10px] text-[#777b86] opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">
-                  {d.rate}%
+          {/* Top Categories + Habit Streaks */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]">
+              <div className="flex items-center justify-between gap-2 mb-5">
+                <h3 className="text-[17px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em]">
+                  Top categorías (7 días)
+                </h3>
+                <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] whitespace-nowrap shrink-0">
+                  {weeklySummary.topCategories.length} activas
                 </span>
-                <div className="w-full bg-[#f2f2f3] rounded-t-sm h-32 relative overflow-hidden flex items-end">
-                  <div
-                    className="w-full rounded-t-sm transition-all duration-300"
-                    style={{
-                      height: `${d.rate}%`,
-                      backgroundColor: d.rate >= 80 ? '#17191c' : d.rate >= 50 ? '#5d2a1a' : '#a3a6af',
-                    }}
-                  />
-                </div>
-                <span className="text-[11px] text-[#777b86]">{d.dayLabel}</span>
               </div>
-            ))}
-          </div>
 
-          <div className="flex items-center justify-between text-[12px] text-[#979799] mt-2.5">
-            <span>Hace 14 días</span>
-            <span>Hoy</span>
-          </div>
-        </div>
-
-        <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
-          <div className="flex items-start justify-between gap-2 mb-5">
-            <div>
-              <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em] mb-1">
-                Top categorías (últimos 7 días)
-              </h3>
-              <p className="text-[13px] text-[#777b86]">
-                Ranking por tasa de cumplimiento semanal y volumen de check-ins.
-              </p>
-            </div>
-            <span className="text-[12px] text-[#979799] whitespace-nowrap shrink-0">
-              {weeklySummary.topCategories.length} activas
-            </span>
-          </div>
-
-          <div className="space-y-4">
-            {weeklySummary.topCategories.length === 0 ? (
-              <p className="text-[13px] text-[#979799] py-6 text-center">
-                Aún no hay categorías con hábitos activos para clasificar.
-              </p>
-            ) : (
-              weeklySummary.topCategories.map(
-                (
-                  { category, habitCount, weeklyCompleted, weeklyScheduled, weeklyRate, totalAllTimeCompletions },
-                  idx
-                ) => (
-                  <div key={category.id} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-2 text-[13px]">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span
-                          className={`text-[12px] tabular-nums w-5 shrink-0 ${
-                            idx === 0 ? 'text-[#5d2a1a] font-medium' : 'text-[#979799]'
-                          }`}
-                        >
-                          #{idx + 1}
-                        </span>
-                        <div className="w-6 h-6 rounded-lg bg-[#f2f2f3] text-[#17191c] flex items-center justify-center shrink-0">
-                          <CategoryIcon name={category.iconName} className="w-3.5 h-3.5" />
+              <div className="space-y-4">
+                {weeklySummary.topCategories.length === 0 ? (
+                  <p className="text-[13px] text-[#979799] dark:text-[#6f7a8a] py-6 text-center">
+                    Sin categorías activas todavía.
+                  </p>
+                ) : (
+                  weeklySummary.topCategories.map(
+                    (
+                      { category, weeklyCompleted, weeklyScheduled, weeklyRate },
+                      idx
+                    ) => (
+                      <div key={category.id} className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-2 text-[13px]">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span
+                              className="text-[12px] tabular-nums w-5 shrink-0 font-medium"
+                              style={{ color: idx === 0 ? category.colorHex : isDark ? '#9aa4b2' : '#777b86' }}
+                            >
+                              #{idx + 1}
+                            </span>
+                            <div
+                              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                              style={{
+                                backgroundColor: `${category.colorHex}1A`,
+                                color: category.colorHex,
+                              }}
+                            >
+                              <CategoryIcon name={category.iconName} className="w-4 h-4" />
+                            </div>
+                            <span className="font-medium text-[#17191c] dark:text-[#f1f5f9] truncate">{category.name}</span>
+                          </div>
+                          <span className="font-medium text-[#17191c] dark:text-[#f1f5f9] tabular-nums whitespace-nowrap shrink-0">
+                            {weeklyRate}%{' '}
+                            <span className="text-[#979799] dark:text-[#6f7a8a] font-normal">
+                              ({weeklyCompleted}/{weeklyScheduled})
+                            </span>
+                          </span>
                         </div>
-                        <span className="font-medium text-[#17191c] truncate">{category.name}</span>
-                        <span className="text-[#979799] text-[12px] whitespace-nowrap shrink-0">
-                          {habitCount} h · {totalAllTimeCompletions} tot.
+
+                        <div className="w-full h-1.5 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{
+                              width: `${weeklyRate}%`,
+                              backgroundColor: category.colorHex || '#059669',
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  )
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]">
+              <h3 className="text-[17px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em] mb-4 flex items-center gap-2">
+                <Flame className="w-4 h-4 text-[#D97706] dark:text-[#fbbf24]" />
+                Récords por hábito
+              </h3>
+
+              <div className="divide-y divide-[#ececec] dark:divide-[#252e3a]">
+                {activeHabits.map((habit) => {
+                  const cat = categoryMap.get(habit.categoryId);
+                  const streakRatio = habit.bestStreak > 0 ? Math.round((habit.currentStreak / habit.bestStreak) * 100) : 0;
+
+                  return (
+                    <div key={habit.id} className="py-3 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: cat?.colorHex || '#059669' }}
+                        />
+                        <span className="text-[14px] font-medium text-[#17191c] dark:text-[#f1f5f9] truncate">{habit.title}</span>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0 text-[13px] tabular-nums">
+                        <span className="font-medium text-[#D97706] dark:text-[#fbbf24]">
+                          {habit.currentStreak}d
+                        </span>
+                        <div className="w-16 hidden sm:block">
+                          <div className="w-full h-1.5 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] overflow-hidden">
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${streakRatio}%`,
+                                backgroundColor: cat?.colorHex || '#059669',
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <span className="text-[#777b86] dark:text-[#9aa4b2]">
+                          máx {habit.bestStreak}d
                         </span>
                       </div>
-                      <span className="font-medium text-[#17191c] tabular-nums whitespace-nowrap shrink-0">
-                        {weeklyRate}%{' '}
-                        <span className="text-[#979799] font-normal">
-                          ({weeklyCompleted}/{weeklyScheduled})
-                        </span>
-                      </span>
                     </div>
-
-                    <div className="w-full h-1.5 rounded-full bg-[#f2f2f3] overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-300"
-                        style={{
-                          width: `${weeklyRate}%`,
-                          backgroundColor: idx === 0 ? '#5d2a1a' : '#17191c',
-                        }}
-                      />
-                    </div>
-                  </div>
-                )
-              )
-            )}
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Streaks Hall of Fame */}
-      <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
-        <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em] mb-1 flex items-center gap-2">
-          <Flame className="w-4 h-4 text-[#5d2a1a]" />
-          Récords de racha por hábito
-        </h3>
-        <p className="text-[13px] text-[#777b86] mb-4">
-          Comparativa entre racha actual activa y máxima histórica conseguida.
-        </p>
+      {activeTab === 'compare' && (
+        <MonthlyComparator
+          habits={habits}
+          logs={logs}
+          selectedHabitId={selectedHabitId}
+          timezone={timezone}
+          isDark={isDark}
+        />
+      )}
 
-        <div className="divide-y divide-[#ececec]">
-          {activeHabits.map((habit) => {
-            const cat = categoryMap.get(habit.categoryId);
-            const streakRatio = habit.bestStreak > 0 ? Math.round((habit.currentStreak / habit.bestStreak) * 100) : 0;
+      {activeTab === 'forecast' && (
+        <MomentumForecast
+          habits={habits}
+          logs={logs}
+          categories={categories}
+          selectedHabitId={selectedHabitId}
+          timezone={timezone}
+          onApplyReminderTime={onApplyReminderTime}
+          isDark={isDark}
+        />
+      )}
 
-            return (
-              <div key={habit.id} className="py-3.5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: cat?.colorHex || '#17191c' }}
-                  />
-                  <span className="text-[14px] font-medium text-[#17191c] truncate">{habit.title}</span>
-                </div>
-
-                <div className="flex items-center gap-5 shrink-0">
-                  <div className="text-right">
-                    <span className="text-[13px] font-medium text-[#5d2a1a] tabular-nums">
-                      {habit.currentStreak} d
-                    </span>
-                    <span className="text-[11px] text-[#979799] block">actual</span>
-                  </div>
-
-                  <div className="w-24 hidden sm:block">
-                    <div className="w-full h-1.5 rounded-full bg-[#f2f2f3] overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-[#17191c]"
-                        style={{ width: `${streakRatio}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-[13px] font-medium text-[#17191c] tabular-nums">
-                      {habit.bestStreak} d
-                    </span>
-                    <span className="text-[11px] text-[#979799] block">récord</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Automated Streak Badges Showcase */}
-      <BadgesModule badges={badges} />
+      {activeTab === 'journal' && (
+        <ContextualJournalStats
+          habits={habits}
+          logs={logs}
+          selectedHabitId={selectedHabitId}
+          isDark={isDark}
+        />
+      )}
     </div>
   );
 };

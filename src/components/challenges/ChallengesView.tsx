@@ -7,7 +7,6 @@ import {
   Target,
   Plus,
   Check,
-  Flame,
   Calendar,
   Trash2,
   Minus,
@@ -18,6 +17,8 @@ import { Category, Challenge, DailyFocus, EvaluatedBadge, Habit, HabitLog } from
 import { StorageService } from '../../services/storage';
 import { CategoryIcon } from '../common/CategoryIcon';
 import { BadgesModule } from '../badges/BadgesModule';
+import { getCategoryBioluminescentTheme } from '../../services/bioluminescentTheme';
+import { ActionHint } from '../common/ActionHint';
 
 interface Props {
   userId: string;
@@ -126,7 +127,7 @@ export const ChallengesView: React.FC<Props> = ({
           particleCount: 42,
           spread: 55,
           origin: { y: 0.7 },
-          colors: ['#17191c', '#5d2a1a', '#fbe1d1'],
+          colors: ['#059669', '#10b981', '#f59e0b', '#0284c7', '#6366f1'],
         });
       } catch {
         // ignore
@@ -164,84 +165,74 @@ export const ChallengesView: React.FC<Props> = ({
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[#ececec]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[#ececec] dark:border-[#252e3a]">
         <div>
-          <span className="text-[14px] text-[#979799] block">Metas &amp; comunidad</span>
-          <h1 className="font-signifier font-normal text-[36px] md:text-[44px] leading-[1.2] tracking-[-0.015em] text-[#17191c] mt-1">
-            Retos &amp; <em className="italic font-normal">hitos</em>
+          <h1 className="font-signifier font-normal text-[36px] md:text-[44px] leading-[1.15] tracking-[-0.015em] text-[#17191c] dark:text-[#f1f5f9]">
+            Retos &amp; <em className="italic font-normal chromatic-gradient-text">hitos</em>
           </h1>
-          <p className="text-[16px] text-[#777b86] mt-1">
-            Únete a metas mensuales comunitarias o conquista hitos personales impulsados por tus hábitos.
-          </p>
         </div>
 
         <button
           type="button"
           onClick={() => setIsCreateOpen(true)}
-          className="px-5 py-2.5 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[14px] transition-colors inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 self-start md:self-auto cursor-pointer"
+          className="btn-chromatic px-5 py-2.5 rounded-full text-white text-[14px] font-medium transition-all inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 self-start md:self-auto cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Crear reto personal</span>
         </button>
       </div>
 
-      {/* KPI Strip — Steep Mist Gray 24px cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="steep-card-mist p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] text-[#979799]">Retos activos</span>
-            <Users className="w-4 h-4 text-[#17191c]" />
+      {/* Unified 1-Row Hairline Metric Strip */}
+      <div className="rounded-[20px] bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a] overflow-hidden">
+        <div className="h-1 w-full chromatic-accent-bar" />
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#ececec] dark:divide-[#252e3a]">
+          <div className="px-4 sm:px-5 py-3.5 sm:py-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 min-w-0">
+            <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2]">Retos activos</span>
+            <div className="flex flex-wrap items-baseline gap-2">
+              <span className="text-[24px] leading-none font-medium text-[#4F46E5] dark:text-[#a5b4fc] tabular-nums">
+                {activeCommunityCount + activeCustomCount}
+              </span>
+              <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] tabular-nums">
+                {activeCommunityCount} com. · {activeCustomCount} propios
+              </span>
+            </div>
           </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-[30px] leading-none font-medium text-[#17191c] tabular-nums">
-              {activeCommunityCount + activeCustomCount}
-            </span>
-            <span className="text-[13px] text-[#777b86]">
-              {activeCommunityCount} comunitarios · {activeCustomCount} propios
-            </span>
-          </div>
-        </div>
 
-        <div className="steep-card-mist p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] text-[#979799]">Hitos alcanzados</span>
-            <Trophy className="w-4 h-4 text-[#5d2a1a]" />
+          <div className="px-4 sm:px-5 py-3.5 sm:py-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 min-w-0">
+            <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2]">Hitos alcanzados</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-[24px] leading-none font-medium text-[#EA580C] dark:text-[#fb923c] tabular-nums">
+                {completedMilestonesCount}
+              </span>
+              <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] tabular-nums">
+                / {allChallenges.length}
+              </span>
+            </div>
           </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-[30px] leading-none font-medium text-[#17191c] tabular-nums">
-              {completedMilestonesCount}
-            </span>
-            <span className="text-[13px] text-[#777b86] tabular-nums">
-              de {allChallenges.length} disponibles
-            </span>
-          </div>
-        </div>
 
-        <div className="steep-card-mist p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] text-[#979799]">Aporte mensual</span>
-            <Flame className="w-4 h-4 text-[#5d2a1a]" />
-          </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-[30px] leading-none font-medium text-[#17191c] tabular-nums">
-              {monthlyCheckins}
-            </span>
-            <span className="text-[13px] text-[#777b86] tabular-nums">
-              check-ins · quedan {daysRemaining} días
-            </span>
+          <div className="px-4 sm:px-5 py-3.5 sm:py-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 min-w-0">
+            <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2]">Aporte mensual</span>
+            <div className="flex flex-wrap items-baseline gap-2">
+              <span className="text-[24px] leading-none font-medium text-[#059669] dark:text-[#34d399] tabular-nums">
+                {monthlyCheckins}
+              </span>
+              <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] tabular-nums">
+                check-ins · {daysRemaining} d restantes
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Filter Segmented Control */}
-      <div className="inline-flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] max-w-full overflow-x-auto">
+      <div className="inline-flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] max-w-full overflow-x-auto">
         <button
           type="button"
           onClick={() => setFilter('all')}
           className={`px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
             filter === 'all'
-              ? 'bg-white text-[#17191c] font-medium shadow-xs'
-              : 'text-[#777b86] hover:text-[#17191c]'
+              ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+              : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
           }`}
         >
           Todos ({allChallenges.length})
@@ -251,8 +242,8 @@ export const ChallengesView: React.FC<Props> = ({
           onClick={() => setFilter('community')}
           className={`px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
             filter === 'community'
-              ? 'bg-white text-[#17191c] font-medium shadow-xs'
-              : 'text-[#777b86] hover:text-[#17191c]'
+              ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+              : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
           }`}
         >
           Metas mensuales
@@ -262,8 +253,8 @@ export const ChallengesView: React.FC<Props> = ({
           onClick={() => setFilter('milestone')}
           className={`px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
             filter === 'milestone'
-              ? 'bg-white text-[#17191c] font-medium shadow-xs'
-              : 'text-[#777b86] hover:text-[#17191c]'
+              ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+              : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
           }`}
         >
           Hitos personales
@@ -273,8 +264,8 @@ export const ChallengesView: React.FC<Props> = ({
           onClick={() => setFilter('badges')}
           className={`px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
             filter === 'badges'
-              ? 'bg-white text-[#17191c] font-medium shadow-xs'
-              : 'text-[#777b86] hover:text-[#17191c]'
+              ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+              : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
           }`}
         >
           Insignias ({badges.filter((b) => b.isUnlocked).length}/{badges.length})
@@ -284,8 +275,8 @@ export const ChallengesView: React.FC<Props> = ({
           onClick={() => setFilter('joined')}
           className={`px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
             filter === 'joined'
-              ? 'bg-white text-[#17191c] font-medium shadow-xs'
-              : 'text-[#777b86] hover:text-[#17191c]'
+              ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+              : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
           }`}
         >
           Mis retos activos
@@ -295,19 +286,15 @@ export const ChallengesView: React.FC<Props> = ({
       {/* Monthly Community Goals Section */}
       {communityItems.length > 0 && (
         <section className="space-y-4">
-          <div>
-            <h2 className="text-[18px] font-medium text-[#17191c] tracking-[-0.01em] flex items-center gap-2">
-              <Users className="w-4 h-4 text-[#5d2a1a]" />
-              <span>Metas mensuales de la comunidad</span>
-            </h2>
-            <p className="text-[14px] text-[#777b86] mt-0.5">
-              Tu progreso se sincroniza automáticamente con tus check-ins diarios del mes en curso.
-            </p>
-          </div>
+          <h2 className="text-[18px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em] flex items-center gap-2">
+            <Users className="w-4 h-4 text-[#4F46E5] dark:text-[#818cf8]" />
+            <span>Metas mensuales de la comunidad</span>
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {communityItems.map(({ challenge, progress, isJoined }) => {
               const cat = challenge.categoryId ? categoryMap.get(challenge.categoryId) : undefined;
+              const bioTheme = cat ? getCategoryBioluminescentTheme(cat) : null;
               const communityPct =
                 challenge.communityTotalTarget && challenge.communityCurrentTotal
                   ? Math.min(
@@ -324,19 +311,20 @@ export const ChallengesView: React.FC<Props> = ({
                 <motion.div
                   key={challenge.id}
                   layout
-                  className={`rounded-[24px] p-6 bg-white border flex flex-col justify-between transition-colors ${
+                  style={bioTheme?.cssVars}
+                  className={`rounded-[24px] p-4 sm:p-6 border flex flex-col justify-between transition-colors bio-accent ${
                     progress.isCompleted
-                      ? 'border-[#5d2a1a]/35'
+                      ? 'bg-[#ECFDF5]/40 border-[#059669]/35 dark:bg-[#059669]/12 dark:border-[#34d399]/35'
                       : isJoined
-                      ? 'border-[#17191c]/20'
-                      : 'border-[#ececec]'
+                      ? 'bg-white border-[#0284C7]/35 dark:bg-[#141920] dark:border-[#38bdf8]/35'
+                      : 'bg-white border-[#ececec] dark:bg-[#141920] dark:border-[#252e3a]'
                   }`}
                 >
                   <div>
                     {/* Quiet unboxed metadata line */}
-                    <div className="flex items-center justify-between gap-2 text-[12px] text-[#979799] mb-3">
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="font-medium text-[#5d2a1a]">
+                    <div className="flex items-center justify-between gap-2 text-[12px] text-[#979799] dark:text-[#6f7a8a] mb-3">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        <span className="font-medium text-[#0369A1] dark:text-[#38bdf8]">
                           {challenge.monthLabel || 'Meta Mensual'}
                         </span>
                         <span aria-hidden="true">·</span>
@@ -349,41 +337,56 @@ export const ChallengesView: React.FC<Props> = ({
                     </div>
 
                     <div className="flex items-start gap-3.5">
-                      <div className="w-10 h-10 rounded-[14px] bg-[#f2f2f3] text-[#17191c] flex items-center justify-center shrink-0">
+                      <div
+                        className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border ${
+                          bioTheme
+                            ? ''
+                            : 'bg-[#E0F2FE] border-[#BAE6FD] text-[#0284C7] dark:bg-[#0284C7]/15 dark:border-[#38BDF8]/30 dark:text-[#38bdf8]'
+                        }`}
+                        style={
+                          bioTheme
+                            ? {
+                                backgroundColor: `rgba(${bioTheme.rgb}, 0.14)`,
+                                borderColor: `rgba(${bioTheme.rgb}, 0.28)`,
+                                color: 'var(--bio-text)',
+                              }
+                            : undefined
+                        }
+                      >
                         {cat ? (
-                          <CategoryIcon name={cat.iconName} className="w-4 h-4" />
+                          <CategoryIcon name={cat.iconName} className="w-6 h-6" />
                         ) : (
-                          <Calendar className="w-4 h-4" />
+                          <Calendar className="w-6 h-6" />
                         )}
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em]">
+                        <h3 className="text-[17px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em]">
                           {challenge.title}
                         </h3>
-                        <p className="text-[13px] text-[#777b86] mt-1 leading-relaxed">
+                        <p className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-1 leading-relaxed">
                           {challenge.description}
                         </p>
                       </div>
                     </div>
 
                     {/* Personal Progress */}
-                    <div className="mt-5 pt-4 border-t border-[#ececec] space-y-3">
+                    <div className="mt-5 pt-4 border-t border-[#ececec] dark:border-[#252e3a] space-y-3">
                       <div>
-                        <div className="flex items-center justify-between text-[13px] mb-1.5">
-                          <span className="text-[#777b86]">
+                        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[13px] mb-1.5">
+                          <span className="text-[#777b86] dark:text-[#9aa4b2]">
                             {isJoined ? 'Tu avance este mes' : 'Tu avance potencial'}
                           </span>
-                          <span className="font-medium text-[#17191c] tabular-nums">
+                          <span className="font-medium text-[#17191c] dark:text-[#f1f5f9] tabular-nums">
                             {progress.current} / {progress.target} {challenge.unitLabel}{' '}
-                            <span className="text-[#5d2a1a] ml-1">({progress.percentage}%)</span>
+                            <span className="text-[#059669] dark:text-[#34d399] ml-1">({progress.percentage}%)</span>
                           </span>
                         </div>
-                        <div className="w-full h-1.5 rounded-full bg-[#f2f2f3] overflow-hidden">
+                        <div className="w-full h-1.5 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-300"
                             style={{
                               width: `${progress.percentage}%`,
-                              backgroundColor: progress.isCompleted ? '#5d2a1a' : '#17191c',
+                              backgroundColor: progress.isCompleted ? '#059669' : '#0284C7',
                             }}
                           />
                         </div>
@@ -392,18 +395,18 @@ export const ChallengesView: React.FC<Props> = ({
                       {/* Community collective progress */}
                       {challenge.communityTotalTarget && (
                         <div>
-                          <div className="flex items-center justify-between text-[12px] text-[#979799] mb-1">
+                          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[12px] text-[#979799] dark:text-[#6f7a8a] mb-1">
                             <span>Objetivo colectivo global</span>
-                            <span className="tabular-nums font-medium text-[#777b86]">
+                            <span className="tabular-nums font-medium text-[#777b86] dark:text-[#9aa4b2]">
                               {(
                                 (challenge.communityCurrentTotal || 0) + progress.current
                               ).toLocaleString('es-ES')}{' '}
                               / {challenge.communityTotalTarget.toLocaleString('es-ES')} ({communityPct}%)
                             </span>
                           </div>
-                          <div className="w-full h-1 rounded-full bg-[#f2f2f3] overflow-hidden">
+                          <div className="w-full h-1 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] overflow-hidden">
                             <div
-                              className="h-full rounded-full bg-[#5d2a1a]/75 transition-all duration-300"
+                              className="h-full rounded-full bg-[#4F46E5]/80 dark:bg-[#818cf8]/80 transition-all duration-300"
                               style={{ width: `${communityPct}%` }}
                             />
                           </div>
@@ -413,14 +416,14 @@ export const ChallengesView: React.FC<Props> = ({
                   </div>
 
                   {/* Card Footer */}
-                  <div className="mt-5 pt-3.5 border-t border-[#ececec] flex items-center justify-between gap-3">
-                    <span className="text-[12px] font-medium text-[#777b86] flex items-center gap-1.5 min-w-0">
-                      <Award className="w-3.5 h-3.5 text-[#5d2a1a] shrink-0" />
+                  <div className="mt-5 pt-3.5 border-t border-[#ececec] dark:border-[#252e3a] flex flex-wrap items-center justify-between gap-3">
+                    <span className="text-[12px] font-medium text-[#777b86] dark:text-[#9aa4b2] flex items-center gap-1.5 min-w-0">
+                      <Award className="w-3.5 h-3.5 text-[#D97706] dark:text-[#fbbf24] shrink-0" />
                       <span className="truncate">{challenge.rewardLabel}</span>
                     </span>
 
                     {progress.isCompleted ? (
-                      <span className="px-3.5 py-1.5 rounded-full bg-[#fbe1d1] text-[#5d2a1a] text-[12px] font-medium inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                      <span className="text-[#047857] dark:text-[#6ee7b7] text-[13px] font-medium inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
                         <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                         <span>Meta cumplida</span>
                       </span>
@@ -428,10 +431,10 @@ export const ChallengesView: React.FC<Props> = ({
                       <button
                         type="button"
                         onClick={() => handleJoinClick(challenge.id, isJoined)}
-                        className={`px-4 py-1.5 rounded-full text-[13px] transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                        className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                           isJoined
-                            ? 'bg-transparent hover:bg-[#fafafb] border border-[#17191c]/25 text-[#17191c]'
-                            : 'bg-[#17191c] hover:bg-[#2a2d32] text-white'
+                            ? 'bg-transparent hover:bg-[#E0F2FE]/50 dark:hover:bg-[#0284C7]/15 border border-[#0284C7]/35 dark:border-[#38bdf8]/40 text-[#0369A1] dark:text-[#38bdf8]'
+                            : 'btn-chromatic text-white'
                         }`}
                       >
                         {isJoined ? 'Participando · Salir' : 'Unirse al reto'}
@@ -448,81 +451,98 @@ export const ChallengesView: React.FC<Props> = ({
       {/* Personal Milestones & Custom Challenges Section */}
       {milestoneItems.length > 0 && (
         <section className="space-y-4">
-          <div>
-            <h2 className="text-[18px] font-medium text-[#17191c] tracking-[-0.01em] flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-[#5d2a1a]" />
-              <span>Hitos personales &amp; metas propias</span>
-            </h2>
-            <p className="text-[14px] text-[#777b86] mt-0.5">
-              Logros calculados en tiempo real desde tus rachas, jornadas al 100% y metas personalizadas.
-            </p>
-          </div>
+          <h2 className="text-[18px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em] flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-[#D97706] dark:text-[#fbbf24]" />
+            <span>Hitos personales &amp; metas propias</span>
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {milestoneItems.map(({ challenge, progress }) => {
               const isCustom = challenge.kind === 'custom';
               const cat = challenge.categoryId ? categoryMap.get(challenge.categoryId) : undefined;
+              const bioTheme = cat ? getCategoryBioluminescentTheme(cat) : null;
 
               return (
                 <div
                   key={challenge.id}
-                  className={`rounded-[24px] p-6 flex flex-col justify-between transition-colors ${
+                  style={bioTheme?.cssVars}
+                  className={`rounded-[24px] p-4 sm:p-6 flex flex-col justify-between transition-colors bio-accent ${
                     progress.isCompleted
-                      ? 'bg-white border border-[#17191c]/20'
+                      ? 'bg-[#ECFDF5]/45 border border-[#059669]/30 dark:bg-[#059669]/12 dark:border-[#34d399]/30'
                       : 'steep-card-mist'
                   }`}
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-3.5">
                       <div
-                        className={`w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 ${
+                        className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border ${
                           progress.isCompleted
-                            ? 'bg-[#17191c] text-white'
-                            : 'bg-white text-[#5d2a1a] border border-[#ececec]'
+                            ? 'bg-[#059669] border-[#059669] text-white'
+                            : bioTheme
+                            ? 'bg-white dark:bg-[#1b222b] border-[#ececec] dark:border-[#252e3a]'
+                            : 'bg-[#FEF3C7] border-[#FDE68A] text-[#D97706] dark:bg-[#D97706]/15 dark:border-[#FBBF24]/30 dark:text-[#fbbf24]'
                         }`}
+                        style={
+                          !progress.isCompleted && bioTheme
+                            ? {
+                                backgroundColor: `rgba(${bioTheme.rgb}, 0.14)`,
+                                borderColor: `rgba(${bioTheme.rgb}, 0.28)`,
+                                color: 'var(--bio-text)',
+                              }
+                            : undefined
+                        }
                       >
                         {progress.isCompleted ? (
-                          <Check className="w-5 h-5 stroke-[2.5]" />
+                          <Check className="w-6 h-6 stroke-[2.5]" />
                         ) : cat ? (
-                          <CategoryIcon name={cat.iconName} className="w-4 h-4" />
+                          <CategoryIcon name={cat.iconName} className="w-6 h-6" />
                         ) : (
-                          <Target className="w-4 h-4" />
+                          <Target className="w-6 h-6" />
                         )}
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-[12px] text-[#979799]">
+                        <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a]">
                           {isCustom ? 'Reto propio' : challenge.rewardLabel}
                         </span>
                         {isCustom && (
-                          <button
-                            type="button"
-                            onClick={() => onDeleteCustomChallenge(challenge.id)}
-                            aria-label="Eliminar reto personal"
-                            className="p-1.5 rounded-full text-[#979799] hover:text-[#b91c1c] hover:bg-white transition-colors cursor-pointer"
+                          <ActionHint
+                            message="Eliminará permanentemente este reto personal"
+                            tone="danger"
+                            position="top"
+                            align="right"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => onDeleteCustomChallenge(challenge.id)}
+                              aria-label="Eliminar reto personal"
+                              className="w-10 h-10 rounded-full flex items-center justify-center text-[#979799] dark:text-[#6f7a8a] hover:text-[#b91c1c] dark:hover:text-[#f87171] hover:bg-[#fee2e2]/60 dark:hover:bg-[#7f1d1d]/30 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-[18px] h-[18px]" />
+                            </button>
+                          </ActionHint>
                         )}
                       </div>
                     </div>
 
-                    <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em]">
+                    <h3 className="text-[17px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em]">
                       {challenge.title}
                     </h3>
-                    <p className="text-[13px] text-[#777b86] mt-1 leading-relaxed">
+                    <p className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-1 leading-relaxed">
                       {challenge.description}
                     </p>
                   </div>
 
-                  <div className="mt-5 pt-3.5 border-t border-[#ececec] space-y-2.5">
-                    <div className="flex items-center justify-between text-[13px]">
-                      <span className="font-medium text-[#17191c] tabular-nums">
+                  <div className="mt-5 pt-3.5 border-t border-[#ececec] dark:border-[#252e3a] space-y-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+                      <span className="font-medium text-[#17191c] dark:text-[#f1f5f9] tabular-nums">
                         {progress.current} / {progress.target} {challenge.unitLabel}
                       </span>
                       <span
                         className={`font-medium tabular-nums ${
-                          progress.isCompleted ? 'text-[#17191c]' : 'text-[#5d2a1a]'
+                          progress.isCompleted
+                            ? 'text-[#047857] dark:text-[#6ee7b7]'
+                            : 'text-[#0284C7] dark:text-[#38bdf8]'
                         }`}
                       >
                         {progress.isCompleted ? 'Desbloqueado' : `${progress.percentage}%`}
@@ -531,36 +551,42 @@ export const ChallengesView: React.FC<Props> = ({
 
                     <div
                       className={`w-full h-1.5 rounded-full overflow-hidden ${
-                        progress.isCompleted ? 'bg-[#f2f2f3]' : 'bg-white'
+                        progress.isCompleted
+                          ? 'bg-[#D1FAE5] dark:bg-[#059669]/25'
+                          : 'bg-white dark:bg-[#1b222b]'
                       }`}
                     >
                       <div
                         className="h-full rounded-full transition-all duration-300"
                         style={{
                           width: `${progress.percentage}%`,
-                          backgroundColor: progress.isCompleted ? '#17191c' : '#5d2a1a',
+                          backgroundColor: progress.isCompleted
+                            ? '#059669'
+                            : bioTheme
+                            ? bioTheme.secondaryHex
+                            : '#D97706',
                         }}
                       />
                     </div>
 
                     {isCustom && (
-                      <div className="pt-1.5 flex items-center justify-end gap-2">
+                      <div className="pt-1.5 flex flex-wrap items-center justify-end gap-2">
                         <button
                           type="button"
                           onClick={() => onStepCustomChallenge(challenge.id, -1)}
                           disabled={progress.current <= 0}
-                          className="w-8 h-8 rounded-full bg-white hover:bg-[#fafafb] disabled:opacity-35 text-[#17191c] flex items-center justify-center border border-[#ececec] cursor-pointer"
+                          className="w-9 h-9 rounded-full bg-white dark:bg-[#1b222b] hover:bg-[#fafafb] dark:hover:bg-[#252e3a] disabled:opacity-35 text-[#17191c] dark:text-[#f1f5f9] flex items-center justify-center border border-[#ececec] dark:border-[#252e3a] cursor-pointer"
                           title="Restar 1"
                         >
-                          <Minus className="w-3.5 h-3.5" />
+                          <Minus className="w-4 h-4 stroke-[2.25]" />
                         </button>
                         <button
                           type="button"
                           onClick={() => onStepCustomChallenge(challenge.id, 1)}
                           disabled={progress.isCompleted}
-                          className="px-3.5 h-8 rounded-full bg-[#17191c] hover:bg-[#2a2d32] disabled:opacity-35 text-white text-[12px] inline-flex items-center gap-1 transition-colors cursor-pointer"
+                          className="px-3.5 h-9 rounded-full bg-[#059669] hover:bg-[#047857] disabled:opacity-35 text-white text-[12px] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                         >
-                          <Plus className="w-3.5 h-3.5" />
+                          <Plus className="w-4 h-4 stroke-[2.25]" />
                           <span>Registrar avance</span>
                         </button>
                       </div>
@@ -580,34 +606,38 @@ export const ChallengesView: React.FC<Props> = ({
 
       {/* Create Custom Challenge Modal */}
       {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#17191c]/35 backdrop-blur-sm">
-          <div className="w-full max-w-md steep-modal p-6 md:p-7">
-            <div className="flex items-center justify-between pb-4 border-b border-[#ececec]">
-              <div>
-                <span className="text-[12px] text-[#979799] block">Meta personalizada</span>
-                <h2 className="font-signifier font-normal text-[26px] text-[#17191c] leading-tight">
-                  Nuevo reto personal
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsCreateOpen(false)}
-                aria-label="Cerrar modal"
-                className="p-2 rounded-full text-[#777b86] hover:text-[#17191c] hover:bg-[#f2f2f3] transition-colors cursor-pointer"
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-5 bg-[#17191c]/35 dark:bg-[#050709]/75 backdrop-blur-sm">
+          <div className="w-full max-w-md my-auto max-h-[calc(100dvh-1.5rem)] sm:max-h-[90dvh] overflow-y-auto overscroll-contain steep-modal p-5 sm:p-6 md:p-7">
+            <div className="flex items-center justify-between gap-3 pb-4 border-b border-[#ececec] dark:border-[#252e3a]">
+              <h2 className="font-signifier font-normal text-[22px] sm:text-[26px] text-[#17191c] dark:text-[#f1f5f9] leading-tight">
+                Nuevo reto personal
+              </h2>
+              <ActionHint
+                message="Cerrará esta ventana sin crear el reto"
+                tone="neutral"
+                position="bottom"
+                align="right"
               >
-                <X className="w-4 h-4" />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateOpen(false)}
+                  aria-label="Cerrar modal"
+                  className="w-11 h-11 rounded-full border border-[#ececec] dark:border-[#252e3a] bg-[#fafafb] dark:bg-[#1b222b] text-[#5c616d] dark:text-[#9aa4b2] hover:text-[#b91c1c] dark:hover:text-[#fca5a5] hover:bg-[#fee2e2]/60 dark:hover:bg-[#7f1d1d]/30 hover:border-[#ef4444]/40 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+                >
+                  <X className="w-6 h-6 stroke-[2.5]" />
+                </button>
+              </ActionHint>
             </div>
 
             <form onSubmit={handleCreateSubmit} className="mt-5 space-y-4">
               {formError && (
-                <div className="p-3 rounded-[14px] bg-[#fbe1d1] text-[13px] text-[#5d2a1a]">
+                <div className="p-3 rounded-[14px] bg-[#fbe1d1] text-[13px] text-[#5d2a1a] dark:bg-[#241814] dark:text-[#fbdac7] dark:border dark:border-[#4a2d20]">
                   {formError}
                 </div>
               )}
 
               <div>
-                <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                <label className="block text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1.5">
                   Título del reto *
                 </label>
                 <input
@@ -619,12 +649,12 @@ export const ChallengesView: React.FC<Props> = ({
                     setFormError(null);
                   }}
                   placeholder="Ej: 14 días sin azúcar añadida"
-                  className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] placeholder-[#a3a6af] text-[14px] focus:outline-none focus:border-[#17191c]"
+                  className="w-full px-4 py-2.5 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] placeholder-[#a3a6af] dark:placeholder-[#6f7a8a] text-[14px] focus:outline-none focus:border-[#17191c] dark:focus:border-[#34d399]"
                 />
               </div>
 
               <div>
-                <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                <label className="block text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1.5">
                   Descripción
                 </label>
                 <input
@@ -633,13 +663,13 @@ export const ChallengesView: React.FC<Props> = ({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Ej: Mejorar claridad mental y descanso nocturno"
-                  className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] placeholder-[#a3a6af] text-[14px] focus:outline-none focus:border-[#17191c]"
+                  className="w-full px-4 py-2.5 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] placeholder-[#a3a6af] dark:placeholder-[#6f7a8a] text-[14px] focus:outline-none focus:border-[#17191c] dark:focus:border-[#34d399]"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                  <label className="block text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1.5">
                     Meta numérica *
                   </label>
                   <input
@@ -648,11 +678,11 @@ export const ChallengesView: React.FC<Props> = ({
                     max={365}
                     value={targetCount}
                     onChange={(e) => setTargetCount(parseInt(e.target.value, 10) || 1)}
-                    className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c] tabular-nums"
+                    className="w-full px-4 py-2.5 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] text-[14px] focus:outline-none focus:border-[#17191c] dark:focus:border-[#34d399] tabular-nums"
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                  <label className="block text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1.5">
                     Unidad
                   </label>
                   <input
@@ -661,19 +691,19 @@ export const ChallengesView: React.FC<Props> = ({
                     value={unitLabel}
                     onChange={(e) => setUnitLabel(e.target.value)}
                     placeholder="días, sesiones, km"
-                    className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c]"
+                    className="w-full px-4 py-2.5 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] placeholder-[#a3a6af] dark:placeholder-[#6f7a8a] text-[14px] focus:outline-none focus:border-[#17191c] dark:focus:border-[#34d399]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                <label className="block text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1.5">
                   Categoría
                 </label>
                 <select
                   value={categoryId}
                   onChange={(e) => setCategoryId(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c] cursor-pointer"
+                  className="w-full px-4 py-2.5 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] text-[14px] focus:outline-none focus:border-[#17191c] dark:focus:border-[#34d399] cursor-pointer"
                 >
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
@@ -683,17 +713,17 @@ export const ChallengesView: React.FC<Props> = ({
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#ececec]">
+              <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-end gap-2.5 pt-4 border-t border-[#ececec] dark:border-[#252e3a]">
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 rounded-full bg-transparent hover:bg-[#fafafb] border border-[#17191c]/25 text-[13px] text-[#17191c] transition-colors cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2 rounded-full bg-transparent hover:bg-[#fafafb] dark:hover:bg-[#1b222b] border border-[#17191c]/25 dark:border-[#252e3a] text-[13px] text-[#17191c] dark:text-[#f1f5f9] transition-colors cursor-pointer text-center"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[13px] transition-colors cursor-pointer"
+                  className="w-full sm:w-auto btn-chromatic px-5 py-2 rounded-full text-white text-[13px] font-medium transition-all cursor-pointer text-center"
                 >
                   Crear reto
                 </button>

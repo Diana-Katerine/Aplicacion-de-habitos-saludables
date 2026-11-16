@@ -28,7 +28,7 @@ export const BIOLUMINESCENT_PRESETS: Record<
     label: 'Brillo Ámbar Cálido',
     shortLabel: 'Ámbar Cálido',
     glowHex: '#B45309',
-    secondaryHex: '#D97706',
+    secondaryHex: '#FBBF24',
     rgb: '180, 83, 9',
   },
   emerald: {
@@ -36,7 +36,7 @@ export const BIOLUMINESCENT_PRESETS: Record<
     label: 'Brillo Esmeralda',
     shortLabel: 'Esmeralda',
     glowHex: '#047857',
-    secondaryHex: '#10B981',
+    secondaryHex: '#34D399',
     rgb: '4, 120, 87',
   },
   indigo: {
@@ -44,7 +44,7 @@ export const BIOLUMINESCENT_PRESETS: Record<
     label: 'Brillo Índigo',
     shortLabel: 'Índigo',
     glowHex: '#4F46E5',
-    secondaryHex: '#6366F1',
+    secondaryHex: '#818CF8',
     rgb: '79, 70, 229',
   },
   magenta: {
@@ -52,7 +52,7 @@ export const BIOLUMINESCENT_PRESETS: Record<
     label: 'Brillo Magenta',
     shortLabel: 'Magenta',
     glowHex: '#BE185D',
-    secondaryHex: '#EC4899',
+    secondaryHex: '#F472B6',
     rgb: '190, 24, 93',
   },
 };
@@ -100,6 +100,7 @@ function withCssVars(
     cssVars: {
       '--bio-rgb': base.rgb,
       '--bio-hex': base.glowHex,
+      '--bio-hex-dark': base.secondaryHex,
     } as React.CSSProperties,
   };
 }

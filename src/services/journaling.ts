@@ -11,13 +11,13 @@ export const MOOD_OPTIONS: MoodOption[] = [
   {
     id: 'focused',
     label: 'Enfocado',
-    colorHex: '#17191c',
+    colorHex: '#0284c7',
     description: 'Claridad mental y atención sostenida',
   },
   {
     id: 'motivated',
     label: 'Motivado',
-    colorHex: '#5d2a1a',
+    colorHex: '#059669',
     description: 'Alta iniciativa e impulso positivo',
   },
   {
@@ -29,13 +29,13 @@ export const MOOD_OPTIONS: MoodOption[] = [
   {
     id: 'tired',
     label: 'Cansado',
-    colorHex: '#b45309',
+    colorHex: '#d97706',
     description: 'Baja reserva física o fatiga',
   },
   {
     id: 'stressed',
     label: 'Estresado',
-    colorHex: '#b91c1c',
+    colorHex: '#e11d48',
     description: 'Tensión o sobrecarga externa',
   },
 ];

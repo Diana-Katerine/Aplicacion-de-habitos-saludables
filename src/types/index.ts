@@ -198,4 +198,42 @@ export interface MomentumForecastResult {
   generatedAt: string;
 }
 
+export type EncouragementTone = 'celebration' | 'momentum' | 'resilience' | 'calm';
+
+export type EncouragementTrigger =
+  | 'daily_brief'
+  | 'habit_completed'
+  | 'journal_saved'
+  | 'manual_boost';
+
+export interface AiEncouragementMessage {
+  headline: string;
+  message: string;
+  microAction: string;
+  tone: EncouragementTone;
+  trigger: EncouragementTrigger;
+  generatedAt: string;
+}
+
+export interface AiHabitSuggestion {
+  id: string;
+  categoryId: number;
+  categoryName: string;
+  title: string;
+  description: string;
+  whyItFits: string;
+  targetValue: number;
+  unitLabel: string;
+  scheduledDays: DayOfWeek[];
+  recommendedTimeOfDay: 'morning' | 'afternoon' | 'evening' | 'anytime';
+  reminderTime?: string;
+  popularityTag: string;
+}
+
+export interface AiHabitSuggestionsResponse {
+  interestSummary: string;
+  suggestions: AiHabitSuggestion[];
+  generatedAt: string;
+}
+
 export type ViewRoute = 'today' | 'habits' | 'stats' | 'challenges' | 'templates' | 'profile';

@@ -20,6 +20,7 @@ import {
 import { CategoryIcon } from '../common/CategoryIcon';
 import { RitualNotesMarkdown } from '../habits/RitualNotesEditor';
 import { getCategoryBioluminescentTheme } from '../../services/bioluminescentTheme';
+import { ActionHint } from '../common/ActionHint';
 
 interface Props {
   habit: HabitWithTodayLog | null;
@@ -192,62 +193,69 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
       role="dialog"
       aria-modal="true"
       aria-label={`Enfoque ambiental para ${habit.title}`}
-      className="fixed inset-0 z-50 bg-[#17191c]/55 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-[#17191c]/55 dark:bg-[#050709]/80 backdrop-blur-md flex items-start sm:items-center justify-center p-3 sm:p-6 overflow-y-auto"
     >
       <div
         style={{
           ...bioTheme.cssVars,
-          backgroundImage: `radial-gradient(ellipse at top center, rgba(${bioTheme.rgb}, 0.08), transparent 55%)`,
+          backgroundImage: `radial-gradient(ellipse at top center, rgba(${bioTheme.rgb}, 0.12), transparent 55%)`,
         }}
-        className="w-full max-w-xl steep-modal p-6 sm:p-9 my-auto space-y-6"
+        className="w-full max-w-xl steep-modal p-4 sm:p-9 my-auto max-h-[calc(100dvh-1.5rem)] sm:max-h-[90dvh] overflow-y-auto overscroll-contain space-y-5 sm:space-y-6"
       >
         {/* Top Header */}
-        <div className="flex items-center justify-between gap-4 pb-4 border-b border-[#ececec]">
-          <div className="flex items-center gap-2.5 min-w-0 text-[13px]">
+        <div className="flex items-center justify-between gap-3 pb-4 border-b border-[#ececec] dark:border-[#252e3a]">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1 text-[13px]">
             <div
-              className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 border"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] flex items-center justify-center shrink-0 border"
               style={{
-                backgroundColor: `rgba(${bioTheme.rgb}, 0.1)`,
-                borderColor: `rgba(${bioTheme.rgb}, 0.25)`,
-                color: bioTheme.glowHex,
+                backgroundColor: `rgba(${bioTheme.rgb}, 0.14)`,
+                borderColor: `rgba(${bioTheme.rgb}, 0.3)`,
+                color: bioTheme.secondaryHex,
               }}
             >
-              <CategoryIcon name={habit.category.iconName} className="w-4 h-4" />
+              <CategoryIcon name={habit.category.iconName} className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="truncate" style={{ color: bioTheme.glowHex }}>
+            <span className="truncate font-medium text-[#17191c] dark:text-[#f1f5f9]">
               {habit.category.name}
             </span>
-            <span aria-hidden="true" className="text-[#a3a6af]">·</span>
-            <span className="text-[#777b86] whitespace-nowrap shrink-0">
+            <span aria-hidden="true" className="hidden sm:inline text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
+            <span className="hidden sm:inline text-[#777b86] dark:text-[#9aa4b2] whitespace-nowrap shrink-0">
               Enfoque ambiental
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-3.5 py-1.5 rounded-full text-[13px] text-[#777b86] hover:text-[#17191c] hover:bg-[#f2f2f3] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+          <ActionHint
+            message="Saldrá del enfoque ambiental y detendrá el audio"
+            tone="neutral"
+            position="bottom"
+            align="right"
           >
-            <span>Salir</span>
-            <X className="w-4 h-4" />
-          </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-full border border-[#ececec] dark:border-[#252e3a] bg-[#fafafb] dark:bg-[#1b222b] text-[13px] font-medium text-[#5c616d] dark:text-[#cbd5e1] hover:text-[#b91c1c] dark:hover:text-[#fca5a5] hover:bg-[#fee2e2]/60 dark:hover:bg-[#7f1d1d]/30 hover:border-[#ef4444]/40 inline-flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <span>Salir</span>
+              <X className="w-5 h-5 stroke-[2.5]" />
+            </button>
+          </ActionHint>
         </div>
 
         {/* Habit Title & Streak Context */}
         <div className="text-center space-y-2">
-          <h2 className="font-signifier font-normal text-[30px] sm:text-[36px] leading-[1.2] tracking-[-0.015em] text-[#17191c] text-balance">
+          <h2 className="font-signifier font-normal text-[25px] sm:text-[36px] leading-[1.2] tracking-[-0.015em] text-[#17191c] dark:text-[#f1f5f9] text-balance break-words">
             {habit.title}
           </h2>
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-[#777b86]">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-[#777b86] dark:text-[#9aa4b2]">
             <span className="tabular-nums">
               Meta:{' '}
-              <strong className="text-[#17191c] font-medium">
+              <strong className="text-[#17191c] dark:text-[#f1f5f9] font-medium">
                 {isCumulative ? `${completedValue}/${habit.targetValue}` : habit.targetValue}{' '}
                 {habit.unitLabel}
               </strong>
             </span>
             <span aria-hidden="true">·</span>
-            <span className="inline-flex items-center gap-1 text-[#5d2a1a] tabular-nums">
+            <span className="inline-flex items-center gap-1 text-[#5d2a1a] dark:text-[#fbbf24] tabular-nums">
               <Flame className="w-3.5 h-3.5" />
               Racha de {habit.currentStreak} días
             </span>
@@ -255,12 +263,12 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
         </div>
 
         {/* Focus Timer Block */}
-        <div className="py-6 border-y border-[#ececec] flex flex-col items-center space-y-4">
-          <div className="text-[52px] sm:text-[64px] leading-none font-mono font-normal text-[#17191c] tracking-tight tabular-nums">
+        <div className="py-5 sm:py-6 border-y border-[#ececec] dark:border-[#252e3a] flex flex-col items-center space-y-4">
+          <div className="text-[44px] sm:text-[64px] leading-none font-mono font-normal text-[#17191c] dark:text-[#f1f5f9] tracking-tight tabular-nums">
             {formatClock(remainingSeconds)}
           </div>
 
-          <div className="w-full max-w-sm h-1.5 rounded-full bg-[#f2f2f3] overflow-hidden">
+          <div className="w-full max-w-sm h-1.5 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
@@ -274,7 +282,7 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setIsTimerRunning((prev) => !prev)}
-              className="px-5 py-2.5 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[13px] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="px-5 py-2.5 rounded-full bg-[#17191c] dark:bg-[#059669] hover:bg-[#2a2d32] dark:hover:bg-[#047857] text-white text-[13px] font-medium inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               {isTimerRunning ? (
                 <>
@@ -293,13 +301,13 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
               type="button"
               onClick={handleResetTimer}
               title="Reiniciar temporizador"
-              className="px-4 py-2.5 rounded-full bg-white hover:bg-[#fafafb] border border-[#17191c]/25 text-[13px] text-[#17191c] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="px-4 py-2.5 rounded-full bg-white dark:bg-[#1b222b] hover:bg-[#fafafb] dark:hover:bg-[#252e3a] border border-[#17191c]/25 dark:border-[#252e3a] text-[13px] text-[#17191c] dark:text-[#f1f5f9] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reiniciar</span>
             </button>
 
-            <div className="flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3]">
+            <div className="flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b]">
               {DURATION_PRESETS_MIN.map((mins) => {
                 const isSelected = durationSeconds === mins * 60;
                 return (
@@ -309,8 +317,8 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
                     onClick={() => handleSelectDuration(mins)}
                     className={`px-3 py-1 rounded-full text-[12px] tabular-nums transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                       isSelected
-                        ? 'bg-white text-[#17191c] font-medium shadow-xs'
-                        : 'text-[#777b86] hover:text-[#17191c]'
+                        ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                        : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
                     }`}
                   >
                     {mins}m
@@ -324,11 +332,11 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
         {/* Generative Soundscape Controls */}
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-[13px]">
-              <Headphones className="w-4 h-4 text-[#17191c] shrink-0" />
-              <span className="font-medium text-[#17191c]">Paisaje sonoro generativo</span>
-              <span aria-hidden="true" className="text-[#a3a6af]">·</span>
-              <span className="text-[#777b86]">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[13px] min-w-0">
+              <Headphones className="w-4 h-4 text-[#17191c] dark:text-[#f1f5f9] shrink-0" />
+              <span className="font-medium text-[#17191c] dark:text-[#f1f5f9]">Paisaje sonoro</span>
+              <span aria-hidden="true" className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
+              <span className="text-[#777b86] dark:text-[#9aa4b2]">
                 {isAudioEnabled ? activePresetMeta?.description : 'Audio en pausa'}
               </span>
             </div>
@@ -336,7 +344,7 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
             <button
               type="button"
               onClick={handleToggleAudio}
-              className="px-3.5 py-1.5 rounded-full bg-[#f2f2f3] hover:bg-[#e5e5e7] text-[12px] text-[#17191c] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 self-start sm:self-auto cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] hover:bg-[#e5e5e7] dark:hover:bg-[#252e3a] text-[12px] text-[#17191c] dark:text-[#f1f5f9] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 self-start sm:self-auto cursor-pointer"
             >
               {isAudioEnabled ? (
                 <>
@@ -345,7 +353,7 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
                 </>
               ) : (
                 <>
-                  <VolumeX className="w-3.5 h-3.5 text-[#777b86]" />
+                  <VolumeX className="w-3.5 h-3.5 text-[#777b86] dark:text-[#9aa4b2]" />
                   <span>Activar audio</span>
                 </>
               )}
@@ -353,7 +361,7 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] overflow-x-auto">
+            <div className="flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] max-w-full overflow-x-auto">
               {SOUNDSCAPE_OPTIONS.map((opt) => {
                 const active = preset === opt.id && isAudioEnabled;
                 return (
@@ -363,8 +371,8 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
                     onClick={() => handleSelectPreset(opt.id)}
                     className={`px-3.5 py-1.5 rounded-full text-[12px] transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                       active
-                        ? 'bg-white text-[#17191c] font-medium shadow-xs'
-                        : 'text-[#777b86] hover:text-[#17191c]'
+                        ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                        : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
                     }`}
                   >
                     {opt.label}
@@ -374,7 +382,7 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
             </div>
 
             <div className="flex items-center gap-2.5 shrink-0">
-              <Volume2 className="w-3.5 h-3.5 text-[#777b86] shrink-0" />
+              <Volume2 className="w-3.5 h-3.5 text-[#777b86] dark:text-[#9aa4b2] shrink-0" />
               <input
                 type="range"
                 min={0}
@@ -382,9 +390,9 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
                 value={isAudioEnabled ? Math.round(volume * 100) : 0}
                 onChange={(e) => handleVolumeChange(Number(e.target.value))}
                 aria-label="Volumen del paisaje sonoro"
-                className="w-24 accent-[#17191c] cursor-pointer"
+                className="w-24 accent-[#059669] cursor-pointer"
               />
-              <span className="text-[12px] font-mono text-[#777b86] tabular-nums w-8 text-right">
+              <span className="text-[12px] font-mono text-[#777b86] dark:text-[#9aa4b2] tabular-nums w-8 text-right">
                 {isAudioEnabled ? `${Math.round(volume * 100)}%` : '0%'}
               </span>
             </div>
@@ -393,8 +401,8 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
 
         {/* Daily Ritual Notes Reference */}
         {habit.notes && (
-          <div className="pt-4 border-t border-[#ececec] space-y-1.5 max-h-36 overflow-y-auto">
-            <span className="text-[12px] text-[#979799] block">
+          <div className="pt-4 border-t border-[#ececec] dark:border-[#252e3a] space-y-1.5 max-h-36 overflow-y-auto">
+            <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] block">
               Notas del ritual
             </span>
             <RitualNotesMarkdown content={habit.notes} compact />
@@ -402,17 +410,17 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
         )}
 
         {/* Completion Actions */}
-        <div className="pt-4 border-t border-[#ececec] flex flex-wrap items-center justify-between gap-3">
-          <span className="text-[12px] text-[#979799]">
-            Presiona <kbd className="px-1.5 py-0.5 rounded bg-[#f2f2f3] text-[11px] text-[#17191c] font-mono">Esc</kbd> para salir
+        <div className="pt-4 border-t border-[#ececec] dark:border-[#252e3a] flex flex-wrap items-center justify-between gap-3">
+          <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a]">
+            Presiona <kbd className="px-1.5 py-0.5 rounded bg-[#f2f2f3] dark:bg-[#1b222b] text-[11px] text-[#17191c] dark:text-[#f1f5f9] font-mono">Esc</kbd> para salir
           </span>
 
-          <div className="flex items-center gap-2.5 ml-auto">
+          <div className="flex flex-wrap items-center justify-end gap-2.5 w-full sm:w-auto sm:ml-auto">
             {isCumulative && !isCompleted && (
               <button
                 type="button"
                 onClick={() => onCheckIn(habit.id, 1)}
-                className="px-4 py-2 rounded-full bg-white hover:bg-[#fafafb] border border-[#17191c]/25 text-[13px] text-[#17191c] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                className="px-4 py-2 rounded-full bg-white dark:bg-[#1b222b] hover:bg-[#fafafb] dark:hover:bg-[#252e3a] border border-[#17191c]/25 dark:border-[#252e3a] text-[13px] text-[#17191c] dark:text-[#f1f5f9] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>+1 {habit.unitLabel}</span>
@@ -423,10 +431,10 @@ export const AmbientFocusOverlay: React.FC<Props> = ({
               type="button"
               onClick={handleCompleteNow}
               disabled={isCompleted}
-              className={`px-5 py-2.5 rounded-full text-[13px] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+              className={`px-5 py-2.5 rounded-full text-[13px] font-medium inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
                 isCompleted
-                  ? 'bg-[#f2f2f3] text-[#777b86] cursor-default'
-                  : 'bg-[#17191c] hover:bg-[#2a2d32] text-white cursor-pointer'
+                  ? 'bg-[#f2f2f3] dark:bg-[#1b222b] text-[#777b86] dark:text-[#6f7a8a] cursor-default'
+                  : 'bg-[#059669] hover:bg-[#047857] text-white cursor-pointer'
               }`}
             >
               <Check className="w-3.5 h-3.5" />

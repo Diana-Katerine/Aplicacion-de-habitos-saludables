@@ -7,17 +7,21 @@ import {
   LogOut,
   Check,
   Palette,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { BioluminescentThemeId, Category, EvaluatedBadge, Habit, User } from '../../types';
 import { detectBrowserTimezone, StorageService } from '../../services/storage';
-import { BadgesModule } from '../badges/BadgesModule';
 import { CategoryManager } from './CategoryManager';
+import { ActionHint } from '../common/ActionHint';
 
 interface Props {
   user: User;
   badges: EvaluatedBadge[];
   categories: Category[];
   habits: Habit[];
+  theme?: 'LIGHT' | 'DARK';
+  onChangeTheme?: (theme: 'LIGHT' | 'DARK') => void;
   onCreateCategory: (data: {
     name: string;
     iconName: string;
@@ -59,6 +63,8 @@ export const ProfileView: React.FC<Props> = ({
   badges,
   categories,
   habits,
+  theme = 'LIGHT',
+  onChangeTheme,
   onCreateCategory,
   onUpdateCategory,
   onDeleteCategory,
@@ -98,7 +104,7 @@ export const ProfileView: React.FC<Props> = ({
       const dailyFocuses = StorageService.getAllDailyFocuses(user.id);
 
       const backupPayload = {
-        app: 'Impulso Diario - Habit Tracker',
+        app: 'Impulso diario',
         version: '1.0.0',
         exportedAt: new Date().toISOString(),
         user: {
@@ -153,18 +159,11 @@ export const ProfileView: React.FC<Props> = ({
   return (
     <div className="space-y-8 max-w-4xl">
       {/* Header */}
-      <div className="pb-6 border-b border-[#ececec]">
-        <span className="text-[14px] text-[#979799] block">Cuenta &amp; preferencias</span>
-        <h1 className="font-signifier font-normal text-[36px] md:text-[44px] leading-[1.2] tracking-[-0.015em] text-[#17191c] mt-1">
-          Perfil &amp; <em className="italic font-normal">configuración</em>
+      <div className="pb-6 border-b border-[#ececec] dark:border-[#252e3a]">
+        <h1 className="font-signifier font-normal text-[36px] md:text-[44px] leading-[1.15] tracking-[-0.015em] text-[#17191c] dark:text-[#f1f5f9]">
+          Perfil &amp; <em className="italic font-normal text-[#059669] dark:text-[#34d399]">configuración</em>
         </h1>
-        <p className="text-[16px] text-[#777b86] mt-1">
-          Ajustes de cuenta, categorías personalizadas, zona horaria IANA y recordatorios diarios.
-        </p>
       </div>
-
-      {/* Streak Badges Showcase */}
-      <BadgesModule badges={badges} />
 
       {/* Category Manager */}
       <CategoryManager
@@ -177,81 +176,77 @@ export const ProfileView: React.FC<Props> = ({
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* User Card */}
-        <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
+        <div className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-[#17191c] text-white flex items-center justify-center font-signifier text-[28px] shrink-0">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#059669] to-[#0284C7] text-white flex items-center justify-center font-signifier text-[28px] shrink-0 shadow-xs">
               {user.fullName.charAt(0)}
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2.5">
-                <h3 className="text-[18px] font-medium text-[#17191c]">{user.fullName}</h3>
-                <span className="text-[12px] text-[#979799]">· {user.role}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
+                <h3 className="text-[18px] font-medium text-[#17191c] dark:text-[#f1f5f9] break-words">{user.fullName}</h3>
+                <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a]">· {user.role}</span>
               </div>
-              <p className="text-[14px] text-[#777b86] mt-0.5">{user.email}</p>
-              <div className="flex items-center gap-2 text-[12px] text-[#979799] mt-1">
-                <span>
-                  Miembro desde{' '}
-                  {new Date(user.createdAt).toLocaleDateString('es-ES', {
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </span>
-                <span>·</span>
-                <span className="text-[#5d2a1a] font-medium">Modo activo</span>
-              </div>
+              <p className="text-[14px] text-[#777b86] dark:text-[#9aa4b2] mt-0.5 break-all">{user.email}</p>
+              <p className="text-[12px] text-[#979799] dark:text-[#6f7a8a] mt-1">
+                Miembro desde{' '}
+                {new Date(user.createdAt).toLocaleDateString('es-ES', {
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-5 border-t border-[#ececec]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-5 border-t border-[#ececec] dark:border-[#252e3a]">
             <div>
-              <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+              <label className="block text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1.5">
                 Nombre completo
               </label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c]"
+                className="w-full px-4 py-2.5 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] text-[14px] focus:outline-none focus:border-[#17191c] dark:focus:border-[#34d399]"
               />
             </div>
 
             <div>
-              <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+              <label className="block text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1.5">
                 Correo electrónico
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c]"
+                className="w-full px-4 py-2.5 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] text-[14px] focus:outline-none focus:border-[#17191c] dark:focus:border-[#34d399]"
               />
             </div>
           </div>
         </div>
 
         {/* Timezone Configuration */}
-        <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
+        <div className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-[14px] bg-[#f2f2f3] text-[#17191c] flex items-center justify-center shrink-0">
-              <Globe className="w-4 h-4" />
+            <div className="w-11 h-11 rounded-[14px] bg-[#E0F2FE] dark:bg-[#0284C7]/18 text-[#0284C7] dark:text-[#38bdf8] flex items-center justify-center shrink-0">
+              <Globe className="w-5 h-5" />
             </div>
-            <div className="flex-1">
-              <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em]">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-[17px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em]">
                 Zona horaria (corte de medianoche 00:00)
               </h3>
-              <p className="text-[13px] text-[#777b86] mt-1 leading-relaxed">
-                Tus hábitos y rachas se reinician exactamente a las 00:00 de tu hora local. Esta zona horaria fue autodetectada y previene desfasajes de días en tus registros.
+              <p className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-1">
+                Corte diario a las 00:00 según tu hora local.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 items-end">
                 <div>
-                  <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
+                  <label className="block text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1.5">
                     Zona horaria IANA
                   </label>
                   <select
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c] cursor-pointer"
+                    className="w-full px-4 py-2.5 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] text-[14px] focus:outline-none focus:border-[#17191c] dark:focus:border-[#34d399] cursor-pointer"
                   >
                     {!COMMON_TIMEZONES.includes(timezone) && (
                       <option value={timezone}>{timezone} (Detectada)</option>
@@ -265,13 +260,21 @@ export const ProfileView: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => setTimezone(detectBrowserTimezone())}
-                    className="px-4 py-2.5 rounded-full bg-transparent hover:bg-[#fafafb] border border-[#17191c]/25 hover:border-[#17191c] text-[13px] text-[#17191c] transition-colors cursor-pointer"
+                  <ActionHint
+                    message="Detectará y aplicará la zona horaria actual de tu navegador"
+                    tone="accent"
+                    position="top"
+                    align="center"
+                    className="w-full sm:w-auto"
                   >
-                    Autodetectar del navegador
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setTimezone(detectBrowserTimezone())}
+                      className="w-full sm:w-auto px-4 py-2.5 rounded-full bg-transparent hover:bg-[#fafafb] dark:hover:bg-[#1b222b] border border-[#17191c]/25 dark:border-[#252e3a] hover:border-[#17191c] dark:hover:border-[#38bdf8] text-[13px] text-[#17191c] dark:text-[#f1f5f9] transition-colors cursor-pointer text-center"
+                    >
+                      Autodetectar del navegador
+                    </button>
+                  </ActionHint>
                 </div>
               </div>
             </div>
@@ -279,19 +282,19 @@ export const ProfileView: React.FC<Props> = ({
         </div>
 
         {/* Reminders / Notifications */}
-        <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
+        <div className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-[14px] bg-[#fbe1d1] text-[#5d2a1a] flex items-center justify-center shrink-0">
-              <Bell className="w-4 h-4" />
+            <div className="w-11 h-11 rounded-[14px] bg-[#FEF3C7] dark:bg-[#D97706]/18 text-[#D97706] dark:text-[#fbbf24] flex items-center justify-center shrink-0">
+              <Bell className="w-5 h-5" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em]">
+                  <h3 className="text-[17px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em]">
                     Recordatorios diarios
                   </h3>
-                  <p className="text-[13px] text-[#777b86] mt-0.5">
-                    Avisos inteligentes para arrancar tu mañana y proteger tus rachas antes de dormir.
+                  <p className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-0.5">
+                    Avisos de inicio de jornada y cierre de rachas.
                   </p>
                 </div>
 
@@ -302,33 +305,33 @@ export const ProfileView: React.FC<Props> = ({
                     onChange={(e) => setReminderEnabled(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-[#f2f2f3] border border-[#ececec] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:shadow-xs after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-[#17191c] peer-checked:border-[#17191c]"></div>
+                  <div className="w-11 h-6 bg-[#f2f2f3] dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:shadow-xs after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-[#059669] peer-checked:border-[#059669]"></div>
                 </label>
               </div>
 
               {reminderEnabled && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5 pt-4 border-t border-[#ececec]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5 pt-4 border-t border-[#ececec] dark:border-[#252e3a]">
                   <div>
-                    <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
-                      Recordatorio matutino (inicio de jornada)
+                    <label className="block text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1.5">
+                      Recordatorio matutino
                     </label>
                     <input
                       type="time"
                       value={morningTime}
                       onChange={(e) => setMorningTime(e.target.value)}
-                      className="w-full px-4 py-2 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c]"
+                      className="w-full px-4 py-2 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] text-[14px] focus:outline-none focus:border-[#17191c] dark:focus:border-[#34d399] dark:[color-scheme:dark]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[13px] font-medium text-[#17191c] mb-1.5">
-                      Revisión nocturna (cierre de rachas)
+                    <label className="block text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1.5">
+                      Revisión nocturna
                     </label>
                     <input
                       type="time"
                       value={eveningTime}
                       onChange={(e) => setEveningTime(e.target.value)}
-                      className="w-full px-4 py-2 rounded-[16px] bg-white border border-[#ececec] text-[#17191c] text-[14px] focus:outline-none focus:border-[#17191c]"
+                      className="w-full px-4 py-2 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] text-[14px] focus:outline-none focus:border-[#17191c] dark:focus:border-[#34d399] dark:[color-scheme:dark]"
                     />
                   </div>
                 </div>
@@ -337,36 +340,93 @@ export const ProfileView: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Editorial Theme Information */}
-        <div className="steep-card-mist p-6">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-[14px] bg-white border border-[#ececec] text-[#17191c] flex items-center justify-center shrink-0">
-              <Palette className="w-4 h-4" />
+        {/* Appearance & Theme Selector */}
+        <div className="rounded-[24px] p-4 sm:p-6 bg-[#EEF2FF]/60 dark:bg-[#141920] border border-[#4F46E5]/15 dark:border-[#252e3a]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+              <div className="w-11 h-11 rounded-[14px] bg-white dark:bg-[#4F46E5]/18 border border-[#4F46E5]/20 dark:border-[#818CF8]/30 text-[#4F46E5] dark:text-[#a5b4fc] flex items-center justify-center shrink-0">
+                <Palette className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-[16px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em]">
+                  Apariencia &amp; tema visual
+                </h3>
+                <p className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-0.5">
+                  Alterna entre modo claro y oscuro obsidiana.
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-[16px] font-medium text-[#17191c] tracking-[-0.01em]">
-                Sistema visual editorial · Papel cálido
-              </h3>
-              <p className="text-[13px] text-[#777b86] mt-0.5 leading-relaxed">
-                Tipografía Signifier sobre papel blanco (#ffffff), tarjetas suaves (#f2f2f3), acentos durazno (#fbe1d1) y halos de categoría adaptativos para lectura serena sin fatiga visual.
-              </p>
+
+            <div
+              role="group"
+              aria-label="Seleccionar tema visual"
+              className="inline-flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] self-start sm:self-center max-w-full overflow-x-auto shrink-0"
+            >
+              <ActionHint
+                message={
+                  theme === 'LIGHT'
+                    ? 'Modo claro activo actualmente'
+                    : 'Cambiará de modo oscuro a modo claro'
+                }
+                tone="theme"
+                position="top"
+                align="center"
+              >
+                <button
+                  type="button"
+                  onClick={() => onChangeTheme?.('LIGHT')}
+                  aria-pressed={theme === 'LIGHT'}
+                  className={`px-3.5 py-1.5 rounded-full text-[13px] inline-flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                    theme === 'LIGHT'
+                      ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                      : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
+                  }`}
+                >
+                  <Sun className="w-4 h-4 text-[#D97706]" />
+                  <span>Modo Claro</span>
+                </button>
+              </ActionHint>
+              <ActionHint
+                message={
+                  theme === 'DARK'
+                    ? 'Modo oscuro activo actualmente'
+                    : 'Cambiará de modo claro a modo oscuro'
+                }
+                tone="theme"
+                position="top"
+                align="right"
+              >
+                <button
+                  type="button"
+                  onClick={() => onChangeTheme?.('DARK')}
+                  aria-pressed={theme === 'DARK'}
+                  className={`px-3.5 py-1.5 rounded-full text-[13px] inline-flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                    theme === 'DARK'
+                      ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
+                      : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
+                  }`}
+                >
+                  <Moon className="w-4 h-4 text-[#4F46E5] dark:text-[#a5b4fc]" />
+                  <span>Modo Oscuro</span>
+                </button>
+              </ActionHint>
             </div>
           </div>
         </div>
 
         {/* Save button */}
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-2">
           {savedSuccess ? (
-            <span className="text-[13px] font-medium text-[#5d2a1a] flex items-center gap-1.5">
-              <Check className="w-4 h-4" /> Configuración guardada correctamente
+            <span className="text-[13px] font-medium text-[#047857] dark:text-[#34d399] flex items-center gap-1.5">
+              <Check className="w-4 h-4 shrink-0" /> Configuración guardada correctamente
             </span>
           ) : (
-            <span />
+            <span className="hidden sm:inline" />
           )}
 
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-full bg-[#17191c] hover:bg-[#2a2d32] text-white text-[14px] transition-colors cursor-pointer"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-[14px] transition-colors cursor-pointer shadow-xs text-center"
           >
             Guardar cambios
           </button>
@@ -374,39 +434,36 @@ export const ProfileView: React.FC<Props> = ({
       </form>
 
       {/* Dedicated Local Backup & Data Export Card */}
-      <div className="rounded-[24px] p-6 bg-white border border-[#ececec]">
+      <div className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div className="flex items-start gap-3.5 flex-1">
-            <div className="w-10 h-10 rounded-[14px] bg-[#f2f2f3] text-[#17191c] flex items-center justify-center shrink-0">
-              <Download className="w-4 h-4" />
+          <div className="flex items-start gap-3.5 flex-1 min-w-0">
+            <div className="w-11 h-11 rounded-[14px] bg-[#D1FAE5] dark:bg-[#059669]/18 text-[#047857] dark:text-[#34d399] flex items-center justify-center shrink-0">
+              <Download className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em]">
-                  Copia de seguridad local (JSON)
-                </h3>
-                <span className="text-[12px] text-[#979799]">· Backup local</span>
-              </div>
-              <p className="text-[13px] text-[#777b86] mt-1 leading-relaxed max-w-xl">
-                Descarga un archivo JSON estructurado con tu perfil, hábitos activos, metas, días programados y el historial cronológico completo de tus check-ins.
+            <div className="min-w-0">
+              <h3 className="text-[17px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em]">
+                Copia de seguridad local (JSON)
+              </h3>
+              <p className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-1 max-w-xl">
+                Descarga un archivo JSON con tus hábitos, metas e historial completo.
               </p>
             </div>
           </div>
 
-          <div className="shrink-0 self-start sm:self-center">
+          <div className="shrink-0 w-full sm:w-auto self-start sm:self-center">
             <button
               type="button"
               onClick={handleExportJSON}
-              className="px-5 py-2.5 rounded-full bg-transparent hover:bg-[#fafafb] border border-[#17191c]/25 hover:border-[#17191c] text-[#17191c] text-[13px] transition-colors inline-flex items-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-transparent hover:bg-[#ECFDF5]/60 dark:hover:bg-[#059669]/15 border border-[#059669]/35 dark:border-[#34d399]/35 hover:border-[#059669] dark:hover:border-[#34d399] text-[#047857] dark:text-[#34d399] text-[13px] transition-colors inline-flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 shrink-0" />
               <span>Exportar datos JSON</span>
             </button>
           </div>
         </div>
 
         {exportSuccess && (
-          <div className="mt-4 p-3 rounded-[14px] bg-[#fbe1d1] text-[13px] text-[#5d2a1a] flex items-center gap-2 font-medium">
+          <div className="mt-4 p-3 rounded-[14px] bg-[#D1FAE5] dark:bg-[#059669]/20 text-[13px] text-[#047857] dark:text-[#6ee7b7] flex items-center gap-2 font-medium">
             <Check className="w-4 h-4 shrink-0" />
             <span>Archivo JSON de respaldo generado y descargado exitosamente.</span>
           </div>
@@ -414,15 +471,15 @@ export const ProfileView: React.FC<Props> = ({
       </div>
 
       {/* Session & Reset Section */}
-      <div className="rounded-[24px] p-6 bg-[#fafafb] border border-[#ececec]">
-        <h3 className="text-[17px] font-medium text-[#17191c] tracking-[-0.01em] mb-4">
+      <div className="rounded-[24px] p-4 sm:p-6 bg-[#fafafb] dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]">
+        <h3 className="text-[17px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em] mb-4">
           Gestión de sesión &amp; datos
         </h3>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {confirmReset ? (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[13px] text-[#5d2a1a]">
+              <span className="text-[13px] text-[#5d2a1a] dark:text-[#fbdac7]">
                 ¿Reiniciar a la demostración inicial?
               </span>
               <button
@@ -438,30 +495,46 @@ export const ProfileView: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setConfirmReset(false)}
-                className="px-4 py-2 rounded-full bg-white border border-[#ececec] text-[13px] text-[#17191c] transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-full bg-white dark:bg-[#1b222b] hover:bg-[#fafafb] dark:hover:bg-[#252e3a] border border-[#ececec] dark:border-[#252e3a] text-[13px] text-[#17191c] dark:text-[#f1f5f9] transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmReset(true)}
-              className="px-4 py-2 rounded-full bg-white hover:bg-[#f2f2f3] border border-[#ececec] text-[13px] text-[#17191c] transition-colors inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+            <ActionHint
+              message="Restaurará los datos de demostración iniciales"
+              tone="danger"
+              position="top"
+              align="left"
+              className="w-full sm:w-auto"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-[#5d2a1a]" />
-              <span>Reiniciar datos a demostración inicial</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setConfirmReset(true)}
+                className="w-full sm:w-auto px-4 py-2 rounded-full bg-white dark:bg-[#1b222b] hover:bg-[#f2f2f3] dark:hover:bg-[#252e3a] border border-[#ececec] dark:border-[#252e3a] text-[13px] text-[#17191c] dark:text-[#f1f5f9] transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer whitespace-normal text-left sm:text-center"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-[#5d2a1a] dark:text-[#fca5a5] shrink-0" />
+                <span>Reiniciar datos a demostración inicial</span>
+              </button>
+            </ActionHint>
           )}
 
-          <button
-            type="button"
-            onClick={onLogout}
-            className="px-4 py-2 rounded-full bg-white hover:bg-[#fbe1d1]/50 border border-[#ececec] hover:border-[#b91c1c]/40 text-[13px] text-[#b91c1c] transition-colors inline-flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+          <ActionHint
+            message="Cerrará tu sesión actual e irá al inicio de sesión"
+            tone="danger"
+            position="top"
+            align="right"
+            className="w-full sm:w-auto"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Cerrar sesión</span>
-          </button>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="w-full sm:w-auto px-4 py-2 rounded-full bg-white dark:bg-[#1b222b] hover:bg-[#fbe1d1]/50 dark:hover:bg-[#7f1d1d]/25 border border-[#ececec] dark:border-[#252e3a] hover:border-[#b91c1c]/40 dark:hover:border-[#f87171]/45 text-[13px] text-[#b91c1c] dark:text-[#fca5a5] transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5 shrink-0" />
+              <span>Cerrar sesión</span>
+            </button>
+          </ActionHint>
         </div>
       </div>
     </div>

@@ -1,7 +1,8 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Colors — Steep Palette */
+  /* Colors — Steep Editorial + Botanical Chromatic Accents */
   --color-ink-black: #17191c;
   --color-paper-white: #ffffff;
   --color-mist-gray: #f2f2f3;
@@ -11,6 +12,10 @@
   --color-smoke-gray: #a3a6af;
   --color-blush-peach: #fbe1d1;
   --color-sienna-brown: #5d2a1a;
+  --color-emerald-accent: #059669;
+  --color-amber-accent: #d97706;
+  --color-sky-accent: #0284c7;
+  --color-indigo-accent: #4f46e5;
 
   /* Typography */
   --font-signifier: 'Signifier', 'Source Serif 4', Georgia, serif;
@@ -38,23 +43,6 @@
   --leading-display: 1.3;
   --tracking-display: -2.25px;
 
-  /* Spacing */
-  --spacing-4: 4px;
-  --spacing-8: 8px;
-  --spacing-12: 12px;
-  --spacing-16: 16px;
-  --spacing-20: 20px;
-  --spacing-24: 24px;
-  --spacing-28: 28px;
-  --spacing-32: 32px;
-  --spacing-40: 40px;
-  --spacing-64: 64px;
-  --spacing-80: 80px;
-  --spacing-96: 96px;
-  --spacing-124: 124px;
-  --spacing-128: 128px;
-  --spacing-160: 160px;
-
   /* Border Radius */
   --radius-sm: 0.01px;
   --radius-xl: 12px;
@@ -69,13 +57,26 @@
 }
 
 @layer base {
+  html,
+  body {
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
   :root {
     font-family: var(--font-sohne);
     color: #17191c;
     background-color: #ffffff;
+    color-scheme: light;
   }
 
-  /* Custom subtle scrollbar for light editorial canvas */
+  :root.dark {
+    color: #f1f5f9;
+    background-color: #0c0f12;
+    color-scheme: dark;
+  }
+
+  /* Custom subtle scrollbar for light & dark editorial canvas */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -89,6 +90,12 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(23, 25, 28, 0.28);
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(241, 245, 249, 0.16);
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(241, 245, 249, 0.3);
   }
 }
 
@@ -107,14 +114,52 @@
 
 /* Steep Surfaces & Elevations */
 .steep-card-mist {
-  background-color: #f2f2f3;
+  background-color: #f4f5f8;
   border-radius: 24px;
 }
 
+.dark .steep-card-mist {
+  background-color: #141920;
+  border: 1px solid #252e3a;
+}
+
 .steep-card-peach {
-  background-color: #fbe1d1;
+  background-image: linear-gradient(135deg, #ffe8d6 0%, #ffd8c4 52%, #fef3c7 100%);
   color: #5d2a1a;
   border-radius: 24px;
+}
+
+.dark .steep-card-peach {
+  background-image: linear-gradient(135deg, #2b1814 0%, #261721 55%, #241b12 100%);
+  color: #fbdac7;
+  border: 1px solid rgba(251, 146, 60, 0.28);
+}
+
+.chromatic-gradient-text {
+  background-image: linear-gradient(110deg, #059669 0%, #0284c7 52%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.dark .chromatic-gradient-text {
+  background-image: linear-gradient(110deg, #34d399 0%, #38bdf8 52%, #c084fc 100%);
+}
+
+.btn-chromatic {
+  background-image: linear-gradient(110deg, #059669 0%, #0d9488 52%, #0284c7 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 20px -8px rgba(5, 150, 105, 0.52);
+  transition: filter 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.btn-chromatic:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 10px 24px -6px rgba(2, 132, 199, 0.55);
+}
+
+.chromatic-accent-bar {
+  background-image: linear-gradient(90deg, #10b981 0%, #06b6d4 35%, #6366f1 68%, #f59e0b 100%);
 }
 
 .steep-artifact {
@@ -126,12 +171,27 @@
     rgba(0, 0, 0, 0.1) 0px 8px 10px -6px;
 }
 
+.dark .steep-artifact {
+  background-color: #141920;
+  box-shadow:
+    rgba(255, 255, 255, 0.06) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.55) 0px 20px 25px -5px,
+    rgba(0, 0, 0, 0.4) 0px 8px 10px -6px;
+}
+
 .steep-modal {
   background-color: #ffffff;
   border-radius: 24px;
   box-shadow:
     oklab(0 0 0 / 0.05) 0px 0px 0px 1px,
     rgba(0, 0, 0, 0.1) 0px 8px 40px 0px;
+}
+
+.dark .steep-modal {
+  background-color: #141920;
+  box-shadow:
+    rgba(255, 255, 255, 0.08) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.65) 0px 12px 48px 0px;
 }
 
 .steep-popover {
@@ -142,36 +202,122 @@
     rgba(0, 0, 0, 0.08) 0px 4px 24px 0px;
 }
 
-/* Dynamic category halo adapted for Steep warm-paper editorial discipline */
+.dark .steep-popover {
+  background-color: #181f28;
+  box-shadow:
+    rgba(255, 255, 255, 0.09) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.55) 0px 8px 28px 0px;
+}
+
+/* Dynamic category halo adapted for vivid light & obsidian dark editorial surfaces */
+.bio-accent {
+  --bio-text: var(--bio-hex, #059669);
+}
+
+.dark .bio-accent {
+  --bio-text: var(--bio-hex-dark, #34d399);
+}
+
 .bioluminescent-card {
+  --bio-text: var(--bio-hex, #059669);
   background-color: #ffffff;
-  border: 1px solid #ececec;
-  background-image: radial-gradient(
-    ellipse at top left,
-    rgba(var(--bio-rgb, 93, 42, 26), 0.075),
-    transparent 58%
-  );
+  border: 1px solid rgba(var(--bio-rgb, 5, 150, 105), 0.24);
+  background-image:
+    radial-gradient(
+      ellipse at top left,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.18),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.08),
+      transparent 52%
+    );
   transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.dark .bioluminescent-card {
+  --bio-text: var(--bio-hex-dark, #34d399);
+  background-color: #141920;
+  border-color: rgba(var(--bio-rgb, 5, 150, 105), 0.34);
+  background-image:
+    radial-gradient(
+      ellipse at top left,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.25),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.12),
+      transparent 54%
+    );
+}
+
 .bioluminescent-card:hover {
-  border-color: rgba(var(--bio-rgb, 93, 42, 26), 0.34);
-  background-image: radial-gradient(
-    ellipse at top left,
-    rgba(var(--bio-rgb, 93, 42, 26), 0.115),
-    transparent 62%
-  );
+  border-color: rgba(var(--bio-rgb, 5, 150, 105), 0.52);
+  background-image:
+    radial-gradient(
+      ellipse at top left,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.24),
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.12),
+      transparent 56%
+    );
   box-shadow:
-    0 0 0 1px rgba(var(--bio-rgb, 93, 42, 26), 0.08),
-    0 8px 24px -10px rgba(var(--bio-rgb, 93, 42, 26), 0.18);
+    0 0 0 1px rgba(var(--bio-rgb, 5, 150, 105), 0.14),
+    0 12px 28px -10px rgba(var(--bio-rgb, 5, 150, 105), 0.28);
+}
+
+.dark .bioluminescent-card:hover {
+  background-color: #181f28;
+  border-color: rgba(var(--bio-rgb, 5, 150, 105), 0.62);
+  background-image:
+    radial-gradient(
+      ellipse at top left,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.34),
+      transparent 64%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.16),
+      transparent 58%
+    );
+  box-shadow:
+    0 0 0 1px rgba(var(--bio-rgb, 5, 150, 105), 0.22),
+    0 14px 32px -10px rgba(var(--bio-rgb, 5, 150, 105), 0.44);
 }
 
 .bioluminescent-card[data-completed='true'] {
-  background-color: #fafafb;
-  border-color: rgba(var(--bio-rgb, 93, 42, 26), 0.38);
-  background-image: radial-gradient(
-    ellipse at top left,
-    rgba(var(--bio-rgb, 93, 42, 26), 0.13),
-    transparent 64%
-  );
+  background-color: #fafcfb;
+  border-color: rgba(var(--bio-rgb, 5, 150, 105), 0.52);
+  background-image:
+    radial-gradient(
+      ellipse at top left,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.26),
+      transparent 64%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.14),
+      transparent 55%
+    );
+}
+
+.dark .bioluminescent-card[data-completed='true'] {
+  background-color: #161d26;
+  border-color: rgba(var(--bio-rgb, 5, 150, 105), 0.62);
+  background-image:
+    radial-gradient(
+      ellipse at top left,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.34),
+      transparent 64%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(var(--bio-rgb, 5, 150, 105), 0.18),
+      transparent 55%
+    );
 }

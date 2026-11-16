@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Calendar, Flame, CheckCircle2, Sparkles } from 'lucide-react';
+import { Calendar, Flame, CheckCircle2 } from 'lucide-react';
 import { DayOfWeek, Habit, HabitLog } from '../../types';
 import { formatDate, getDayOfWeek, getTodayDateString } from '../../services/storage';
 
@@ -211,46 +211,46 @@ export const HistoricalStreaksHeatmap: React.FC<Props> = ({
   const activeInspectCell =
     hoveredCell || (pinnedDate ? cellsByDate.get(pinnedDate) || null : null);
 
-  // Steep Kraft-Paper Tonal Scale: Mist Gray -> Blush Peach -> Sienna Brown
+  // Botanical Emerald Tonal Scale: Mist Gray -> Mint -> Emerald -> Deep Forest
   const levelClasses: Record<0 | 1 | 2 | 3 | 4, string> = {
-    0: 'bg-[#f2f2f3] border border-[#e5e5e8]',
-    1: 'bg-[#fbe1d1] border border-[#f2ceb8]',
-    2: 'bg-[#e5b89e] border border-[#d69f80]',
-    3: 'bg-[#9b5741] border border-[#824431]',
-    4: 'bg-[#5d2a1a] border border-[#481e11]',
+    0: 'bg-[#f2f2f3] dark:bg-[#1b222b] border border-[#e5e5e8] dark:border-[#252e3a]',
+    1: 'bg-[#d1fae5] dark:bg-[#064e3b] border border-[#a7f3d0] dark:border-[#065f46]',
+    2: 'bg-[#6ee7b7] dark:bg-[#047857] border border-[#34d399] dark:border-[#059669]',
+    3: 'bg-[#10b981] dark:bg-[#059669] border border-[#059669] dark:border-[#10b981]',
+    4: 'bg-[#047857] dark:bg-[#10b981] border border-[#065f46] dark:border-[#34d399]',
   };
 
   return (
     <section
       aria-label="Calendario de rachas históricas de los últimos 90 días"
-      className="rounded-[24px] p-6 bg-white border border-[#ececec]"
+      className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]"
     >
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
-        <div>
-          <h3 className="text-[18px] font-medium text-[#17191c] tracking-[-0.01em] flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#5d2a1a] shrink-0" />
+        <div className="min-w-0">
+          <h3 className="text-[18px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em] flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[#059669] dark:text-[#34d399] shrink-0" />
             <span>Calendario de rachas históricas (últimos 90 días)</span>
           </h3>
-          <p className="text-[13px] text-[#777b86] mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+          <p className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <span className="tabular-nums">
-              <strong className="font-medium text-[#17191c]">{totalCompletions90d}</strong> hábitos completados
+              <strong className="font-medium text-[#17191c] dark:text-[#f1f5f9]">{totalCompletions90d}</strong> hábitos completados
             </span>
-            <span aria-hidden="true" className="text-[#a3a6af]">·</span>
+            <span aria-hidden="true" className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
             <span className="tabular-nums">
-              <strong className="font-medium text-[#17191c]">{activeDaysCount}/90</strong> días activos
+              <strong className="font-medium text-[#17191c] dark:text-[#f1f5f9]">{activeDaysCount}/90</strong> días activos
             </span>
-            <span aria-hidden="true" className="text-[#a3a6af]">·</span>
+            <span aria-hidden="true" className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
             <span className="tabular-nums">
-              Mejor racha 90d: <strong className="font-medium text-[#5d2a1a]">{longestStreak90d} días</strong>
+              Mejor racha 90d: <strong className="font-medium text-[#059669] dark:text-[#34d399]">{longestStreak90d} días</strong>
             </span>
-            <span aria-hidden="true" className="text-[#a3a6af]">·</span>
+            <span aria-hidden="true" className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
             <span className="tabular-nums">
-              Constancia actual: <strong className="font-medium text-[#17191c]">{currentStreak90d} días</strong>
+              Constancia actual: <strong className="font-medium text-[#047857] dark:text-[#6ee7b7]">{currentStreak90d} días</strong>
             </span>
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 text-[12px] text-[#777b86] shrink-0">
+        <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-[#777b86] dark:text-[#9aa4b2] shrink-0">
           <span>Menos</span>
           {([0, 1, 2, 3, 4] as const).map((lvl) => (
             <span
@@ -268,7 +268,7 @@ export const HistoricalStreaksHeatmap: React.FC<Props> = ({
         <div className="inline-block min-w-full sm:min-w-0">
           <div className="flex items-center gap-2 mb-1.5 pl-6">
             <div
-              className="grid gap-1.5 text-[11px] text-[#777b86] capitalize"
+              className="grid gap-1.5 text-[11px] text-[#777b86] dark:text-[#9aa4b2] capitalize"
               style={{
                 gridTemplateColumns: `repeat(${weekColumns.length}, minmax(18px, 1fr))`,
               }}
@@ -289,7 +289,7 @@ export const HistoricalStreaksHeatmap: React.FC<Props> = ({
           </div>
 
           <div className="flex gap-2">
-            <div className="grid grid-rows-7 gap-1.5 text-[10px] font-medium text-[#979799] pr-1 select-none w-4">
+            <div className="grid grid-rows-7 gap-1.5 text-[10px] font-medium text-[#979799] dark:text-[#6f7a8a] pr-1 select-none w-4">
               {WEEKDAY_ROW_LABELS.map((label, idx) => (
                 <span key={idx} className="h-[18px] md:h-5 flex items-center justify-end">
                   {label}
@@ -325,9 +325,9 @@ export const HistoricalStreaksHeatmap: React.FC<Props> = ({
                         }
                         aria-label={`${cell.formattedDate}: ${cell.completedCount} hábitos completados`}
                         title={`${cell.formattedDate}: ${cell.completedCount} completados`}
-                        className={`w-[18px] h-[18px] md:w-5 md:h-5 rounded-[4px] transition-transform hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17191c] cursor-pointer ${
+                        className={`w-[18px] h-[18px] md:w-5 md:h-5 rounded-[4px] transition-transform hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17191c] dark:focus-visible:ring-[#34d399] cursor-pointer ${
                           levelClasses[cell.level]
-                        } ${isPinned ? 'ring-2 ring-[#17191c] scale-110' : ''}`}
+                        } ${isPinned ? 'ring-2 ring-[#17191c] dark:ring-[#34d399] scale-110' : ''}`}
                       />
                     );
                   })}
@@ -339,46 +339,39 @@ export const HistoricalStreaksHeatmap: React.FC<Props> = ({
       </div>
 
       {/* Footer Inspection */}
-      <div className="mt-4 pt-3.5 border-t border-[#ececec] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[13px] min-h-[28px]">
-        {activeInspectCell ? (
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-            <span className="font-medium text-[#17191c] inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#5d2a1a] shrink-0" />
-              {activeInspectCell.formattedDate}
-            </span>
-            <span aria-hidden="true" className="text-[#a3a6af]">·</span>
-            <span className="text-[#17191c] tabular-nums">
-              {activeInspectCell.completedCount}{' '}
-              {activeInspectCell.completedCount === 1 ? 'hábito completado' : 'hábitos completados'}
-              {activeInspectCell.scheduledCount > 0
-                ? ` de ${activeInspectCell.scheduledCount} programados`
-                : ''}
-            </span>
-            {activeInspectCell.completedHabitTitles.length > 0 && (
-              <>
-                <span aria-hidden="true" className="text-[#a3a6af]">·</span>
-                <span className="text-[#777b86] truncate max-w-xl">
-                  {activeInspectCell.completedHabitTitles.join(' · ')}
-                </span>
-              </>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[#777b86]">
-            <Sparkles className="w-3.5 h-3.5 text-[#979799] shrink-0" />
-            <span>
-              Pasa el cursor o haz clic en cualquier cuadro para inspeccionar los hábitos completados de ese día.
-            </span>
-          </div>
-        )}
+      {(activeInspectCell || peakDay) && (
+        <div className="mt-4 pt-3.5 border-t border-[#ececec] dark:border-[#252e3a] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[13px] min-h-[24px]">
+          {activeInspectCell ? (
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+              <span className="font-medium text-[#17191c] dark:text-[#f1f5f9] inline-flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] dark:text-[#34d399] shrink-0" />
+                {activeInspectCell.formattedDate}
+              </span>
+              <span aria-hidden="true" className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
+              <span className="text-[#17191c] dark:text-[#f1f5f9] tabular-nums">
+                {activeInspectCell.completedCount}/{activeInspectCell.scheduledCount || activeInspectCell.completedCount} completados
+              </span>
+              {activeInspectCell.completedHabitTitles.length > 0 && (
+                <>
+                  <span aria-hidden="true" className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
+                  <span className="text-[#777b86] dark:text-[#9aa4b2] break-words max-w-full sm:max-w-xl">
+                    {activeInspectCell.completedHabitTitles.join(' · ')}
+                  </span>
+                </>
+              )}
+            </div>
+          ) : (
+            <span />
+          )}
 
-        {peakDay && (
-          <span className="text-[12px] text-[#777b86] inline-flex items-center gap-1 whitespace-nowrap shrink-0 tabular-nums">
-            <Flame className="w-3.5 h-3.5 text-[#5d2a1a] shrink-0" />
-            Pico 90d: <strong className="text-[#17191c] font-medium">{peakDay.completedCount}</strong> ({peakDay.date.slice(5)})
-          </span>
-        )}
-      </div>
+          {peakDay && (
+            <span className="text-[12px] text-[#777b86] dark:text-[#9aa4b2] inline-flex items-center gap-1 whitespace-nowrap shrink-0 tabular-nums">
+              <Flame className="w-3.5 h-3.5 text-[#D97706] dark:text-[#fbbf24] shrink-0" />
+              Pico 90d: <strong className="text-[#17191c] dark:text-[#f1f5f9] font-medium">{peakDay.completedCount}</strong> ({peakDay.date.slice(5)})
+            </span>
+          )}
+        </div>
+      )}
     </section>
   );
 };

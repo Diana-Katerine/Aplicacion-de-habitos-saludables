@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { Play, Pause, RotateCcw, ChevronDown, ChevronUp, Layers } from 'lucide-react';
+import { Play, Pause, RotateCcw, Layers } from 'lucide-react';
 
 type SculpturePreset = 'morning' | 'deep' | 'exploded';
 
@@ -55,7 +55,7 @@ function createContactShadowTexture(): THREE.CanvasTexture {
   return tex;
 }
 
-function createDialRingTexture(maxAnisotropy: number): THREE.CanvasTexture {
+function createDialRingTexture(maxAnisotropy: number, isDarkMode = false): THREE.CanvasTexture {
   const size = 1024;
   const canvas = document.createElement('canvas');
   canvas.width = size;
@@ -65,17 +65,17 @@ function createDialRingTexture(maxAnisotropy: number): THREE.CanvasTexture {
   if (ctx) {
     const cx = size / 2;
     const cy = size / 2;
-    ctx.fillStyle = '#f5f4f2';
+    ctx.fillStyle = isDarkMode ? '#141920' : '#f5f4f2';
     ctx.fillRect(0, 0, size, size);
 
     // Subtle concentric hairline rings
-    ctx.strokeStyle = 'rgba(23, 25, 28, 0.14)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = isDarkMode ? 'rgba(52, 211, 153, 0.34)' : 'rgba(5, 150, 105, 0.24)';
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.arc(cx, cy, size * 0.45, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.strokeStyle = 'rgba(93, 42, 26, 0.25)';
+    ctx.strokeStyle = isDarkMode ? 'rgba(251, 191, 36, 0.32)' : 'rgba(217, 119, 6, 0.28)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(cx, cy, size * 0.34, 0, Math.PI * 2);
@@ -87,7 +87,13 @@ function createDialRingTexture(maxAnisotropy: number): THREE.CanvasTexture {
       const isMajor = i % 2 === 0;
       const innerR = isMajor ? size * 0.385 : size * 0.41;
       const outerR = size * 0.442;
-      ctx.strokeStyle = isMajor ? '#17191c' : 'rgba(119, 123, 134, 0.55)';
+      ctx.strokeStyle = isMajor
+        ? isDarkMode
+          ? '#34d399'
+          : '#059669'
+        : isDarkMode
+        ? 'rgba(56, 189, 248, 0.55)'
+        : 'rgba(2, 132, 199, 0.45)';
       ctx.lineWidth = isMajor ? 3.5 : 1.8;
       ctx.beginPath();
       ctx.moveTo(cx + Math.cos(angle) * innerR, cy + Math.sin(angle) * innerR);
@@ -97,8 +103,8 @@ function createDialRingTexture(maxAnisotropy: number): THREE.CanvasTexture {
 
     // Weekday cardinal inscriptions
     const labels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-    ctx.fillStyle = '#5d2a1a';
-    ctx.font = '500 26px "DM Sans", sans-serif';
+    ctx.fillStyle = isDarkMode ? '#6ee7b7' : '#047857';
+    ctx.font = '600 26px "DM Sans", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     labels.forEach((lbl, idx) => {
@@ -118,16 +124,31 @@ function createDialRingTexture(maxAnisotropy: number): THREE.CanvasTexture {
   return tex;
 }
 
-export const HeroThreeScene: React.FC = () => {
+interface HeroThreeSceneProps {
+  isDark?: boolean;
+}
+
+export const HeroThreeScene: React.FC<HeroThreeSceneProps> = ({ isDark = false }) => {
   const canvasMountRef = useRef<HTMLDivElement | null>(null);
   const [preset, setPreset] = useState<SculpturePreset>('morning');
   const [isPlaying, setIsPlaying] = useState(true);
-  const [hudCollapsed, setHudCollapsed] = useState(false);
   const [webglUnavailable, setWebglUnavailable] = useState(false);
 
   const presetRef = useRef<SculpturePreset>('morning');
   const isPlayingRef = useRef<boolean>(true);
+  const isDarkRef = useRef<boolean>(isDark);
   const resetCameraFnRef = useRef<(() => void) | null>(null);
+
+  const sceneThemeRefs = useRef<{
+    scene: THREE.Scene;
+    hemiLight: THREE.HemisphereLight;
+    alabasterMat: THREE.MeshStandardMaterial;
+    inkSteelMat: THREE.MeshPhysicalMaterial;
+    dialMat: THREE.MeshStandardMaterial;
+    lightDialTex: THREE.CanvasTexture;
+    darkDialTex: THREE.CanvasTexture;
+    contactShadowMat: THREE.MeshBasicMaterial;
+  } | null>(null);
 
   useEffect(() => {
     presetRef.current = preset;
@@ -136,6 +157,24 @@ export const HeroThreeScene: React.FC = () => {
   useEffect(() => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
+
+  useEffect(() => {
+    isDarkRef.current = isDark;
+    const refs = sceneThemeRefs.current;
+    if (!refs) return;
+
+    const bgHex = isDark ? '#0c0f12' : '#f7faf9';
+    refs.scene.background = new THREE.Color(bgHex);
+    refs.scene.fog = new THREE.FogExp2(bgHex, isDark ? 0.038 : 0.032);
+    refs.hemiLight.color.set(isDark ? 0x94a3b8 : 0xf6f8fc);
+    refs.hemiLight.groundColor.set(isDark ? 0x1e293b : 0xe8d5c9);
+    refs.hemiLight.intensity = isDark ? 0.95 : 1.15;
+    refs.alabasterMat.color.set(isDark ? '#1b222c' : '#eef4f2');
+    refs.inkSteelMat.color.set(isDark ? '#94a3b8' : '#1e293b');
+    refs.dialMat.map = isDark ? refs.darkDialTex : refs.lightDialTex;
+    refs.dialMat.needsUpdate = true;
+    refs.contactShadowMat.opacity = isDark ? 0.55 : 1.0;
+  }, [isDark]);
 
   useEffect(() => {
     const container = canvasMountRef.current;
@@ -164,8 +203,8 @@ export const HeroThreeScene: React.FC = () => {
       return;
     }
 
-    const width = Math.max(container.clientWidth, 320);
-    const height = Math.max(container.clientHeight, 360);
+    const width = Math.max(container.clientWidth, 260);
+    const height = Math.max(container.clientHeight, 300);
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -179,13 +218,15 @@ export const HeroThreeScene: React.FC = () => {
     domCanvas.style.display = 'block';
     domCanvas.style.width = '100%';
     domCanvas.style.height = '100%';
-    domCanvas.setAttribute('aria-label', 'Escultura cinética 3D interactiva de Impulso Diario');
+    domCanvas.setAttribute('aria-label', 'Escultura cinética 3D interactiva de Impulso diario');
     container.appendChild(domCanvas);
 
-    // Scene & Editorial Warm-Paper Atmosphere
+    // Scene & Luminous Editorial Atmosphere (Light or Dark Obsidian)
+    const initialDark = isDarkRef.current;
+    const initialBgHex = initialDark ? '#0c0f12' : '#f7faf9';
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#fafafb');
-    scene.fog = new THREE.FogExp2('#fafafb', 0.036);
+    scene.background = new THREE.Color(initialBgHex);
+    scene.fog = new THREE.FogExp2(initialBgHex, initialDark ? 0.038 : 0.032);
 
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 60);
     const defaultCameraPos = new THREE.Vector3(0.35, 1.95, 6.55);
@@ -201,7 +242,11 @@ export const HeroThreeScene: React.FC = () => {
     pmremGenerator.dispose();
 
     // 3-Point Warm/Cool Studio Lighting Rig (<= 1 Shadow Caster)
-    const hemiLight = new THREE.HemisphereLight(0xf6f8fc, 0xe8d5c9, 1.15);
+    const hemiLight = new THREE.HemisphereLight(
+      initialDark ? 0x94a3b8 : 0xf6f8fc,
+      initialDark ? 0x1e293b : 0xe8d5c9,
+      initialDark ? 0.95 : 1.15
+    );
     hemiLight.position.set(0, 10, 0);
     scene.add(hemiLight);
 
@@ -261,36 +306,51 @@ export const HeroThreeScene: React.FC = () => {
 
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    // PBR Materials in Steep Palette
+    // PBR Materials in Botanical & Editorial Palette
     const alabasterMat = new THREE.MeshStandardMaterial({
-      color: '#f2f2f3',
-      roughness: 0.78,
-      metalness: 0.04,
+      color: initialDark ? '#1b222c' : '#eef4f2',
+      roughness: 0.72,
+      metalness: 0.06,
     });
     const inkSteelMat = new THREE.MeshPhysicalMaterial({
-      color: '#17191c',
-      roughness: 0.28,
-      metalness: 0.88,
-      clearcoat: 0.4,
-      clearcoatRoughness: 0.2,
+      color: initialDark ? '#94a3b8' : '#1e293b',
+      roughness: 0.26,
+      metalness: 0.86,
+      clearcoat: 0.45,
+      clearcoatRoughness: 0.18,
+    });
+    const emeraldMetalMat = new THREE.MeshPhysicalMaterial({
+      color: '#059669',
+      roughness: 0.2,
+      metalness: 0.78,
+      clearcoat: 0.55,
+      clearcoatRoughness: 0.15,
     });
     const siennaBronzeMat = new THREE.MeshPhysicalMaterial({
-      color: '#733824',
+      color: '#d97706',
       roughness: 0.22,
-      metalness: 0.92,
+      metalness: 0.9,
       anisotropy: 0.7,
     });
+    const cobaltCeramicMat = new THREE.MeshPhysicalMaterial({
+      color: '#0284c7',
+      roughness: 0.18,
+      metalness: 0.45,
+      clearcoat: 0.8,
+      clearcoatRoughness: 0.1,
+    });
     const blushCeramicMat = new THREE.MeshPhysicalMaterial({
-      color: '#fbe1d1',
+      color: '#f9a886',
       roughness: 0.16,
-      metalness: 0.05,
+      metalness: 0.08,
       clearcoat: 1.0,
       clearcoatRoughness: 0.08,
     });
-    const dialTex = createDialRingTexture(maxAniso);
+    const lightDialTex = createDialRingTexture(maxAniso, false);
+    const darkDialTex = createDialRingTexture(maxAniso, true);
     const dialMat = new THREE.MeshStandardMaterial({
-      map: dialTex,
-      roughness: 0.52,
+      map: initialDark ? darkDialTex : lightDialTex,
+      roughness: 0.5,
       metalness: 0.08,
       polygonOffset: true,
       polygonOffsetFactor: -1,
@@ -301,14 +361,28 @@ export const HeroThreeScene: React.FC = () => {
     const contactShadowMat = new THREE.MeshBasicMaterial({
       map: shadowTex,
       transparent: true,
+      opacity: initialDark ? 0.55 : 1.0,
       depthWrite: false,
     });
 
-    textures.push(dialTex, shadowTex);
+    sceneThemeRefs.current = {
+      scene,
+      hemiLight,
+      alabasterMat,
+      inkSteelMat,
+      dialMat,
+      lightDialTex,
+      darkDialTex,
+      contactShadowMat,
+    };
+
+    textures.push(lightDialTex, darkDialTex, shadowTex);
     materials.push(
       alabasterMat,
       inkSteelMat,
+      emeraldMetalMat,
       siennaBronzeMat,
+      cobaltCeramicMat,
       blushCeramicMat,
       dialMat,
       contactShadowMat
@@ -402,7 +476,7 @@ export const HeroThreeScene: React.FC = () => {
     heroGroup.add(ringOuterGroup);
 
     const outerRingGeo = new THREE.TorusGeometry(1.78, 0.042, 24, 96);
-    const outerRingMesh = new THREE.Mesh(outerRingGeo, inkSteelMat);
+    const outerRingMesh = new THREE.Mesh(outerRingGeo, emeraldMetalMat);
     outerRingMesh.castShadow = !isSoftwareGl;
     ringOuterGroup.add(outerRingMesh);
     geometries.push(outerRingGeo);
@@ -422,7 +496,7 @@ export const HeroThreeScene: React.FC = () => {
     heroGroup.add(ringInnerGroup);
 
     const innerRingGeo = new THREE.TorusGeometry(0.98, 0.028, 20, 72);
-    const innerRingMesh = new THREE.Mesh(innerRingGeo, alabasterMat);
+    const innerRingMesh = new THREE.Mesh(innerRingGeo, cobaltCeramicMat);
     innerRingMesh.castShadow = !isSoftwareGl;
     ringInnerGroup.add(innerRingMesh);
     geometries.push(innerRingGeo);
@@ -440,7 +514,7 @@ export const HeroThreeScene: React.FC = () => {
     nodesInstanced.castShadow = !isSoftwareGl;
     nodesInstanced.frustumCulled = false;
 
-    const paletteHexes = ['#17191c', '#5d2a1a', '#9b5741', '#fbe1d1', '#d8d9dc'];
+    const paletteHexes = ['#059669', '#10b981', '#0284c7', '#f59e0b', '#f9a886'];
     const nodeBaseParams: { angle: number; radius: number; yOffset: number; scale: number }[] = [];
 
     for (let i = 0; i < nodeCount; i++) {
@@ -452,17 +526,17 @@ export const HeroThreeScene: React.FC = () => {
       const scale = isPeakDay ? 1.18 : 0.85;
       nodeBaseParams.push({ angle, radius, yOffset, scale });
 
-      // Assign Steep tonal streak colors
+      // Assign vibrant botanical & momentum streak colors
       const colorHex =
-        i >= 25
+        i >= 24
           ? paletteHexes[0]
-          : i >= 18
+          : i >= 17
           ? paletteHexes[1]
           : i >= 10
           ? paletteHexes[2]
-          : i % 4 === 0
-          ? paletteHexes[4]
-          : paletteHexes[3];
+          : i % 3 === 0
+          ? paletteHexes[3]
+          : paletteHexes[4];
       _color.set(colorHex);
       nodesInstanced.setColorAt(i, _color);
     }
@@ -483,12 +557,12 @@ export const HeroThreeScene: React.FC = () => {
     bead1.position.set(1.78, 0, 0);
     ringOuterGroup.add(bead1);
 
-    const bead2 = new THREE.Mesh(beadGeo, inkSteelMat);
+    const bead2 = new THREE.Mesh(beadGeo, cobaltCeramicMat);
     bead2.scale.setScalar(0.85);
     bead2.position.set(-1.36, 0, 0);
     ringMidGroup.add(bead2);
 
-    const bead3 = new THREE.Mesh(beadGeo, blushCeramicMat);
+    const bead3 = new THREE.Mesh(beadGeo, emeraldMetalMat);
     bead3.scale.setScalar(0.75);
     bead3.position.set(0, 0.98, 0);
     ringInnerGroup.add(bead3);
@@ -525,8 +599,8 @@ export const HeroThreeScene: React.FC = () => {
     // ResizeObserver for crisp responsive sizing
     const handleResize = () => {
       if (!container) return;
-      const w = Math.max(container.clientWidth, 280);
-      const h = Math.max(container.clientHeight, 320);
+      const w = Math.max(container.clientWidth, 260);
+      const h = Math.max(container.clientHeight, 300);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -675,6 +749,7 @@ export const HeroThreeScene: React.FC = () => {
       controls.removeEventListener('end', handleControlEnd);
       controls.dispose();
 
+      sceneThemeRefs.current = null;
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
       textures.forEach((t) => t.dispose());
@@ -688,14 +763,14 @@ export const HeroThreeScene: React.FC = () => {
 
   if (webglUnavailable) {
     return (
-      <div className="w-full h-full min-h-[420px] rounded-[24px] bg-[#fafafb] border border-[#ececec] flex flex-col items-center justify-center p-8 text-center">
-        <div className="w-24 h-24 rounded-full border border-[#5d2a1a]/30 bg-[#fbe1d1] flex items-center justify-center mb-4">
-          <Layers className="w-8 h-8 text-[#5d2a1a]" />
+      <div className="w-full h-full min-h-[340px] sm:min-h-[420px] rounded-[24px] bg-[#fafafb] dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a] flex flex-col items-center justify-center p-5 sm:p-8 text-center">
+        <div className="w-24 h-24 rounded-full border border-[#5d2a1a]/30 dark:border-[#4a2d20] bg-[#fbe1d1] dark:bg-[#241814] flex items-center justify-center mb-4">
+          <Layers className="w-8 h-8 text-[#5d2a1a] dark:text-[#fbdac7]" />
         </div>
-        <p className="font-signifier text-[24px] text-[#17191c]">
+        <p className="font-signifier text-[24px] text-[#17191c] dark:text-[#f1f5f9]">
           Órbita de Constancia 3D
         </p>
-        <p className="text-[14px] text-[#777b86] max-w-xs mt-1">
+        <p className="text-[14px] text-[#777b86] dark:text-[#9aa4b2] max-w-xs mt-1">
           Tu navegador actual no tiene aceleración WebGL activa. El resto de la experiencia funciona al 100%.
         </p>
       </div>
@@ -703,77 +778,59 @@ export const HeroThreeScene: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full h-[420px] sm:h-[470px] lg:h-[510px] rounded-[24px] border border-[#ececec] bg-[#fafafb] overflow-hidden select-none">
+    <div className="relative w-full h-[350px] sm:h-[450px] lg:h-[510px] rounded-[24px] border border-[#059669]/15 dark:border-[#34d399]/20 bg-[#f7faf9] dark:bg-[#0c0f12] overflow-hidden select-none shadow-[0_14px_40px_-18px_rgba(5,150,105,0.2)] dark:shadow-[0_14px_40px_-18px_rgba(5,150,105,0.35)]">
       {/* Isolated WebGL Canvas Container */}
       <div ref={canvasMountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
-      {/* Collapsible Bottom Control Dock (Zero Viewport Occlusion, No backdrop-filter) */}
-      <div className="absolute bottom-3.5 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center max-w-[94%]">
-        <button
-          type="button"
-          onClick={() => setHudCollapsed((c) => !c)}
-          aria-label={hudCollapsed ? 'Mostrar controles 3D' : 'Ocultar controles 3D'}
-          className="mb-1.5 px-3 py-1 rounded-full bg-white border border-[#ececec] text-[11px] text-[#777b86] hover:text-[#17191c] inline-flex items-center gap-1 transition-colors cursor-pointer"
-        >
-          {hudCollapsed ? (
-            <>
-              <ChevronUp className="w-3 h-3" />
-              <span>Controles 3D</span>
-            </>
-          ) : (
-            <ChevronDown className="w-3 h-3" />
-          )}
-        </button>
+      {/* Single Minimal Bottom Control Bar */}
+      <div className="absolute bottom-3 sm:bottom-3.5 left-1/2 -translate-x-1/2 z-10 max-w-[94%] w-max">
+        <div className="px-2 py-1.5 rounded-[20px] sm:rounded-full bg-white/92 dark:bg-[#141920]/92 border border-[#ececec] dark:border-[#252e3a] shadow-sm flex flex-wrap items-center justify-center gap-1">
+          {(
+            [
+              { id: 'morning', label: 'Ritmo' },
+              { id: 'deep', label: 'Enfoque' },
+              { id: 'exploded', label: 'Anatomía' },
+            ] as { id: SculpturePreset; label: string }[]
+          ).map((item) => {
+            const active = preset === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setPreset(item.id)}
+                className={`px-3 py-1 rounded-full text-[12px] transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  active
+                    ? 'bg-[#059669] text-white font-medium'
+                    : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
 
-        {!hudCollapsed && (
-          <div className="px-2 py-1.5 rounded-full bg-white border border-[#ececec] shadow-sm flex flex-wrap items-center justify-center gap-1.5">
-            {(
-              [
-                { id: 'morning', label: 'Ritmo' },
-                { id: 'deep', label: 'Enfoque' },
-                { id: 'exploded', label: 'Anatomía' },
-              ] as { id: SculpturePreset; label: string }[]
-            ).map((item) => {
-              const active = preset === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setPreset(item.id)}
-                  className={`px-3 py-1 rounded-full text-[12px] transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    active
-                      ? 'bg-[#17191c] text-white'
-                      : 'bg-[#f2f2f3] text-[#777b86] hover:text-[#17191c]'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
+          <span aria-hidden="true" className="w-px h-4 bg-[#ececec] dark:bg-[#252e3a] mx-1" />
 
-            <span aria-hidden="true" className="w-px h-4 bg-[#ececec] mx-0.5" />
+          <button
+            type="button"
+            onClick={() => setIsPlaying((p) => !p)}
+            aria-label={isPlaying ? 'Pausar animación 3D' : 'Reanudar animación 3D'}
+            className="w-7 h-7 rounded-full hover:bg-[#f2f2f3] dark:hover:bg-[#1b222b] text-[#777b86] dark:text-[#9aa4b2] hover:text-[#059669] dark:hover:text-[#34d399] flex items-center justify-center transition-colors cursor-pointer"
+            title={isPlaying ? 'Pausar' : 'Reanudar'}
+          >
+            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+          </button>
 
-            <button
-              type="button"
-              onClick={() => setIsPlaying((p) => !p)}
-              aria-label={isPlaying ? 'Pausar animación 3D' : 'Reanudar animación 3D'}
-              className="w-7 h-7 rounded-full bg-[#f2f2f3] hover:bg-[#17191c] text-[#17191c] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-              title={isPlaying ? 'Pausar animación' : 'Reanudar animación'}
-            >
-              {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => resetCameraFnRef.current?.()}
-              aria-label="Restablecer cámara 3D"
-              className="w-7 h-7 rounded-full bg-[#f2f2f3] hover:bg-[#17191c] text-[#17191c] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-              title="Restablecer vista"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
+          <button
+            type="button"
+            onClick={() => resetCameraFnRef.current?.()}
+            aria-label="Restablecer cámara 3D"
+            className="w-7 h-7 rounded-full hover:bg-[#f2f2f3] dark:hover:bg-[#1b222b] text-[#777b86] dark:text-[#9aa4b2] hover:text-[#059669] dark:hover:text-[#34d399] flex items-center justify-center transition-colors cursor-pointer"
+            title="Restablecer vista"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );

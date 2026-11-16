@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Challenge, DailyFocus, EvaluatedBadge, Habit, HabitLog, HabitWithTodayLog, User, ViewRoute, WeeklyFocus } from './types';
+import confetti from 'canvas-confetti';
+import { AiEncouragementMessage, AiHabitSuggestion, Challenge, DailyFocus, EnergyLevel, EvaluatedBadge, Habit, HabitLog, HabitWithTodayLog, MoodTag, User, ViewRoute, WeeklyFocus } from './types';
 import { StorageService, getSundayWeekKey, getTodayDateString, isTodaySunday } from './services/storage';
+import { getGreetingFirstName, getSpanishGreeting, getTimeOfDayPeriod, resolveDisplayName } from './services/greeting';
+import {
+  calculateReachedStreakMilestone,
+  clearDismissedMilestoneToday,
+  dismissMilestoneToday,
+  getExactTodayStreakMilestone,
+  hasDismissedMilestoneToday,
+  StreakMilestone,
+} from './services/streakMilestones';
 import { BadgesService } from './services/badges';
+import { requestAiEncouragement } from './services/aiEncouragement';
 import {
   AdaptiveReminderSuggestion,
   buildAdaptiveReminders,
@@ -23,7 +34,18 @@ import { AuthModal } from './components/auth/AuthModal';
 import { WeeklyReflectionModal } from './components/today/WeeklyReflectionModal';
 import { ToastContainer, ToastMessage } from './components/common/Toast';
 
+const THEME_STORAGE_KEY = 'impulso_diario_theme';
+
 export default function App() {
+  const [theme, setTheme] = useState<'LIGHT' | 'DARK'>(() => {
+    try {
+      const saved = localStorage.getItem(THEME_STORAGE_KEY);
+      if (saved === 'DARK' || saved === 'LIGHT') return saved;
+    } catch {
+      // ignore storage errors
+    }
+    return 'LIGHT';
+  });
   const [user, setUser] = useState<User | null>(null);
   const [currentRoute, setCurrentRoute] = useState<ViewRoute | 'landing'>('today');
   const [todayHabits, setTodayHabits] = useState<HabitWithTodayLog[]>([]);
@@ -46,12 +68,38 @@ export default function App() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isWeeklyReflectionOpen, setIsWeeklyReflectionOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [aiEncouragement, setAiEncouragement] = useState<AiEncouragementMessage | null>(null);
+  const [isEncouragementLoading, setIsEncouragementLoading] = useState(false);
+  const [encouragementError, setEncouragementError] = useState<string | null>(null);
+  const [celebratingMilestones, setCelebratingMilestones] = useState<Record<string, StreakMilestone>>({});
+  const skipNextAutoEncouragementRef = React.useRef(false);
+
+  // Sync <html> .dark class & persist theme preference
+  useEffect(() => {
+    const isDark = theme === 'DARK';
+    document.documentElement.classList.toggle('dark', isDark);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {
+      // ignore storage errors
+    }
+  }, [theme]);
 
   // Initialize user & data on load
   useEffect(() => {
     // Check if user exists or initialize demo user if preferred
     const savedUser = StorageService.getUser();
     if (savedUser) {
+      let hasExplicitStoredTheme = false;
+      try {
+        hasExplicitStoredTheme = localStorage.getItem(THEME_STORAGE_KEY) !== null;
+      } catch {
+        hasExplicitStoredTheme = false;
+      }
+      if (!hasExplicitStoredTheme && savedUser.themePreference) {
+        setTheme(savedUser.themePreference);
+      }
+      StorageService.ensureDemoUserSeeded(savedUser);
       setUser(savedUser);
       setCurrentRoute('today');
       refreshData(savedUser);
@@ -90,7 +138,7 @@ export default function App() {
         markAdaptivePushSentToday(user.id, user.timezone);
         addToast({
           type: 'reminder',
-          metaLabel: 'Impulso Diario · Recordatorio adaptativo',
+          metaLabel: 'Impulso diario · Recordatorio adaptativo',
           title: `¿Completaste "${primary.habit.title}"?`,
           description: primary.reason,
           actionLabel: 'Completar ahora',
@@ -99,7 +147,7 @@ export default function App() {
           onSecondaryAction: () => handleApplyReminderTime(primary.habit.id, primary.suggestedTime),
         });
         tryDispatchBrowserPushNotification(
-          `Impulso Diario · ${primary.habit.title}`,
+          `Impulso diario · ${primary.habit.title}`,
           primary.reason
         );
       }
@@ -109,6 +157,74 @@ export default function App() {
     const intervalId = window.setInterval(checkAndNotify, 60_000);
     return () => window.clearInterval(intervalId);
   }, [user?.id, user?.timezone, user?.reminderEnabled, user?.reminderEveningTime, todayHabits]);
+
+  const triggerAiEncouragement = async (options: {
+    activeUser: User;
+    habitsList: HabitWithTodayLog[];
+    focus: DailyFocus | null;
+    trigger: 'daily_brief' | 'habit_completed' | 'journal_saved' | 'manual_boost';
+    habitTitle?: string;
+    habitStreak?: number;
+    energyLevel?: EnergyLevel;
+    moodTag?: MoodTag;
+    forceRefresh?: boolean;
+    showToast?: boolean;
+  }) => {
+    setIsEncouragementLoading(true);
+    setEncouragementError(null);
+    try {
+      const msg = await requestAiEncouragement({
+        user: options.activeUser,
+        habits: options.habitsList,
+        dailyFocus: options.focus,
+        trigger: options.trigger,
+        habitTitle: options.habitTitle,
+        habitStreak: options.habitStreak,
+        energyLevel: options.energyLevel,
+        moodTag: options.moodTag,
+        forceRefresh: options.forceRefresh,
+      });
+      setAiEncouragement(msg);
+      if (options.showToast) {
+        addToast({
+          type: 'ai',
+          metaLabel: 'Impulso IA',
+          title: msg.headline,
+          description: msg.message,
+          durationMs: 7500,
+        });
+      }
+    } catch (err) {
+      const errMsg =
+        err instanceof Error ? err.message : 'No se pudo generar el mensaje de ánimo.';
+      setEncouragementError(errMsg);
+    } finally {
+      setIsEncouragementLoading(false);
+    }
+  };
+
+  const completedTodayCount = todayHabits.filter((h) => h.todayLog?.isCompleted).length;
+
+  const currentTimeBucket = user ? getTimeOfDayPeriod(user.timezone) : null;
+
+  // Auto-load personalized daily encouragement brief for TodayView
+  useEffect(() => {
+    if (!user) {
+      setAiEncouragement(null);
+      setEncouragementError(null);
+      return;
+    }
+    if (skipNextAutoEncouragementRef.current) {
+      skipNextAutoEncouragementRef.current = false;
+      return;
+    }
+    triggerAiEncouragement({
+      activeUser: user,
+      habitsList: todayHabits,
+      focus: dailyFocus,
+      trigger: 'daily_brief',
+    });
+  }, [user?.id, user?.fullName, currentTimeBucket, todayHabits.length, completedTodayCount, dailyFocus?.intent]);
 
   const refreshData = (activeUser: User, notifyNewBadges = false) => {
     const habits = StorageService.getHabits(activeUser.id);
@@ -132,6 +248,32 @@ export default function App() {
     setBadges(badgeEval.badges);
     setCategories(StorageService.getCategories());
     setTemplates(StorageService.getTemplates());
+
+    const completedIds = new Set(
+      todayH.filter((h) => h.todayLog?.isCompleted).map((h) => h.id)
+    );
+    setCelebratingMilestones((prev) => {
+      const next: Record<string, StreakMilestone> = {};
+      Object.entries(prev).forEach(([id, milestone]) => {
+        if (completedIds.has(id)) {
+          next[id] = milestone;
+        }
+      });
+      todayH.forEach((h) => {
+        if (next[h.id]) return;
+        const exact = getExactTodayStreakMilestone(
+          h.currentStreak,
+          Boolean(h.todayLog?.isCompleted)
+        );
+        if (
+          exact &&
+          !hasDismissedMilestoneToday(activeUser.id, h.id, exact.days, activeUser.timezone)
+        ) {
+          next[h.id] = exact;
+        }
+      });
+      return next;
+    });
 
     if (notifyNewBadges && badgeEval.newlyUnlocked.length > 0) {
       badgeEval.newlyUnlocked.forEach((b) => {
@@ -164,9 +306,10 @@ export default function App() {
       return;
     }
 
-    const previousLog = todayHabits.find((h) => h.id === habitId)?.todayLog;
+    const previousHabit = todayHabits.find((h) => h.id === habitId);
+    const previousLog = previousHabit?.todayLog;
     const previousCompleted = previousLog ? previousLog.isCompleted : false;
-    const previousValue = previousLog ? previousLog.completedValue : 0;
+    const previousStreak = previousHabit ? previousHabit.currentStreak : 0;
 
     try {
       const result = StorageService.checkInHabit(
@@ -179,18 +322,67 @@ export default function App() {
 
       refreshData(user, true);
 
+      const reachedMilestone = calculateReachedStreakMilestone({
+        previousStreak,
+        currentStreak: result.habit.currentStreak,
+        isCompletedToday: result.log.isCompleted,
+        wasCompletedBefore: previousCompleted,
+      });
+
+      if (reachedMilestone) {
+        clearDismissedMilestoneToday(user.id, habitId, user.timezone);
+        setCelebratingMilestones((prev) => ({
+          ...prev,
+          [habitId]: reachedMilestone,
+        }));
+        try {
+          confetti({
+            particleCount: 70,
+            spread: 68,
+            origin: { y: 0.62 },
+            colors: ['#10b981', '#8b5cf6', '#f59e0b', '#06b6d4', '#f43f5e'],
+          });
+        } catch {
+          // ignore confetti canvas error
+        }
+      }
+
       // Toast feedback & Contextual Journaling prompt
       if (!previousCompleted && result.log.isCompleted) {
+        const updatedToday = StorageService.getTodayHabits(user.id, user.timezone);
+        const updatedFocus = StorageService.getDailyFocus(user.id, user.timezone);
+
         if (result.habit.contextualJournalingEnabled !== false) {
+          skipNextAutoEncouragementRef.current = true;
           setJournalPrompt({ habit: result.habit, log: result.log });
+        } else {
+          skipNextAutoEncouragementRef.current = true;
+          void triggerAiEncouragement({
+            activeUser: user,
+            habitsList: updatedToday,
+            focus: updatedFocus,
+            trigger: 'habit_completed',
+            habitTitle: result.habit.title,
+            habitStreak: result.habit.currentStreak,
+            showToast: true,
+          });
         }
         addToast({
           type: 'success',
-          title: `¡${result.habit.title} completado!`,
-          description: `Racha en ${result.habit.currentStreak} días consecutivos.`,
+          title: reachedMilestone
+            ? `${reachedMilestone.headline} en ${result.habit.title}`
+            : `¡${result.habit.title} completado!`,
+          description: reachedMilestone
+            ? reachedMilestone.message
+            : `Racha en ${result.habit.currentStreak} días consecutivos.`,
           onUndo: () => {
             // Rollback check-in
             setJournalPrompt(null);
+            setCelebratingMilestones((prev) => {
+              const next = { ...prev };
+              delete next[habitId];
+              return next;
+            });
             StorageService.checkInHabit(user.id, habitId, undefined, false, user.timezone);
             refreshData(user);
             addToast({
@@ -201,6 +393,11 @@ export default function App() {
           },
         });
       } else if (previousCompleted && !result.log.isCompleted) {
+        setCelebratingMilestones((prev) => {
+          const next = { ...prev };
+          delete next[habitId];
+          return next;
+        });
         addToast({
           type: 'undo',
           title: 'Registro deshecho',
@@ -261,6 +458,21 @@ export default function App() {
         summaryParts.length > 0
           ? `${summaryParts.join(' · ')} correlacionado en Estadísticas.`
           : 'Nota de sesión registrada correctamente.',
+    });
+
+    const completedHabit = allHabits.find((h) => h.id === habitId);
+    const latestToday = StorageService.getTodayHabits(user.id, user.timezone);
+    const latestFocus = StorageService.getDailyFocus(user.id, user.timezone);
+    void triggerAiEncouragement({
+      activeUser: user,
+      habitsList: latestToday,
+      focus: latestFocus,
+      trigger: 'journal_saved',
+      habitTitle: completedHabit?.title,
+      habitStreak: completedHabit?.currentStreak,
+      energyLevel: payload.energyLevel,
+      moodTag: payload.moodTag,
+      showToast: true,
     });
   };
 
@@ -364,10 +576,48 @@ export default function App() {
     });
   };
 
+  // Add AI Suggested Habit
+  const handleAddSuggestedHabit = (suggestion: AiHabitSuggestion) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    const habit = StorageService.addSuggestedHabit(user.id, suggestion);
+    refreshData(user);
+
+    addToast({
+      type: 'success',
+      title: 'Hábito recomendado añadido',
+      description: `"${habit.title}" ya forma parte de tu rutina diaria.`,
+    });
+  };
+
+  // Theme switcher
+  const handleSetTheme = (nextTheme: 'LIGHT' | 'DARK') => {
+    setTheme(nextTheme);
+    if (user) {
+      const merged = { ...user, themePreference: nextTheme };
+      setUser(merged);
+      StorageService.setUser(merged);
+    }
+  };
+
+  const handleToggleTheme = () => {
+    handleSetTheme(theme === 'DARK' ? 'LIGHT' : 'DARK');
+  };
+
   // Update user profile
   const handleUpdateUser = (updatedUser: Partial<User>) => {
     if (!user) return;
+    if (updatedUser.themePreference) {
+      setTheme(updatedUser.themePreference);
+    }
     const merged = { ...user, ...updatedUser };
+    const cleanName = resolveDisplayName(merged.fullName, merged.email);
+    if (cleanName) {
+      merged.fullName = cleanName;
+      StorageService.saveAccountProfile(merged.email, cleanName, merged.timezone, merged.id);
+    }
     setUser(merged);
     StorageService.setUser(merged);
     refreshData(merged);
@@ -391,10 +641,14 @@ export default function App() {
   };
 
   // Logout
-  const handleLogout = () => {
+  const handleLogout = (openLogin = false) => {
     StorageService.setUser(null);
     setUser(null);
     setCurrentRoute('landing');
+    if (openLogin === true) {
+      setAuthMode('login');
+      setIsAuthModalOpen(true);
+    }
     addToast({
       type: 'info',
       title: 'Sesión finalizada',
@@ -477,7 +731,7 @@ export default function App() {
     if (!user) return;
     addToast({
       type: 'reminder',
-      metaLabel: 'Impulso Diario · Alerta push adaptativa',
+      metaLabel: 'Impulso diario · Alerta push adaptativa',
       title: `Pendiente hoy: ${suggestion.habit.title}`,
       description: suggestion.reason,
       actionLabel: 'Completar ahora',
@@ -486,7 +740,7 @@ export default function App() {
       onSecondaryAction: () => handleApplyReminderTime(suggestion.habit.id, suggestion.suggestedTime),
     });
     tryDispatchBrowserPushNotification(
-      `Impulso Diario · ${suggestion.habit.title}`,
+      `Impulso diario · ${suggestion.habit.title}`,
       suggestion.reason
     );
   };
@@ -606,19 +860,23 @@ export default function App() {
     setUser(demoUser);
     setCurrentRoute('today');
     refreshData(demoUser);
+    const greeting = getSpanishGreeting(demoUser.timezone);
+    const firstName = getGreetingFirstName(demoUser.fullName, demoUser.email);
     addToast({
       type: 'success',
-      title: '¡Modo demostración activado!',
-      description: 'Explora hábitos reales, mapas de calor y registro en tiempo real.',
+      title: `¡${greeting}, ${firstName}!`,
+      description: 'Modo demostración activado: explora hábitos reales, mapas de calor y registro en tiempo real.',
     });
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#17191c] flex flex-col selection:bg-[#fbe1d1] selection:text-[#5d2a1a]">
+    <div className="min-h-screen overflow-x-clip bg-white dark:bg-[#0c0f12] text-[#17191c] dark:text-[#f1f5f9] flex flex-col selection:bg-[#fbe1d1] selection:text-[#5d2a1a] dark:selection:bg-[#5d2a1a] dark:selection:text-[#fbe1d1] transition-colors duration-200">
       {/* 3-Zone Navigation Header */}
       <Navbar
         currentRoute={currentRoute}
         user={user}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
         onNavigate={(route) => setCurrentRoute(route)}
         onOpenCreateModal={() => {
           setHabitToEdit(null);
@@ -628,19 +886,20 @@ export default function App() {
           setAuthMode(mode);
           setIsAuthModalOpen(true);
         }}
-        onLogout={handleLogout}
+        onLogout={() => handleLogout(true)}
       />
 
       {/* Main Container */}
       <main
         className={
           currentRoute === 'landing' && !user
-            ? 'flex-1 w-full'
-            : 'flex-1 max-w-[1200px] w-full mx-auto px-5 sm:px-6 py-8 md:py-10'
+            ? 'flex-1 w-full min-w-0'
+            : 'flex-1 max-w-[1200px] w-full min-w-0 mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-10'
         }
       >
         {currentRoute === 'landing' && !user && (
           <LandingPage
+            isDark={theme === 'DARK'}
             onStartFree={() => {
               setAuthMode('register');
               setIsAuthModalOpen(true);
@@ -678,6 +937,49 @@ export default function App() {
             onTogglePause={handleTogglePause}
             onDeleteHabit={handleDeleteHabit}
             onReorderHabits={handleReorderHabits}
+            aiEncouragement={aiEncouragement}
+            isEncouragementLoading={isEncouragementLoading}
+            encouragementError={encouragementError}
+            onRefreshEncouragement={() => {
+              if (!user) return;
+              void triggerAiEncouragement({
+                activeUser: user,
+                habitsList: todayHabits,
+                focus: dailyFocus,
+                trigger: 'manual_boost',
+                forceRefresh: true,
+              });
+            }}
+            celebratingMilestones={celebratingMilestones}
+            onDismissMilestone={(habitId, milestoneDays) => {
+              if (user) {
+                dismissMilestoneToday(user.id, habitId, milestoneDays, user.timezone);
+              }
+              setCelebratingMilestones((prev) => {
+                const next = { ...prev };
+                delete next[habitId];
+                return next;
+              });
+            }}
+            onReplayMilestone={(habitId, milestone) => {
+              if (user) {
+                clearDismissedMilestoneToday(user.id, habitId, user.timezone);
+              }
+              setCelebratingMilestones((prev) => ({
+                ...prev,
+                [habitId]: milestone,
+              }));
+              try {
+                confetti({
+                  particleCount: 45,
+                  spread: 55,
+                  origin: { y: 0.65 },
+                  colors: ['#10b981', '#8b5cf6', '#f59e0b', '#06b6d4', '#f43f5e'],
+                });
+              } catch {
+                // ignore confetti errors
+              }
+            }}
           />
         )}
 
@@ -725,6 +1027,7 @@ export default function App() {
             badges={badges}
             userName={user.fullName}
             timezone={user.timezone}
+            isDark={theme === 'DARK'}
             onApplyReminderTime={handleApplyReminderTime}
             onReportExported={(filename, topCategoryName, weeklyRate) => {
               addToast({
@@ -748,12 +1051,18 @@ export default function App() {
               setHabitToEdit(null);
               setIsHabitModalOpen(true);
             }}
+            user={user}
+            habits={allHabits}
+            logs={allLogs}
+            onAddSuggestedHabit={handleAddSuggestedHabit}
           />
         )}
 
         {user && currentRoute === 'profile' && (
           <ProfileView
             user={user}
+            theme={theme}
+            onChangeTheme={handleSetTheme}
             badges={badges}
             categories={categories}
             habits={allHabits}
@@ -762,23 +1071,21 @@ export default function App() {
             onDeleteCategory={handleDeleteCategory}
             onUpdateUser={handleUpdateUser}
             onResetData={handleResetData}
-            onLogout={handleLogout}
+            onLogout={() => handleLogout(true)}
           />
         )}
       </main>
 
       {/* Editorial Footer */}
-      <footer className="border-t border-[#ececec] bg-[#fafafb] py-8 text-[13px] text-[#777b86]">
-        <div className="max-w-[1200px] mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span>Impulso Diario © {new Date().getFullYear()} · Rituales diarios y analítica de constancia</span>
-          <div className="flex items-center gap-4 text-[#777b86]">
-            <span>
-              Zona horaria:{' '}
-              <strong className="text-[#17191c] font-mono font-normal">
-                {user?.timezone || 'Auto'}
-              </strong>
-            </span>
-          </div>
+      <footer className="border-t border-[#ececec] dark:border-[#252e3a] bg-[#fafafb] dark:bg-[#101419] py-6 text-[13px] text-[#777b86] dark:text-[#9aa4b2]">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+          <span>Impulso diario © {new Date().getFullYear()}</span>
+          <span className="max-w-full truncate">
+            Zona horaria:{' '}
+            <strong className="text-[#17191c] dark:text-[#f1f5f9] font-mono font-normal">
+              {user?.timezone || 'Auto'}
+            </strong>
+          </span>
         </div>
       </footer>
 
@@ -786,9 +1093,21 @@ export default function App() {
       <HabitModal
         isOpen={isHabitModalOpen || Boolean(journalPrompt)}
         onClose={() => {
+          const skippedJournalHabit = journalPrompt?.habit;
           setIsHabitModalOpen(false);
           setHabitToEdit(null);
           setJournalPrompt(null);
+          if (skippedJournalHabit && user) {
+            void triggerAiEncouragement({
+              activeUser: user,
+              habitsList: todayHabits,
+              focus: dailyFocus,
+              trigger: 'habit_completed',
+              habitTitle: skippedJournalHabit.title,
+              habitStreak: skippedJournalHabit.currentStreak,
+              showToast: true,
+            });
+          }
         }}
         categories={categories}
         habitToEdit={habitToEdit}
@@ -818,6 +1137,13 @@ export default function App() {
           setUser(loggedUser);
           setCurrentRoute('today');
           refreshData(loggedUser);
+          const greeting = getSpanishGreeting(loggedUser.timezone);
+          const firstName = getGreetingFirstName(loggedUser.fullName, loggedUser.email);
+          addToast({
+            type: 'success',
+            title: `¡${greeting}, ${firstName}!`,
+            description: 'Nos alegra verte de nuevo. Tu rutina de hoy está lista.',
+          });
         }}
       />
 

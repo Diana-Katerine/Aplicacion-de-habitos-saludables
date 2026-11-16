@@ -293,7 +293,7 @@ export function generateWeeklyStatsPdf(params: {
     doc.text(`Periodo: ${summary.periodLabel}`, margin, 26.5);
 
     // Right side user metadata
-    const displayName = truncateText(params.userName || 'Usuario Impulso Diario', 28);
+    const displayName = truncateText(params.userName || 'Miembro Impulso diario', 28);
     const tzLabel = truncateText(params.timezone || 'Zona local', 28);
     doc.setTextColor(226, 232, 240);
     doc.setFont('helvetica', 'bold');
@@ -635,7 +635,7 @@ export function generateWeeklyStatsPdf(params: {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.text(
-      `Impulso Diario · Reporte semanal (${summary.periodStart} a ${summary.periodEnd})`,
+      `Impulso diario · Reporte semanal (${summary.periodStart} a ${summary.periodEnd})`,
       margin,
       pageHeight - 8
     );

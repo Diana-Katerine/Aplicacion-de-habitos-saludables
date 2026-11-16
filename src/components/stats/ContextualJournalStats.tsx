@@ -18,6 +18,7 @@ interface Props {
   habits: Habit[];
   logs: HabitLog[];
   selectedHabitId: string | 'all';
+  isDark?: boolean;
 }
 
 interface EnergyBucketPoint {
@@ -42,6 +43,7 @@ export const ContextualJournalStats: React.FC<Props> = ({
   habits,
   logs,
   selectedHabitId,
+  isDark = false,
 }) => {
   const habitMap = useMemo(() => new Map(habits.map((h) => [h.id, h])), [habits]);
 
@@ -209,79 +211,74 @@ export const ContextualJournalStats: React.FC<Props> = ({
   return (
     <section
       aria-label="Correlación de diario contextual, energía y estado de ánimo"
-      className="rounded-[24px] p-6 bg-white border border-[#ececec]"
+      className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
-        <div>
-          <h2 className="text-[18px] font-medium text-[#17191c] tracking-[-0.01em] flex items-center gap-2">
-            <BatteryCharging className="w-4 h-4 text-[#5d2a1a] shrink-0" />
-            <span>Diario contextual · Energía, ánimo y rendimiento</span>
-          </h2>
-          <p className="text-[14px] text-[#777b86] mt-0.5">
-            Correlación entre tu nivel de energía (1–5), estado de ánimo al completar y adherencia diaria.
-          </p>
-        </div>
+        <h2 className="text-[18px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-[-0.01em] flex items-center gap-2">
+          <BatteryCharging className="w-4 h-4 text-[#059669] dark:text-[#34d399] shrink-0" />
+          <span>Diario contextual · Energía y ánimo</span>
+        </h2>
 
-        <span className="text-[13px] text-[#777b86] tabular-nums whitespace-nowrap shrink-0">
-          {journaledCount} registros contextuales
+        <span className="text-[13px] text-[#047857] dark:text-[#34d399] font-medium tabular-nums whitespace-nowrap shrink-0">
+          {journaledCount} registros
         </span>
       </div>
 
       {journaledCount === 0 ? (
-        <div className="py-10 text-center border-t border-[#ececec]">
-          <p className="text-[15px] font-medium text-[#17191c]">
+        <div className="py-10 text-center border-t border-[#ececec] dark:border-[#252e3a]">
+          <p className="text-[15px] font-medium text-[#17191c] dark:text-[#f1f5f9]">
             Aún no hay registros de energía y ánimo en este filtro.
           </p>
-          <p className="text-[13px] text-[#777b86] mt-1 max-w-md mx-auto">
+          <p className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-1 max-w-md mx-auto">
             Completa un hábito en la vista Hoy para registrar tu nivel de energía (1–5) y estado de ánimo y descubrir cómo impactan en tu constancia.
           </p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 mb-6 border-y border-[#ececec]">
-            <div>
-              <span className="text-[12px] text-[#979799] block">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 mb-6 border-y border-[#ececec] dark:border-[#252e3a]">
+            <div className="min-w-0">
+              <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] block">
                 Energía promedio al completar
               </span>
-              <div className="mt-1.5 flex items-baseline gap-2">
-                <span className="text-[26px] leading-none font-medium text-[#17191c] tabular-nums">
+              <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <span className="text-[24px] sm:text-[26px] leading-none font-medium text-[#0284C7] dark:text-[#38bdf8] tabular-nums">
                   {avgEnergy > 0 ? `${avgEnergy}/5` : '—'}
                 </span>
-                <span className="text-[13px] text-[#777b86]">
+                <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2]">
                   {avgEnergy >= 4 ? 'Reserva óptima' : avgEnergy >= 3 ? 'Ritmo estable' : 'Requiere descanso'}
                 </span>
               </div>
             </div>
 
-            <div>
-              <span className="text-[12px] text-[#979799] block">
+            <div className="min-w-0">
+              <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] block">
                 Estado de ánimo dominante
               </span>
-              <div className="mt-1.5 flex items-baseline gap-2">
+              <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                 <span
-                  className="text-[26px] leading-none font-medium"
-                  style={{ color: dominantMood?.colorHex || '#17191c' }}
+                  className="text-[24px] sm:text-[26px] leading-none font-medium"
+                  style={{ color: dominantMood?.colorHex || (isDark ? '#f1f5f9' : '#17191c') }}
                 >
                   {dominantMood?.label || '—'}
                 </span>
                 {dominantMood && (
-                  <span className="text-[13px] text-[#777b86] tabular-nums">
+                  <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] tabular-nums">
                     {dominantMood.sharePercent}% ({dominantMood.avgDailyCompletionRate}% adh.)
                   </span>
                 )}
               </div>
             </div>
 
-            <div>
-              <span className="text-[12px] text-[#979799] block">
+            <div className="min-w-0">
+              <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] block">
                 Impacto en rendimiento diario
               </span>
-              <div className="mt-1.5 flex items-baseline gap-2">
-                <span className="text-[26px] leading-none font-medium text-[#5d2a1a] tabular-nums inline-flex items-center gap-1.5">
+              <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <span className="text-[24px] sm:text-[26px] leading-none font-medium text-[#059669] dark:text-[#34d399] tabular-nums inline-flex items-center gap-1.5">
                   <TrendingUp className="w-4 h-4 shrink-0" />
                   {highEnergyRate !== null ? `${highEnergyRate}%` : '—'}
                 </span>
-                <span className="text-[13px] text-[#777b86] tabular-nums">
+                <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] tabular-nums">
                   {lowEnergyRate !== null
                     ? `en energía 4–5 (vs ${lowEnergyRate}% en 1–2)`
                     : 'adherencia promedio en 4–5'}
@@ -292,37 +289,36 @@ export const ContextualJournalStats: React.FC<Props> = ({
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div className="lg:col-span-7">
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <h3 className="text-[14px] font-medium text-[#17191c]">
+              <div className="mb-3">
+                <h3 className="text-[14px] font-medium text-[#17191c] dark:text-[#f1f5f9]">
                   Nivel de energía (1–5) vs. adherencia diaria
                 </h3>
-                <span className="text-[12px] text-[#979799]">
-                  Barras: volumen · Línea: adherencia %
-                </span>
               </div>
 
               <div className="w-full h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart
                     data={energyBuckets}
-                    margin={{ top: 10, right: 8, left: -18, bottom: 0 }}
+                    margin={{ top: 10, right: 4, left: 0, bottom: 0 }}
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="rgba(23,25,28,0.06)"
+                      stroke={isDark ? 'rgba(241,245,249,0.07)' : 'rgba(23,25,28,0.06)'}
                       vertical={false}
                     />
                     <XAxis
                       dataKey="shortLabel"
-                      stroke="#a3a6af"
-                      tick={{ fill: '#777b86', fontSize: 11 }}
+                      stroke={isDark ? '#6f7a8a' : '#a3a6af'}
+                      tick={{ fill: isDark ? '#9aa4b2' : '#777b86', fontSize: 10.5 }}
                       tickLine={false}
-                      axisLine={{ stroke: '#ececec' }}
+                      axisLine={{ stroke: isDark ? '#252e3a' : '#ececec' }}
+                      interval={0}
                     />
                     <YAxis
                       yAxisId="left"
-                      stroke="#a3a6af"
-                      tick={{ fill: '#777b86', fontSize: 11 }}
+                      width={26}
+                      stroke={isDark ? '#6f7a8a' : '#a3a6af'}
+                      tick={{ fill: isDark ? '#9aa4b2' : '#777b86', fontSize: 11 }}
                       tickLine={false}
                       axisLine={false}
                       allowDecimals={false}
@@ -330,25 +326,26 @@ export const ContextualJournalStats: React.FC<Props> = ({
                     <YAxis
                       yAxisId="right"
                       orientation="right"
-                      stroke="#a3a6af"
-                      tick={{ fill: '#5d2a1a', fontSize: 11 }}
+                      width={38}
+                      stroke={isDark ? '#6f7a8a' : '#a3a6af'}
+                      tick={{ fill: isDark ? '#fbbf24' : '#D97706', fontSize: 11 }}
                       tickLine={false}
                       axisLine={false}
                       domain={[0, 100]}
                       unit="%"
                     />
                     <Tooltip
-                      cursor={{ fill: 'rgba(23, 25, 28, 0.04)' }}
+                      cursor={{ fill: 'rgba(56, 189, 248, 0.08)' }}
                       content={({ active, payload }) => {
                         if (!active || !payload || !payload.length) return null;
                         const pt = payload[0].payload as EnergyBucketPoint;
                         return (
                           <div className="steep-popover px-3.5 py-2.5 text-[12px] space-y-1">
-                            <p className="font-medium text-[#17191c]">{pt.shortLabel}</p>
-                            <p className="text-[#5d2a1a] font-medium tabular-nums">
+                            <p className="font-medium text-[#17191c] dark:text-[#f1f5f9]">{pt.shortLabel}</p>
+                            <p className="text-[#D97706] dark:text-[#fbbf24] font-medium tabular-nums">
                               Adherencia diaria promedio: {pt.avgDailyCompletionRate}%
                             </p>
-                            <p className="text-[#777b86] tabular-nums">
+                            <p className="text-[#0284C7] dark:text-[#38bdf8] tabular-nums">
                               Sesiones registradas: {pt.checkInsCount}
                             </p>
                           </div>
@@ -359,9 +356,9 @@ export const ContextualJournalStats: React.FC<Props> = ({
                       yAxisId="left"
                       dataKey="checkInsCount"
                       name="Sesiones"
-                      fill="#f2f2f3"
-                      stroke="#d4d4d8"
-                      radius={[4, 4, 0, 0]}
+                      fill={isDark ? 'rgba(56, 189, 248, 0.25)' : '#BAE6FD'}
+                      stroke="#38BDF8"
+                      radius={[5, 5, 0, 0]}
                       maxBarSize={34}
                     />
                     <Line
@@ -369,10 +366,20 @@ export const ContextualJournalStats: React.FC<Props> = ({
                       type="monotone"
                       dataKey="avgDailyCompletionRate"
                       name="Adherencia %"
-                      stroke="#5d2a1a"
+                      stroke={isDark ? '#fbbf24' : '#D97706'}
                       strokeWidth={2.5}
-                      dot={{ r: 4, fill: '#5d2a1a', stroke: '#ffffff', strokeWidth: 2 }}
-                      activeDot={{ r: 6, fill: '#5d2a1a', stroke: '#ffffff', strokeWidth: 2 }}
+                      dot={{
+                        r: 4,
+                        fill: isDark ? '#fbbf24' : '#D97706',
+                        stroke: isDark ? '#141920' : '#ffffff',
+                        strokeWidth: 2,
+                      }}
+                      activeDot={{
+                        r: 6,
+                        fill: isDark ? '#fbbf24' : '#D97706',
+                        stroke: isDark ? '#141920' : '#ffffff',
+                        strokeWidth: 2,
+                      }}
                     />
                   </ComposedChart>
                 </ResponsiveContainer>
@@ -381,8 +388,8 @@ export const ContextualJournalStats: React.FC<Props> = ({
 
             <div className="lg:col-span-5">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <h3 className="text-[14px] font-medium text-[#17191c] flex items-center gap-1.5">
-                  <Smile className="w-4 h-4 text-[#5d2a1a]" />
+                <h3 className="text-[14px] font-medium text-[#17191c] dark:text-[#f1f5f9] flex items-center gap-1.5">
+                  <Smile className="w-4 h-4 text-[#4F46E5] dark:text-[#a5b4fc]" />
                   <span>Rendimiento por estado de ánimo</span>
                 </h3>
               </div>
@@ -390,24 +397,24 @@ export const ContextualJournalStats: React.FC<Props> = ({
               <div className="space-y-4">
                 {moodRows.map((row) => (
                   <div key={row.mood} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-2 text-[13px]">
-                      <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[13px]">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0">
                         <span
                           className="font-medium truncate"
                           style={{ color: row.colorHex }}
                         >
                           {row.label}
                         </span>
-                        <span className="text-[12px] text-[#979799] tabular-nums">
+                        <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] tabular-nums">
                           {row.count} ses. · E:{row.avgEnergy}/5
                         </span>
                       </div>
-                      <span className="font-medium text-[#17191c] tabular-nums whitespace-nowrap shrink-0">
+                      <span className="font-medium text-[#17191c] dark:text-[#f1f5f9] tabular-nums whitespace-nowrap shrink-0">
                         {row.avgDailyCompletionRate}%{' '}
-                        <span className="text-[#979799] font-normal">({row.sharePercent}%)</span>
+                        <span className="text-[#979799] dark:text-[#6f7a8a] font-normal">({row.sharePercent}%)</span>
                       </span>
                     </div>
-                    <div className="w-full h-1.5 rounded-full bg-[#f2f2f3] overflow-hidden">
+                    <div className="w-full h-1.5 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-300"
                         style={{
@@ -423,12 +430,12 @@ export const ContextualJournalStats: React.FC<Props> = ({
           </div>
 
           {recentEntries.length > 0 && (
-            <div className="mt-6 pt-5 border-t border-[#ececec]">
-              <h3 className="text-[14px] font-medium text-[#17191c] flex items-center gap-1.5 mb-3">
-                <BookOpen className="w-4 h-4 text-[#17191c]" />
+            <div className="mt-6 pt-5 border-t border-[#ececec] dark:border-[#252e3a]">
+              <h3 className="text-[14px] font-medium text-[#17191c] dark:text-[#f1f5f9] flex items-center gap-1.5 mb-3">
+                <BookOpen className="w-4 h-4 text-[#0284C7] dark:text-[#38bdf8]" />
                 <span>Últimos registros contextuales</span>
               </h3>
-              <div className="divide-y divide-[#ececec]">
+              <div className="divide-y divide-[#ececec] dark:divide-[#252e3a]">
                 {recentEntries.map((entry) => {
                   const h = habitMap.get(entry.habitId);
                   const mood = getMoodMeta(entry.moodTag);
@@ -439,16 +446,16 @@ export const ContextualJournalStats: React.FC<Props> = ({
                     >
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                          <span className="font-medium text-[#17191c] truncate">
+                          <span className="font-medium text-[#17191c] dark:text-[#f1f5f9] truncate">
                             {h?.title || 'Hábito'}
                           </span>
-                          <span className="text-[#a3a6af]">·</span>
-                          <span className="text-[#777b86] tabular-nums">
+                          <span className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
+                          <span className="text-[#777b86] dark:text-[#9aa4b2] tabular-nums">
                             {formatDateDisplay(entry.logDate)}
                           </span>
                         </div>
                         {entry.journalEntry && (
-                          <p className="text-[#777b86] text-[12px] mt-0.5">
+                          <p className="text-[#777b86] dark:text-[#9aa4b2] text-[12px] mt-0.5">
                             “{entry.journalEntry}”
                           </p>
                         )}
@@ -456,12 +463,12 @@ export const ContextualJournalStats: React.FC<Props> = ({
 
                       <div className="flex items-center gap-2 text-[12px] tabular-nums shrink-0">
                         {entry.energyLevel !== undefined && (
-                          <span className="text-[#17191c] font-medium">
+                          <span className="text-[#17191c] dark:text-[#f1f5f9] font-medium">
                             Energía {entry.energyLevel}/5
                           </span>
                         )}
                         {entry.energyLevel !== undefined && mood && (
-                          <span className="text-[#a3a6af]">·</span>
+                          <span className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
                         )}
                         {mood && (
                           <span className="font-medium" style={{ color: mood.colorHex }}>

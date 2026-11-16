@@ -1,4 +1,5 @@
-import { Category, Challenge, DailyFocus, EnergyLevel, Habit, HabitLog, HabitTemplate, HabitWithTodayLog, MoodTag, User, DayOfWeek, WeeklyFocus } from '../types';
+import { AiHabitSuggestion, Category, Challenge, DailyFocus, EnergyLevel, Habit, HabitLog, HabitTemplate, HabitWithTodayLog, MoodTag, User, DayOfWeek, WeeklyFocus } from '../types';
+import { isGenericPlaceholderName, resolveDisplayName } from './greeting';
 
 export const DEFAULT_CATEGORIES: Category[] = [
   { id: 1, name: 'Hidratación', iconName: 'Droplets', colorHex: '#0EA5E9' },
@@ -105,7 +106,20 @@ const STORAGE_KEYS = {
   WEEKLY_REFLECTION_SEEN: 'lm_weekly_reflection_seen',
   JOINED_CHALLENGES: 'lm_joined_challenges',
   CUSTOM_CHALLENGES: 'lm_custom_challenges',
+  KNOWN_ACCOUNTS: 'lm_known_accounts',
+  DEMO_SEED_VERSION: 'lm_demo_seed_version',
 };
+
+export const DEMO_USER_ID = 'user-demo-1';
+const DEMO_SEED_VERSION = '2026-11-alex-full-v3';
+
+export interface KnownAccountProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  timezone?: string;
+  updatedAt: string;
+}
 
 // Helper: Format date as YYYY-MM-DD
 export function formatDate(date: Date): string {
@@ -171,8 +185,102 @@ export function isTodaySunday(timezone?: string): boolean {
   return getLocalAnchorDate(timezone).getDay() === 0;
 }
 
-// Generate sample realistic past logs
-function generateSeedData(userId: string) {
+interface GeneratedSeedBundle {
+  habits: Habit[];
+  logs: HabitLog[];
+  dailyFocuses: DailyFocus[];
+  weeklyFocus: WeeklyFocus;
+  joinedChallengeIds: string[];
+  customChallenges: Challenge[];
+}
+
+const DEMO_JOURNAL_SNIPPETS: Record<string, string[]> = {
+  'h-1': [
+    'Botella siempre a la vista en el escritorio; cero fatiga después de almorzar.',
+    'Completé los 8 vasos antes de las 19:30, mejoró muchísimo mi concentración.',
+    'Empecé la mañana con agua y limón antes del café; gran diferencia en energía.',
+  ],
+  'h-2': [
+    'Diez minutos de respiración 4-7-8 al despertar. Mente serena y enfocada.',
+    'Sesión guiada de atención plena; logré soltar la tensión de la semana.',
+    'Silencio total antes de abrir notificaciones. El mejor ancla del día.',
+  ],
+  'h-3': [
+    'Caminata rápida recibiendo luz natural matutina; despejó por completo la cabeza.',
+    '25 minutos al aire libre sin mirar el móvil, ritmo constante y buen ánimo.',
+    'Salí justo después de comer para reactivar la energía de la tarde.',
+  ],
+  'h-4': [
+    'Leí un capítulo completo subrayando ideas prácticas sobre diseño de rutinas.',
+    'Quince páginas antes de dormir; excelente transición para desconectar.',
+    'Sinteticé tres aprendizajes clave en mi cuaderno personal.',
+  ],
+  'h-5': [
+    'Circuito de fuerza con buena técnica en sentadilla y remo; sensación de progreso.',
+    'Entrenamiento intenso de 45 min, subí repeticiones manteniendo control.',
+    'Movilidad articular + trabajo de core; espalda mucho más ligera.',
+  ],
+  'h-6': [
+    'Definí las 3 prioridades críticas antes de las 08:30; mañana súper productiva.',
+    'Bloque profundo completado sin interrupciones gracias a la lista clara.',
+    'Cerré los tres entregables clave antes de las 17:00.',
+  ],
+  'h-7': [
+    'Teléfono fuera del dormitorio desde las 22:00; descanso profundo continuo.',
+    'Cambié pantallas por música instrumental tranquila antes de dormir.',
+    'Modo avión activado a tiempo; desperté con mucha más claridad.',
+  ],
+  'h-8': [
+    'Ensalada completa con aguacate, hojas verdes y buena proteína al mediodía.',
+    'Dos porciones frescas preparadas con antelación; digestión ligera toda la tarde.',
+    'Cero ultraprocesados en la cena, bowl equilibrado y saciante.',
+  ],
+};
+
+function computeHistoricalBestStreak(
+  habit: Habit,
+  logs: HabitLog[],
+  anchorToday: Date,
+  lookbackDays: number
+): number {
+  const completedMap = new Map<string, boolean>();
+  logs.forEach((l) => {
+    if (l.habitId === habit.id && l.isCompleted) {
+      completedMap.set(l.logDate, true);
+    }
+  });
+
+  let best = 0;
+  let running = 0;
+  for (let i = lookbackDays; i >= 0; i--) {
+    const d = new Date(anchorToday);
+    d.setDate(anchorToday.getDate() - i);
+    const dayNum = getDayOfWeek(d);
+    if (!habit.scheduledDays.includes(dayNum)) continue;
+    const dateStr = formatDate(d);
+    if (completedMap.get(dateStr)) {
+      running += 1;
+      if (running > best) best = running;
+    } else if (i > 0) {
+      running = 0;
+    }
+  }
+  return best;
+}
+
+// Generate rich 95-day realistic history for Alex demo & initial seed
+function generateSeedData(userId: string, timezone?: string): GeneratedSeedBundle {
+  const today = getLocalAnchorDate(timezone);
+  const todayStr = formatDate(today);
+  const todayDayOfWeek = getDayOfWeek(today);
+  const nowIso = new Date().toISOString();
+  const isoDaysAgo = (days: number, hour = 10, minute = 0) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - days);
+    d.setHours(hour, minute, 0, 0);
+    return d.toISOString();
+  };
+
   const habits: Habit[] = [
     {
       id: 'h-1',
@@ -182,168 +290,352 @@ function generateSeedData(userId: string) {
       targetValue: 8,
       unitLabel: 'vasos',
       scheduledDays: [1, 2, 3, 4, 5, 6, 7],
-      currentStreak: 12,
-      bestStreak: 21,
+      currentStreak: 14,
+      bestStreak: 24,
       isActive: true,
-      createdAt: new Date(Date.now() - 30 * 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
+      sortOrder: 0,
+      contextualJournalingEnabled: true,
+      createdAt: isoDaysAgo(96, 8, 0),
+      updatedAt: nowIso,
       reminderTime: '08:30',
-      notes: 'Hidratación óptima durante todo el día',
+      notes:
+        '- [x] Primer vaso al despertar antes del café\n- [x] Botella de 750 ml en el escritorio\n- [ ] Último vaso antes de las 20:00\n> Mantener hidratación constante sostiene la claridad mental.',
     },
     {
       id: 'h-2',
-      userId,
-      categoryId: 2,
-      title: 'Caminar 20 minutos al sol',
-      targetValue: 20,
-      unitLabel: 'minutos',
-      scheduledDays: [1, 2, 3, 4, 5, 6, 7],
-      currentStreak: 7,
-      bestStreak: 14,
-      isActive: true,
-      createdAt: new Date(Date.now() - 25 * 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
-      reminderTime: '09:00',
-    },
-    {
-      id: 'h-3',
       userId,
       categoryId: 3,
       title: 'Meditación consciente matutina',
       targetValue: 1,
       unitLabel: 'sesión',
       scheduledDays: [1, 2, 3, 4, 5, 6, 7],
-      currentStreak: 9,
-      bestStreak: 15,
+      currentStreak: 30,
+      bestStreak: 30,
       isActive: true,
-      createdAt: new Date(Date.now() - 20 * 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
+      sortOrder: 1,
+      contextualJournalingEnabled: true,
+      createdAt: isoDaysAgo(96, 7, 15),
+      updatedAt: nowIso,
       reminderTime: '07:15',
+      notes:
+        '- **Protocolo:** Respiración 4-7-8 + escaneo corporal (10–12 min)\n- [x] Modo silencio antes de iniciar\n> "La calma de los primeros 10 minutos marca el ritmo de todo el día."',
+    },
+    {
+      id: 'h-3',
+      userId,
+      categoryId: 2,
+      title: 'Caminar 20 minutos al sol',
+      targetValue: 20,
+      unitLabel: 'minutos',
+      scheduledDays: [1, 2, 3, 4, 5, 6, 7],
+      currentStreak: 15,
+      bestStreak: 22,
+      isActive: true,
+      sortOrder: 2,
+      contextualJournalingEnabled: true,
+      createdAt: isoDaysAgo(95, 9, 0),
+      updatedAt: nowIso,
+      reminderTime: '09:00',
+      notes:
+        '- [x] Exposición a luz natural dentro de los primeros 90 min\n- [ ] Paso firme sin revisar mensajes durante la vuelta',
     },
     {
       id: 'h-4',
       userId,
       categoryId: 6,
-      title: 'Lectura de desarrollo personal',
+      title: 'Lectura de no ficción y síntesis',
       targetValue: 15,
       unitLabel: 'páginas',
-      scheduledDays: [1, 2, 3, 4, 5],
-      currentStreak: 5,
-      bestStreak: 11,
+      scheduledDays: [1, 2, 3, 4, 5, 6, 7],
+      currentStreak: 7,
+      bestStreak: 19,
       isActive: true,
-      createdAt: new Date(Date.now() - 15 * 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
-      reminderTime: '21:30',
+      sortOrder: 3,
+      contextualJournalingEnabled: true,
+      createdAt: isoDaysAgo(94, 21, 0),
+      updatedAt: nowIso,
+      reminderTime: '21:15',
+      notes:
+        '- **Lectura actual:** *Hábitos Atómicos* (Cap. 14)\n- [x] Subrayar 1 idea accionable diaria\n- [ ] Pasar aprendizajes al cuaderno semanal',
     },
     {
       id: 'h-5',
       userId,
       categoryId: 2,
-      title: 'Entrenamiento de fuerza en gimnasio',
+      title: 'Entrenamiento de fuerza funcional',
       targetValue: 45,
       unitLabel: 'minutos',
-      scheduledDays: [1, 2, 4, 5],
-      currentStreak: 4,
-      bestStreak: 8,
+      scheduledDays: [1, 2, 4, 5, 6],
+      currentStreak: 11,
+      bestStreak: 16,
       isActive: true,
-      createdAt: new Date(Date.now() - 28 * 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
+      sortOrder: 4,
+      contextualJournalingEnabled: true,
+      createdAt: isoDaysAgo(95, 18, 0),
+      updatedAt: nowIso,
       reminderTime: '18:00',
+      notes:
+        '- **Bloque A:** Sentadilla búlgara + Remo con mancuernas (4×10)\n- **Bloque B:** Press militar + Core anti-rotación (3×12)\n> Priorizar técnica limpia sobre peso máximo.',
     },
     {
       id: 'h-6',
       userId,
       categoryId: 7,
-      title: 'Planificar top 3 del día',
+      title: 'Planificar top 3 prioridades del día',
       targetValue: 1,
       unitLabel: 'vez',
       scheduledDays: [1, 2, 3, 4, 5],
-      currentStreak: 14,
+      currentStreak: 18,
+      bestStreak: 25,
+      isActive: true,
+      sortOrder: 5,
+      contextualJournalingEnabled: true,
+      createdAt: isoDaysAgo(96, 8, 0),
+      updatedAt: nowIso,
+      reminderTime: '08:00',
+      notes:
+        '1. Bloque de foco profundo de 90 min (sin correo)\n2. Entregable principal del sprint\n3. Revisión ordenada antes de cerrar el día',
+    },
+    {
+      id: 'h-7',
+      userId,
+      categoryId: 5,
+      title: 'Desconexión digital nocturna',
+      targetValue: 1,
+      unitLabel: 'vez',
+      scheduledDays: [1, 2, 3, 4, 5, 6, 7],
+      currentStreak: 9,
+      bestStreak: 16,
+      isActive: true,
+      sortOrder: 6,
+      contextualJournalingEnabled: true,
+      createdAt: isoDaysAgo(90, 22, 15),
+      updatedAt: nowIso,
+      reminderTime: '22:15',
+      notes:
+        '- [x] Dejar el teléfono cargando fuera del dormitorio\n- [x] Luz cálida 45 min antes de dormir',
+    },
+    {
+      id: 'h-8',
+      userId,
+      categoryId: 4,
+      title: 'Plato balanceado con vegetales frescos',
+      targetValue: 2,
+      unitLabel: 'porciones',
+      scheduledDays: [1, 2, 3, 4, 5, 6, 7],
+      currentStreak: 8,
       bestStreak: 14,
       isActive: true,
-      createdAt: new Date(Date.now() - 35 * 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
-      reminderTime: '08:00',
+      sortOrder: 7,
+      contextualJournalingEnabled: true,
+      createdAt: isoDaysAgo(92, 13, 30),
+      updatedAt: nowIso,
+      reminderTime: '13:30',
+      notes:
+        '- **Almuerzo:** Base verde + proteína magra + grasas saludables\n- [x] Preparar vegetales lavados los domingos',
+    },
+    {
+      id: 'h-9',
+      userId,
+      categoryId: 5,
+      title: 'Diario de gratitud nocturno',
+      targetValue: 1,
+      unitLabel: 'entrada',
+      scheduledDays: [1, 2, 3, 4, 5, 6, 7],
+      currentStreak: 0,
+      bestStreak: 12,
+      isActive: false,
+      sortOrder: 8,
+      contextualJournalingEnabled: true,
+      createdAt: isoDaysAgo(70, 22, 0),
+      updatedAt: isoDaysAgo(35, 22, 15),
+      reminderTime: '22:00',
+      notes:
+        '- Anotar 3 cosas positivas del día antes de dormir\n> En pausa temporal mientras consolido lectura nocturna.',
     },
   ];
 
   const logs: HabitLog[] = [];
-  const today = new Date();
+  const moodCycle: MoodTag[] = ['focused', 'motivated', 'calm', 'focused', 'calm', 'motivated', 'tired', 'stressed'];
 
-  const moodCycle: MoodTag[] = ['focused', 'motivated', 'calm', 'focused', 'calm', 'tired', 'stressed'];
+  // Track consecutive scheduled steps backwards from yesterday (step = 1 is most recent scheduled day before today)
+  const scheduledStepsByHabit = new Map<string, number>();
+  const LOOKBACK_DAYS = 95;
 
-  // Populate trailing 45 days
-  for (let i = 45; i >= 1; i--) {
+  for (let daysBack = 1; daysBack <= LOOKBACK_DAYS; daysBack++) {
     const d = new Date(today);
-    d.setDate(d.getDate() - i);
+    d.setDate(today.getDate() - daysBack);
     const dateStr = formatDate(d);
     const dayOfWeek = getDayOfWeek(d);
-    const dayEnergyBase = dayOfWeek <= 4 ? 4 : dayOfWeek === 5 ? 3 : 3;
+    const dayEnergyBase = dayOfWeek <= 4 ? 4 : dayOfWeek === 5 ? 4 : 3;
 
-    habits.forEach((habit) => {
-      if (habit.scheduledDays.includes(dayOfWeek)) {
-        // High completion probability (85%) for rich realistic data
-        const pseudoRandom = (d.getDate() * 17 + habit.id.charCodeAt(2) * 11 + i * 3) % 100;
-        const isCompleted = pseudoRandom < 82;
-        const completedValue = isCompleted
-          ? habit.targetValue
-          : Math.floor((habit.targetValue * (pseudoRandom % 70)) / 100);
+    habits.forEach((habit, hIdx) => {
+      if (!habit.scheduledDays.includes(dayOfWeek)) return;
+      if (habit.id === 'h-9' && (daysBack < 36 || daysBack > 68)) return;
 
-        const energyOffset = (pseudoRandom % 3) - 1;
-        const energyLevel = isCompleted
-          ? (Math.max(1, Math.min(5, dayEnergyBase + energyOffset)) as EnergyLevel)
-          : undefined;
-        const moodTag = isCompleted
-          ? moodCycle[(d.getDate() + habit.categoryId + i) % moodCycle.length]
-          : undefined;
+      const step = (scheduledStepsByHabit.get(habit.id) || 0) + 1;
+      scheduledStepsByHabit.set(habit.id, step);
 
-        logs.push({
-          id: `log-${habit.id}-${dateStr}`,
-          habitId: habit.id,
-          userId,
-          logDate: dateStr,
-          completedValue,
-          isCompleted,
-          energyLevel,
-          moodTag,
-          createdAt: d.toISOString(),
-          updatedAt: d.toISOString(),
-        });
+      const pseudo = (d.getDate() * 19 + (hIdx + 1) * 13 + daysBack * 7) % 100;
+      const isRecentMonth = daysBack <= 28;
+      const baseRate = isRecentMonth ? 86 : 76;
+
+      let isCompleted = pseudo < baseRate;
+
+      // Guarantee exact deterministic trailing & historical streak patterns
+      if (habit.id === 'h-1') {
+        if (step <= 14) isCompleted = true;
+        else if (step === 15) isCompleted = false;
+        else if (step >= 68 && step <= 91) isCompleted = true; // 24d historical record
+      } else if (habit.id === 'h-2') {
+        if (step <= 29) isCompleted = true; // + today = 30d streak!
+        else if (step === 30) isCompleted = false;
+      } else if (habit.id === 'h-3') {
+        if (step <= 14) isCompleted = true; // + today = 15d streak!
+        else if (step === 15) isCompleted = false;
+        else if (step >= 42 && step <= 63) isCompleted = true; // 22d historical record
+      } else if (habit.id === 'h-4') {
+        if (step <= 7) isCompleted = true; // 7d active streak
+        else if (step === 8) isCompleted = false;
+        else if (step >= 50 && step <= 68) isCompleted = true; // 19d historical record
+      } else if (habit.id === 'h-5') {
+        const targetPrev = habit.scheduledDays.includes(todayDayOfWeek) ? 10 : 11;
+        if (step <= targetPrev) isCompleted = true;
+        else if (step === targetPrev + 1) isCompleted = false;
+        else if (step >= 26 && step <= 41) isCompleted = true; // 16d historical record
+      } else if (habit.id === 'h-6') {
+        const targetPrev = habit.scheduledDays.includes(todayDayOfWeek) ? 17 : 18;
+        if (step <= targetPrev) isCompleted = true;
+        else if (step === targetPrev + 1) isCompleted = false;
+        else if (step >= 28 && step <= 52) isCompleted = true; // 25d historical record
+      } else if (habit.id === 'h-7') {
+        if (step <= 8) isCompleted = true; // + today = 9d streak
+        else if (step === 9) isCompleted = false;
+        else if (step >= 40 && step <= 55) isCompleted = true; // 16d historical record
+      } else if (habit.id === 'h-8') {
+        if (step <= 7) isCompleted = true; // + today = 8d streak
+        else if (step === 8) isCompleted = false;
+        else if (step >= 35 && step <= 48) isCompleted = true; // 14d historical record
+      } else if (habit.id === 'h-9') {
+        isCompleted = daysBack >= 40 && daysBack <= 51; // 12d historical streak before pause
       }
+
+      const completedValue = isCompleted
+        ? habit.targetValue
+        : Math.max(0, Math.floor((habit.targetValue * ((pseudo % 65) + 10)) / 100));
+
+      const energyOffset = (pseudo % 3) - 1;
+      const energyLevel = isCompleted
+        ? (Math.max(2, Math.min(5, dayEnergyBase + energyOffset)) as EnergyLevel)
+        : undefined;
+      const moodTag = isCompleted
+        ? moodCycle[(d.getDate() + habit.categoryId + daysBack) % moodCycle.length]
+        : undefined;
+
+      // Include authentic Spanish journal entries on recent completed logs
+      const snippets = DEMO_JOURNAL_SNIPPETS[habit.id];
+      const includeJournal = isCompleted && snippets && daysBack <= 35 && (daysBack + hIdx) % 4 === 0;
+      const journalEntry = includeJournal
+        ? snippets[(daysBack + hIdx) % snippets.length]
+        : undefined;
+
+      const timestamp = isoDaysAgo(daysBack, 9 + (hIdx % 11), (hIdx * 13) % 60);
+
+      logs.push({
+        id: `log-${habit.id}-${dateStr}`,
+        habitId: habit.id,
+        userId,
+        logDate: dateStr,
+        completedValue,
+        isCompleted,
+        energyLevel,
+        moodTag,
+        journalEntry,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
     });
   }
 
-  // Today's partial logs (some completed, some in progress)
-  const todayStr = formatDate(today);
-  const todayDayOfWeek = getDayOfWeek(today);
+  // Today's rich mix: finished routines with reflections + 2 interactive in-progress habits
+  const todayTimestamps = (hour: number, minute: number) => {
+    const d = new Date(today);
+    d.setHours(hour, minute, 0, 0);
+    return d.toISOString();
+  };
 
-  // h-1: water at 5/8
+  // h-1: water at 6/8 (interactive, finishing reaches 15d milestone!)
   logs.push({
     id: `log-h-1-${todayStr}`,
     habitId: 'h-1',
     userId,
     logDate: todayStr,
-    completedValue: 5,
+    completedValue: 6,
     isCompleted: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: todayTimestamps(8, 35),
+    updatedAt: todayTimestamps(11, 20),
   });
 
-  // h-3: meditation completed
+  // h-2: meditation completed (hits exact 30-day milestone celebration!)
+  logs.push({
+    id: `log-h-2-${todayStr}`,
+    habitId: 'h-2',
+    userId,
+    logDate: todayStr,
+    completedValue: 1,
+    isCompleted: true,
+    energyLevel: 5,
+    moodTag: 'calm',
+    journalEntry: 'Respiración 4-7-8 durante 12 minutos antes de revisar mensajes. Mente completamente despejada.',
+    createdAt: todayTimestamps(7, 20),
+    updatedAt: todayTimestamps(7, 32),
+  });
+
+  // h-3: morning walk completed (15-day streak!)
   logs.push({
     id: `log-h-3-${todayStr}`,
     habitId: 'h-3',
     userId,
     logDate: todayStr,
-    completedValue: 1,
+    completedValue: 20,
     isCompleted: true,
     energyLevel: 4,
-    moodTag: 'calm',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    moodTag: 'motivated',
+    journalEntry: 'Vuelta por el parque con sol matutino; activó la energía sin necesidad de segundo café.',
+    createdAt: todayTimestamps(9, 5),
+    updatedAt: todayTimestamps(9, 28),
   });
 
-  // h-6: plan top 3 completed
+  // h-4: reading in progress (10/15 pages)
+  logs.push({
+    id: `log-h-4-${todayStr}`,
+    habitId: 'h-4',
+    userId,
+    logDate: todayStr,
+    completedValue: 10,
+    isCompleted: false,
+    createdAt: todayTimestamps(12, 10),
+    updatedAt: todayTimestamps(12, 30),
+  });
+
+  // h-5: strength training completed if scheduled today
+  if (habits[4].scheduledDays.includes(todayDayOfWeek)) {
+    logs.push({
+      id: `log-h-5-${todayStr}`,
+      habitId: 'h-5',
+      userId,
+      logDate: todayStr,
+      completedValue: 45,
+      isCompleted: true,
+      energyLevel: 5,
+      moodTag: 'motivated',
+      journalEntry: 'Sesión de fuerza y core completada con progresión limpia en press y remo.',
+      createdAt: todayTimestamps(10, 45),
+      updatedAt: todayTimestamps(11, 35),
+    });
+  }
+
+  // h-6: plan top 3 completed if scheduled today
   if (habits[5].scheduledDays.includes(todayDayOfWeek)) {
     logs.push({
       id: `log-h-6-${todayStr}`,
@@ -352,22 +644,210 @@ function generateSeedData(userId: string) {
       logDate: todayStr,
       completedValue: 1,
       isCompleted: true,
-      energyLevel: 5,
+      energyLevel: 4,
       moodTag: 'focused',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      journalEntry: 'Tres prioridades cerradas antes de las 08:30; mañana enfocada sin multitarea.',
+      createdAt: todayTimestamps(8, 5),
+      updatedAt: todayTimestamps(8, 15),
     });
   }
 
-  return { habits, logs };
+  // h-7: digital disconnect completed
+  logs.push({
+    id: `log-h-7-${todayStr}`,
+    habitId: 'h-7',
+    userId,
+    logDate: todayStr,
+    completedValue: 1,
+    isCompleted: true,
+    energyLevel: 3,
+    moodTag: 'calm',
+    journalEntry: 'Recordatorio nocturno preparado y cargador fuera del dormitorio para descansar sin pantallas.',
+    createdAt: todayTimestamps(9, 40),
+    updatedAt: todayTimestamps(9, 42),
+  });
+
+  // h-8: balanced vegetables completed
+  logs.push({
+    id: `log-h-8-${todayStr}`,
+    habitId: 'h-8',
+    userId,
+    logDate: todayStr,
+    completedValue: 2,
+    isCompleted: true,
+    energyLevel: 4,
+    moodTag: 'focused',
+    journalEntry: 'Bowl fresco con espinaca, aguacate y proteína ligera; tarde productiva sin pesadez.',
+    createdAt: todayTimestamps(12, 15),
+    updatedAt: todayTimestamps(12, 40),
+  });
+
+  // Synchronize exact currentStreak and bestStreak from actual generated logs
+  habits.forEach((habit) => {
+    const computed = StorageService.calculateStreak(habit, logs, timezone);
+    const historicalBest = computeHistoricalBestStreak(habit, logs, today, LOOKBACK_DAYS);
+    habit.currentStreak = habit.isActive ? computed.currentStreak : 0;
+    habit.bestStreak = Math.max(habit.currentStreak, historicalBest);
+  });
+
+  // Seed Daily Focus history (6 completed past focuses + active focus for today)
+  const pastFocusTemplates = [
+    { daysBack: 14, intent: 'Cerrar la propuesta de producto sin revisar correo hasta las 11:00' },
+    { daysBack: 11, intent: 'Completar bloque creativo de 90 min y caminata sin notificaciones' },
+    { daysBack: 8, intent: 'Organizar el menú semanal saludable y entrenar fuerza en la tarde' },
+    { daysBack: 5, intent: 'Responder pendientes clave antes del mediodía para liberar la tarde' },
+    { daysBack: 3, intent: 'Terminar síntesis de lectura y desconectar pantallas a las 22:00' },
+    { daysBack: 1, intent: 'Consolidar racha matutina completa y preparar prioridades del lunes' },
+  ];
+
+  const dailyFocuses: DailyFocus[] = pastFocusTemplates.map((item) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - item.daysBack);
+    const dStr = formatDate(d);
+    return {
+      id: `focus-${userId}-${dStr}`,
+      userId,
+      date: dStr,
+      intent: item.intent,
+      isCompleted: true,
+      updatedAt: isoDaysAgo(item.daysBack, 19, 30),
+    };
+  });
+
+  dailyFocuses.push({
+    id: `focus-${userId}-${todayStr}`,
+    userId,
+    date: todayStr,
+    intent: 'Proteger mi bloque matutino de foco profundo y cerrar los 8 vasos de agua',
+    isCompleted: false,
+    updatedAt: todayTimestamps(8, 10),
+  });
+
+  // Seed Weekly Focus for current week
+  const weekKey = getSundayWeekKey(timezone);
+  const weeklyFocus: WeeklyFocus = {
+    id: `wfocus-${userId}-${weekKey}`,
+    userId,
+    weekKey,
+    intent: 'Sostener mis 30 días de meditación y mantener energía estable con hidratación temprana',
+    reflectionNote:
+      'La semana pasada subí mi adherencia al 89%; dejar el teléfono fuera del cuarto marcó la mayor diferencia en las mañanas.',
+    createdAt: isoDaysAgo(2, 19, 0),
+    updatedAt: isoDaysAgo(1, 20, 15),
+  };
+
+  const joinedChallengeIds = ['ch-comm-1', 'ch-comm-2', 'ch-comm-3', 'ch-comm-4'];
+
+  const endDateObj = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const customChallenges: Challenge[] = [
+    {
+      id: `ch-custom-${userId}-1`,
+      kind: 'custom',
+      title: '21 días sin azúcar añadida en el café',
+      description:
+        'Mantener energía constante evitando picos de glucosa durante tres semanas seguidas.',
+      categoryId: 4,
+      targetCount: 21,
+      unitLabel: 'días',
+      metricRule: 'manual',
+      manualProgress: 18,
+      rewardLabel: 'Hito Personal',
+      endDate: formatDate(endDateObj),
+    },
+    {
+      id: `ch-custom-${userId}-2`,
+      kind: 'custom',
+      title: '12 noches seguidas de lectura analógica',
+      description:
+        'Leer al menos 15 páginas en papel antes de dormir en lugar de usar el teléfono.',
+      categoryId: 6,
+      targetCount: 12,
+      unitLabel: 'noches',
+      metricRule: 'manual',
+      manualProgress: 12,
+      rewardLabel: 'Hito Personal',
+      endDate: formatDate(endDateObj),
+    },
+  ];
+
+  return {
+    habits,
+    logs,
+    dailyFocuses,
+    weeklyFocus,
+    joinedChallengeIds,
+    customChallenges,
+  };
 }
 
 // Storage Manager Service
 export class StorageService {
+  static getKnownAccounts(): Record<string, KnownAccountProfile> {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.KNOWN_ACCOUNTS);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {
+      console.error(e);
+    }
+    return {};
+  }
+
+  static getSavedAccountProfile(email: string): KnownAccountProfile | null {
+    const key = email.trim().toLowerCase();
+    if (!key) return null;
+    const map = this.getKnownAccounts();
+    const match = map[key];
+    if (!match) return null;
+    return match;
+  }
+
+  static getSavedAccountName(email: string): string | null {
+    const profile = this.getSavedAccountProfile(email);
+    if (!profile || isGenericPlaceholderName(profile.fullName)) return null;
+    return profile.fullName;
+  }
+
+  static saveAccountProfile(
+    email: string,
+    fullName: string,
+    timezone?: string,
+    userId?: string
+  ): void {
+    const key = email.trim().toLowerCase();
+    const cleanedName = resolveDisplayName(fullName, email);
+    if (!key || !cleanedName || isGenericPlaceholderName(cleanedName)) return;
+    try {
+      const map = this.getKnownAccounts();
+      const existing = map[key];
+      map[key] = {
+        id: userId || existing?.id || `usr-${Date.now()}`,
+        email: email.trim(),
+        fullName: cleanedName,
+        timezone: timezone || existing?.timezone,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEYS.KNOWN_ACCOUNTS, JSON.stringify(map));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   static getUser(): User | null {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.USER);
-      if (data) return JSON.parse(data);
+      if (data) {
+        const parsed: User = JSON.parse(data);
+        if (isGenericPlaceholderName(parsed.fullName)) {
+          const savedName = this.getSavedAccountName(parsed.email);
+          const resolved = savedName || resolveDisplayName(parsed.fullName, parsed.email);
+          if (resolved && !isGenericPlaceholderName(resolved)) {
+            const repaired: User = { ...parsed, fullName: resolved };
+            this.setUser(repaired);
+            return repaired;
+          }
+        }
+        return parsed;
+      }
     } catch (e) {
       console.error(e);
     }
@@ -379,38 +859,149 @@ export class StorageService {
       localStorage.removeItem(STORAGE_KEYS.USER);
     } else {
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+      if (!isGenericPlaceholderName(user.fullName)) {
+        this.saveAccountProfile(user.email, user.fullName, user.timezone, user.id);
+      }
+    }
+  }
+
+  static ensureDemoUserSeeded(user: User): void {
+    if (user.id !== DEMO_USER_ID) return;
+    const seedVersion = localStorage.getItem(STORAGE_KEYS.DEMO_SEED_VERSION);
+    const existingDemoHabits = this.getHabits(DEMO_USER_ID);
+    if (existingDemoHabits.length === 0 || seedVersion !== DEMO_SEED_VERSION) {
+      this.seedUserRichDataset(user.id, user.timezone);
+      localStorage.setItem(STORAGE_KEYS.DEMO_SEED_VERSION, DEMO_SEED_VERSION);
     }
   }
 
   static getOrCreateDemoUser(): User {
-    let user = this.getUser();
-    if (!user) {
-      user = {
-        id: 'user-demo-1',
+    const current = this.getUser();
+    const detectedTz = detectBrowserTimezone();
+    const activeTheme: 'DARK' | 'LIGHT' =
+      typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+        ? 'DARK'
+        : 'LIGHT';
+
+    let demoUser: User;
+    if (current && current.id === DEMO_USER_ID) {
+      demoUser = current;
+    } else {
+      demoUser = {
+        id: DEMO_USER_ID,
         email: 'alex.momentum@example.com',
         fullName: 'Alex Vance',
-        timezone: detectBrowserTimezone(),
-        themePreference: 'DARK',
+        timezone: detectedTz,
+        themePreference: activeTheme,
         role: 'USER',
-        createdAt: new Date(Date.now() - 35 * 86400000).toISOString(),
+        createdAt: new Date(Date.now() - 96 * 86400000).toISOString(),
         reminderEnabled: true,
         reminderMorningTime: '08:00',
         reminderEveningTime: '21:00',
       };
-      this.setUser(user);
-      this.initializeSeedData(user.id);
+      this.setUser(demoUser);
     }
-    return user;
+
+    this.ensureDemoUserSeeded(demoUser);
+    return demoUser;
   }
 
-  static initializeSeedData(userId: string, force = false): void {
-    const existingHabits = localStorage.getItem(STORAGE_KEYS.HABITS);
-    if (!existingHabits || force) {
-      const seed = generateSeedData(userId);
-      localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(seed.habits));
-      localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(seed.logs));
-      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(DEFAULT_CATEGORIES));
+  static seedUserRichDataset(userId: string, timezone?: string): void {
+    const seed = generateSeedData(userId, timezone);
+
+    // Ensure categories include all default category IDs (1..7) while keeping custom categories
+    const existingCategories = this.getCategories();
+    const existingCatIds = new Set(existingCategories.map((c) => c.id));
+    const mergedCategories = [
+      ...existingCategories,
+      ...DEFAULT_CATEGORIES.filter((dc) => !existingCatIds.has(dc.id)),
+    ];
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(mergedCategories));
+
+    if (!localStorage.getItem(STORAGE_KEYS.TEMPLATES)) {
       localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(DEFAULT_TEMPLATES));
+    }
+
+    // Merge user's habits without wiping other accounts
+    const allHabits = this.getAllHabits().filter((h) => h.userId !== userId);
+    localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify([...allHabits, ...seed.habits]));
+
+    // Merge user's logs without wiping other accounts
+    let otherLogs: HabitLog[] = [];
+    try {
+      const rawLogs = localStorage.getItem(STORAGE_KEYS.LOGS);
+      if (rawLogs) {
+        otherLogs = (JSON.parse(rawLogs) as HabitLog[]).filter((l) => l.userId !== userId);
+      }
+    } catch {
+      otherLogs = [];
+    }
+    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify([...otherLogs, ...seed.logs]));
+
+    // Merge Daily Focus history
+    let otherFocuses: DailyFocus[] = [];
+    try {
+      const rawFocus = localStorage.getItem(STORAGE_KEYS.DAILY_FOCUS);
+      if (rawFocus) {
+        otherFocuses = (JSON.parse(rawFocus) as DailyFocus[]).filter((f) => f.userId !== userId);
+      }
+    } catch {
+      otherFocuses = [];
+    }
+    localStorage.setItem(
+      STORAGE_KEYS.DAILY_FOCUS,
+      JSON.stringify([...otherFocuses, ...seed.dailyFocuses])
+    );
+
+    // Merge Weekly Focus
+    let otherWeeklyFocuses: WeeklyFocus[] = [];
+    try {
+      const rawWFocus = localStorage.getItem(STORAGE_KEYS.WEEKLY_FOCUS);
+      if (rawWFocus) {
+        otherWeeklyFocuses = (JSON.parse(rawWFocus) as WeeklyFocus[]).filter(
+          (f) => f.userId !== userId
+        );
+      }
+    } catch {
+      otherWeeklyFocuses = [];
+    }
+    localStorage.setItem(
+      STORAGE_KEYS.WEEKLY_FOCUS,
+      JSON.stringify([...otherWeeklyFocuses, seed.weeklyFocus])
+    );
+    this.markWeeklyReflectionSeen(userId, seed.weeklyFocus.weekKey);
+
+    // Merge Joined Challenges
+    let joinedMap: Record<string, string[]> = {};
+    try {
+      const rawJoined = localStorage.getItem(STORAGE_KEYS.JOINED_CHALLENGES);
+      if (rawJoined) joinedMap = JSON.parse(rawJoined);
+    } catch {
+      joinedMap = {};
+    }
+    joinedMap[userId] = seed.joinedChallengeIds;
+    localStorage.setItem(STORAGE_KEYS.JOINED_CHALLENGES, JSON.stringify(joinedMap));
+
+    // Merge Custom Challenges
+    let customMap: Record<string, Challenge[]> = {};
+    try {
+      const rawCustom = localStorage.getItem(STORAGE_KEYS.CUSTOM_CHALLENGES);
+      if (rawCustom) customMap = JSON.parse(rawCustom);
+    } catch {
+      customMap = {};
+    }
+    customMap[userId] = seed.customChallenges;
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_CHALLENGES, JSON.stringify(customMap));
+  }
+
+  static initializeSeedData(userId: string, force = false, timezone?: string): void {
+    const hasUserHabits = this.getHabits(userId).length > 0;
+    const existingHabits = localStorage.getItem(STORAGE_KEYS.HABITS);
+    if (force || (!existingHabits && !hasUserHabits)) {
+      this.seedUserRichDataset(userId, timezone);
+      if (userId === DEMO_USER_ID) {
+        localStorage.setItem(STORAGE_KEYS.DEMO_SEED_VERSION, DEMO_SEED_VERSION);
+      }
     }
   }
 
@@ -572,14 +1163,14 @@ export class StorageService {
         return acc;
       }, {} as Record<string, boolean>);
 
-    // Walk backwards from today or yesterday
+    // Walk backwards from today or yesterday using user's local anchor date
     let currentStreak = 0;
-    const testDate = new Date();
-    
+    const testDate = getLocalAnchorDate(timezone);
+
     // Check today: if today is scheduled and completed, start with 1
     const todayDayNum = getDayOfWeek(testDate);
     const isTodayScheduled = habit.scheduledDays.includes(todayDayNum);
-    
+
     if (isTodayScheduled && habitLogs[todayStr]) {
       currentStreak++;
     }
@@ -589,8 +1180,8 @@ export class StorageService {
     let broken = false;
 
     while (!broken && daysBack <= 365) {
-      const prevDate = new Date();
-      prevDate.setDate(prevDate.getDate() - daysBack);
+      const prevDate = new Date(testDate);
+      prevDate.setDate(testDate.getDate() - daysBack);
       const dateStr = formatDate(prevDate);
       const dayNum = getDayOfWeek(prevDate);
 
@@ -615,8 +1206,8 @@ export class StorageService {
     const habits = this.getHabits(userId);
     const logs = this.getLogs(userId);
     const categories = this.getCategories();
-    const todayStr = getTodayDateString(timezone);
-    const todayDate = new Date();
+    const todayDate = getLocalAnchorDate(timezone);
+    const todayStr = formatDate(todayDate);
     const todayDayOfWeek = getDayOfWeek(todayDate);
 
     // Filter habits scheduled for today
@@ -632,8 +1223,8 @@ export class StorageService {
       // Trailing 7 days history
       const past7Days = [];
       for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
+        const d = new Date(todayDate);
+        d.setDate(todayDate.getDate() - i);
         const dStr = formatDate(d);
         const dayNum = getDayOfWeek(d);
         const isScheduled = habit.scheduledDays.includes(dayNum);
@@ -895,6 +1486,22 @@ export class StorageService {
       scheduledDays: tpl.scheduledDays,
       isActive: true,
       notes: tpl.description,
+    });
+  }
+
+  // Add AI-suggested habit directly to user's active routine
+  static addSuggestedHabit(userId: string, suggestion: AiHabitSuggestion): Habit {
+    const notesParts = [suggestion.description?.trim(), suggestion.whyItFits?.trim() ? `> ${suggestion.whyItFits.trim()}` : ''].filter(Boolean);
+    return this.createHabit(userId, {
+      categoryId: suggestion.categoryId,
+      title: suggestion.title,
+      targetValue: suggestion.targetValue,
+      unitLabel: suggestion.unitLabel,
+      scheduledDays: suggestion.scheduledDays?.length ? suggestion.scheduledDays : [1, 2, 3, 4, 5, 6, 7],
+      reminderTime: suggestion.reminderTime,
+      isActive: true,
+      contextualJournalingEnabled: true,
+      notes: notesParts.join('\n'),
     });
   }
 
@@ -1403,14 +2010,20 @@ export class StorageService {
     };
   }
 
-  // Reset all user data to seed
+  // Reset all user data to rich demo seed
   static resetUserData(userId: string): void {
-    localStorage.removeItem(STORAGE_KEYS.DAILY_FOCUS);
-    localStorage.removeItem(STORAGE_KEYS.WEEKLY_FOCUS);
-    localStorage.removeItem(STORAGE_KEYS.WEEKLY_REFLECTION_SEEN);
-    localStorage.removeItem(STORAGE_KEYS.JOINED_CHALLENGES);
-    localStorage.removeItem(STORAGE_KEYS.CUSTOM_CHALLENGES);
-    localStorage.removeItem('lm_unlocked_badges');
-    this.initializeSeedData(userId, true);
+    const currentUser = this.getUser();
+    const timezone = currentUser?.id === userId ? currentUser.timezone : undefined;
+    try {
+      const rawBadges = localStorage.getItem('lm_unlocked_badges');
+      if (rawBadges) {
+        const parsed = JSON.parse(rawBadges) as Record<string, unknown>;
+        delete parsed[userId];
+        localStorage.setItem('lm_unlocked_badges', JSON.stringify(parsed));
+      }
+    } catch {
+      localStorage.removeItem('lm_unlocked_badges');
+    }
+    this.initializeSeedData(userId, true, timezone);
   }
 }
