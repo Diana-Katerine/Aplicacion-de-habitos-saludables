@@ -123,7 +123,7 @@ export const LandingPage: React.FC<Props> = ({
                   onClick={onStartFree}
                   className="px-6 py-3 rounded-full btn-chromatic text-[15px] leading-none font-medium whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  Comenzar gratis
+                  Crear cuenta
                 </button>
 
                 <button
@@ -365,7 +365,7 @@ export const LandingPage: React.FC<Props> = ({
                 onClick={onStartFree}
                 className="px-6 py-3 rounded-full btn-chromatic text-[15px] leading-none font-medium whitespace-nowrap shrink-0 cursor-pointer"
               >
-                Crear cuenta gratis
+                Crear cuenta
               </button>
               <button
                 type="button"

@@ -25,6 +25,8 @@ import { MonthlyComparator } from './MonthlyComparator';
 import { MomentumForecast } from './MomentumForecast';
 import { ContextualJournalStats } from './ContextualJournalStats';
 import { WeeklyAdherenceD3Chart } from './WeeklyAdherenceD3Chart';
+import { WeeklyAdherenceBarChart } from './WeeklyAdherenceBarChart';
+import { HabitMonthlyCalendar } from './HabitMonthlyCalendar';
 import { StreakComparisonBarChart } from './StreakComparisonBarChart';
 
 interface Props {
@@ -302,6 +304,26 @@ export const StatsView: React.FC<Props> = ({
             habits={habits}
             logs={logs}
             selectedHabitId={selectedHabitId}
+            timezone={timezone}
+            isDark={isDark}
+          />
+
+          {/* Week-by-Week Adherence vs. Historical Mean Bar Chart (Recharts) */}
+          <WeeklyAdherenceBarChart
+            habits={habits}
+            logs={logs}
+            selectedHabitId={selectedHabitId}
+            timezone={timezone}
+            isDark={isDark}
+          />
+
+          {/* Monthly Habit Calendar showing completed days & past streaks */}
+          <HabitMonthlyCalendar
+            habits={habits}
+            logs={logs}
+            categories={categories}
+            selectedHabitId={selectedHabitId}
+            onSelectHabit={(id) => setSelectedHabitId(id)}
             timezone={timezone}
             isDark={isDark}
           />

@@ -1078,14 +1078,8 @@ export default function App() {
 
       {/* Editorial Footer */}
       <footer className="border-t border-[#ececec] dark:border-[#252e3a] bg-[#fafafb] dark:bg-[#101419] py-6 text-[13px] text-[#777b86] dark:text-[#9aa4b2]">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 flex items-center justify-center sm:justify-start text-center sm:text-left">
           <span>Impulso diario © {new Date().getFullYear()}</span>
-          <span className="max-w-full truncate">
-            Zona horaria:{' '}
-            <strong className="text-[#17191c] dark:text-[#f1f5f9] font-mono font-normal">
-              {user?.timezone || 'Auto'}
-            </strong>
-          </span>
         </div>
       </footer>
 
