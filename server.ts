@@ -1,8 +1,13 @@
 import 'dotenv/config';
 import express, { type Request, type Response } from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, ThinkingLevel, Type } from '@google/genai';
+import authRoutes from './server/routes/auth';
+import categoriesRoutes from './server/routes/categories';
+import habitsRoutes from './server/routes/habits';
+import logsRoutes from './server/routes/logs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -100,6 +105,23 @@ function formatGeminiError(err: unknown): { status: number; message: string } {
 async function startServer() {
   const app = express();
   app.use(express.json({ limit: '1mb' }));
+
+  // Rutas RESTful de Sprint 2
+  app.use('/api/auth', authRoutes);
+  app.use('/api/categories', categoriesRoutes);
+  app.use('/api/habits', habitsRoutes);
+  app.use('/api/logs', logsRoutes);
+
+  // Endpoint de documentación OpenAPI
+  app.get('/api/docs/openapi.yaml', (_req: Request, res: Response) => {
+    const openapiPath = path.resolve(__dirname, 'server/docs/openapi.yaml');
+    if (fs.existsSync(openapiPath)) {
+      res.setHeader('Content-Type', 'text/yaml; charset=utf-8');
+      res.sendFile(openapiPath);
+    } else {
+      res.status(404).json({ error: 'Especificación OpenAPI no encontrada.' });
+    }
+  });
 
   app.post('/api/forecast/momentum', async (req: Request, res: Response) => {
     const apiKey = process.env.GEMINI_API_KEY;

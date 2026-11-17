@@ -1,0 +1,541 @@
+openapi: 3.0.3
+info:
+  title: API Impulso Diario - Hábitos Saludables (Sprint 2)
+  description: Backend RESTful con autenticación JWT, persistencia SQLite y control de acceso por usuario para la gestión de hábitos saludables y seguimiento diario.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de desarrollo local
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Credenciales inválidas. Verifica tu correo y contraseña.
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+        timezone:
+          type: string
+        themePreference:
+          type: string
+          enum: [DARK, LIGHT]
+        role:
+          type: string
+          enum: [USER, ADMIN]
+        createdAt:
+          type: string
+          format: date-time
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+          nullable: true
+        name:
+          type: string
+        iconName:
+          type: string
+        colorHex:
+          type: string
+
+    Habit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        title:
+          type: string
+        targetValue:
+          type: number
+        unitLabel:
+          type: string
+        scheduledDays:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 7
+        currentStreak:
+          type: integer
+        bestStreak:
+          type: integer
+        isActive:
+          type: boolean
+        reminderTime:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    HabitLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        habitId:
+          type: string
+        userId:
+          type: string
+        logDate:
+          type: string
+          format: date
+          example: "2026-11-17"
+        completedValue:
+          type: number
+        isCompleted:
+          type: boolean
+        energyLevel:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+        moodTag:
+          type: string
+          enum: [focused, motivated, calm, tired, stressed]
+          nullable: true
+        journalEntry:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+paths:
+  /auth/register:
+    post:
+      summary: Registro de nuevo usuario
+      tags: [Autenticación]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, fullName]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 6
+                fullName:
+                  type: string
+                timezone:
+                  type: string
+                  default: UTC
+                themePreference:
+                  type: string
+                  enum: [DARK, LIGHT]
+                  default: DARK
+      responses:
+        '201':
+          description: Usuario registrado exitosamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Datos de entrada inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: El correo ya existe.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: Inicio de sesión
+      tags: [Autenticación]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Inicio de sesión correcto con token Bearer.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Credenciales incorrectas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      summary: Obtener perfil del usuario autenticado
+      tags: [Autenticación]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Datos del usuario autenticado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Token no provisto o inválido.
+
+  /categories:
+    get:
+      summary: Listar categorías globales y propias
+      tags: [Categorías]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista de categorías accesibles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+    post:
+      summary: Crear categoría personalizada
+      tags: [Categorías]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                iconName:
+                  type: string
+                colorHex:
+                  type: string
+      responses:
+        '201':
+          description: Categoría creada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  category:
+                    $ref: '#/components/schemas/Category'
+
+  /habits:
+    get:
+      summary: Listar hábitos del usuario autenticado
+      tags: [Hábitos]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: activeOnly
+          schema:
+            type: boolean
+          description: Filtrar solo hábitos activos
+      responses:
+        '200':
+          description: Colección de hábitos del usuario.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  habits:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Habit'
+    post:
+      summary: Crear un nuevo hábito
+      tags: [Hábitos]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, categoryId]
+              properties:
+                title:
+                  type: string
+                categoryId:
+                  type: integer
+                targetValue:
+                  type: number
+                  default: 1
+                unitLabel:
+                  type: string
+                  default: veces
+                scheduledDays:
+                  type: array
+                  items:
+                    type: integer
+                  example: [1, 2, 3, 4, 5]
+                reminderTime:
+                  type: string
+                  example: "08:00"
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Hábito creado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  habit:
+                    $ref: '#/components/schemas/Habit'
+
+  /habits/{id}:
+    get:
+      summary: Obtener un hábito por ID
+      tags: [Hábitos]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalle del hábito.
+        '404':
+          description: Hábito no encontrado o no pertenece al usuario.
+    put:
+      summary: Actualizar un hábito
+      tags: [Hábitos]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                categoryId:
+                  type: integer
+                targetValue:
+                  type: number
+                unitLabel:
+                  type: string
+                scheduledDays:
+                  type: array
+                  items:
+                    type: integer
+                isActive:
+                  type: boolean
+                reminderTime:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Hábito actualizado.
+        '404':
+          description: Hábito no encontrado o no autorizado.
+    delete:
+      summary: Eliminar un hábito (eliminación lógica)
+      tags: [Hábitos]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Hábito eliminado.
+        '404':
+          description: Hábito no encontrado.
+
+  /logs:
+    get:
+      summary: Consultar registros diarios de hábitos
+      tags: [Seguimiento y Progreso]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: habitId
+          schema:
+            type: string
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Lista de registros diarios.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HabitLog'
+    post:
+      summary: Registrar o actualizar cumplimiento de un hábito (Upsert diario)
+      tags: [Seguimiento y Progreso]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [habitId, logDate]
+              properties:
+                habitId:
+                  type: string
+                logDate:
+                  type: string
+                  format: date
+                  example: "2026-11-17"
+                completedValue:
+                  type: number
+                isCompleted:
+                  type: boolean
+                energyLevel:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                moodTag:
+                  type: string
+                  enum: [focused, motivated, calm, tired, stressed]
+                journalEntry:
+                  type: string
+      responses:
+        '200':
+          description: Progreso actualizado exitosamente.
+        '201':
+          description: Progreso registrado exitosamente.
+        '404':
+          description: Hábito no encontrado o no pertenece al usuario.
+
+  /logs/{id}:
+    delete:
+      summary: Eliminar un registro de seguimiento
+      tags: [Seguimiento y Progreso]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Registro eliminado correctamente.
+        '404':
+          description: Registro no encontrado.
