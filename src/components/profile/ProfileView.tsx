@@ -10,9 +10,11 @@ import {
   Sun,
   Moon,
 } from 'lucide-react';
-import { BioluminescentThemeId, Category, EvaluatedBadge, Habit, User } from '../../types';
+import { BioluminescentThemeId, Category, EvaluatedBadge, Habit, HabitLog, User } from '../../types';
 import { detectBrowserTimezone, StorageService } from '../../services/storage';
+import { HealthWidgetsService } from '../../services/healthWidgets';
 import { CategoryManager } from './CategoryManager';
+import { HealthWidgetsSection } from './HealthWidgetsSection';
 import { ActionHint } from '../common/ActionHint';
 
 interface Props {
@@ -20,6 +22,7 @@ interface Props {
   badges: EvaluatedBadge[];
   categories: Category[];
   habits: Habit[];
+  logs?: HabitLog[];
   theme?: 'LIGHT' | 'DARK';
   onChangeTheme?: (theme: 'LIGHT' | 'DARK') => void;
   onCreateCategory: (data: {
@@ -63,6 +66,7 @@ export const ProfileView: React.FC<Props> = ({
   badges,
   categories,
   habits,
+  logs = [],
   theme = 'LIGHT',
   onChangeTheme,
   onCreateCategory,
@@ -134,6 +138,7 @@ export const ProfileView: React.FC<Props> = ({
             qualifyingHabitTitle: b.qualifyingHabitTitle,
           })),
         categories: allCategories,
+        healthWidgets: HealthWidgetsService.getHealthState(user.id, user.timezone),
       };
 
       const jsonString = JSON.stringify(backupPayload, null, 2);
@@ -164,6 +169,14 @@ export const ProfileView: React.FC<Props> = ({
           Perfil &amp; <em className="italic font-normal text-[#059669] dark:text-[#34d399]">configuración</em>
         </h1>
       </div>
+
+      {/* Health Widgets: Energy, Mood & Sleep */}
+      <HealthWidgetsSection
+        userId={user.id}
+        habits={habits}
+        logs={logs}
+        timezone={user.timezone}
+      />
 
       {/* Category Manager */}
       <CategoryManager

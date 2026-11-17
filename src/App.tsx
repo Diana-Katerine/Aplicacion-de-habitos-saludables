@@ -12,6 +12,7 @@ import {
   StreakMilestone,
 } from './services/streakMilestones';
 import { BadgesService } from './services/badges';
+import { HealthWidgetsService } from './services/healthWidgets';
 import { requestAiEncouragement } from './services/aiEncouragement';
 import {
   AdaptiveReminderSuggestion,
@@ -632,6 +633,7 @@ export default function App() {
   const handleResetData = () => {
     if (!user) return;
     StorageService.resetUserData(user.id);
+    HealthWidgetsService.resetHealthData(user.id);
     refreshData(user);
     addToast({
       type: 'info',
@@ -1066,6 +1068,7 @@ export default function App() {
             badges={badges}
             categories={categories}
             habits={allHabits}
+            logs={allLogs}
             onCreateCategory={handleCreateCategory}
             onUpdateCategory={handleUpdateCategory}
             onDeleteCategory={handleDeleteCategory}
