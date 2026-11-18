@@ -289,39 +289,39 @@ export const TodayView: React.FC<Props> = ({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Editorial Greeting Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-5 border-b border-[#ececec] dark:border-[#252e3a]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div className="min-w-0">
-          <span className="text-[14px] text-[#979799] dark:text-[#6f7a8a] block">{capitalizedDate}</span>
-          <h1 className="font-signifier font-normal text-[28px] sm:text-[36px] md:text-[42px] leading-[1.15] tracking-[-0.015em] text-[#17191c] dark:text-[#f1f5f9] mt-0.5 break-words">
-            {greeting}, <em className="italic font-normal chromatic-gradient-text">{firstName}</em>
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-400 block mb-1">{capitalizedDate}</span>
+          <h1 className="font-bold text-2xl sm:text-3xl md:text-4xl leading-tight tracking-tight text-slate-900 dark:text-white break-words">
+            {greeting}, <span className="text-indigo-600 dark:text-indigo-400">{firstName}</span>
           </h1>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={onOpenWeeklyReflection}
-            className="px-4 py-2.5 rounded-full bg-[#EEF2FF]/75 dark:bg-[#4F46E5]/15 hover:bg-[#E0E7FF] dark:hover:bg-[#4F46E5]/25 border border-[#4F46E5]/25 dark:border-[#818CF8]/30 text-[13px] font-medium text-[#4338CA] dark:text-[#a5b4fc] transition-colors inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+            className="min-h-[44px] px-4 py-2 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-sm font-medium text-slate-800 dark:text-slate-100 transition-colors inline-flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
           >
-            <Compass className="w-4 h-4" />
+            <Compass className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             <span>Reflexión semanal</span>
           </button>
 
           <button
             type="button"
             onClick={onOpenCreateModal}
-            className="btn-chromatic px-5 py-2.5 rounded-full text-white text-[13px] font-medium transition-all inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+            className="min-h-[44px] px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-all inline-flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 shadow-sm"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Nuevo hábito</span>
           </button>
         </div>
       </div>
 
       {/* Daily Grounding Focus Intent */}
-      <div className="space-y-2.5">
+      <div className="space-y-4">
         <DailyFocusCard
           focus={dailyFocus}
           onSaveFocus={onSaveFocus}
@@ -330,16 +330,16 @@ export const TodayView: React.FC<Props> = ({
         />
 
         {weeklyFocus && (
-          <div className="px-4 sm:px-5 py-2.5 rounded-[18px] sm:rounded-full bg-[#EEF2FF]/50 dark:bg-[#4F46E5]/10 border border-[#4F46E5]/15 dark:border-[#818CF8]/20 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-3 gap-y-1.5 text-[13px]">
-            <div className="flex items-start sm:items-center gap-2 min-w-0 flex-1">
-              <Compass className="w-3.5 h-3.5 text-[#4F46E5] dark:text-[#a5b4fc] shrink-0 mt-0.5 sm:mt-0" />
-              <span className="text-[#4338CA] dark:text-[#a5b4fc] font-medium shrink-0">Semana:</span>
-              <span className="text-[#17191c] dark:text-[#f1f5f9] break-words sm:truncate">{weeklyFocus.intent}</span>
+          <div className="p-4 sm:p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-4 gap-y-2 text-sm shadow-xs">
+            <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+              <Compass className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5 sm:mt-0" />
+              <span className="text-indigo-700 dark:text-indigo-300 font-semibold shrink-0">Meta Semanal:</span>
+              <span className="text-slate-800 dark:text-slate-200 break-words sm:truncate">{weeklyFocus.intent}</span>
             </div>
             <button
               type="button"
               onClick={onOpenWeeklyReflection}
-              className="text-[#4338CA] dark:text-[#a5b4fc] hover:underline underline-offset-4 whitespace-nowrap shrink-0 cursor-pointer font-medium ml-auto"
+              className="min-h-[36px] px-3 py-1 rounded-md text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ml-auto"
             >
               Revisar →
             </button>
@@ -348,29 +348,28 @@ export const TodayView: React.FC<Props> = ({
       </div>
 
       {/* Unified Single-Row Hairline Summary Bar */}
-      <div className="rounded-[24px] bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a] overflow-hidden">
-        <div className="h-1 w-full chromatic-accent-bar" />
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#ececec] dark:divide-[#252e3a]">
-          <div className="px-4 sm:px-6 py-4 min-w-0">
-            <div className="flex items-center justify-between gap-2 text-[13px]">
-              <span className="text-[#777b86] dark:text-[#9aa4b2]">Progreso de hoy</span>
-              <span className="font-medium text-[#047857] dark:text-[#34d399] tabular-nums shrink-0">
+      <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
+          <div className="p-6 min-w-0">
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="text-slate-600 dark:text-slate-400 font-medium">Progreso de hoy</span>
+              <span className="font-semibold text-emerald-700 dark:text-emerald-400 tabular-nums shrink-0">
                 {completedCount}/{totalScheduled}
               </span>
             </div>
-            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-              <span className="text-[28px] leading-none font-medium text-[#059669] dark:text-[#34d399] tracking-[-0.02em] tabular-nums">
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-400 tracking-tight tabular-nums">
                 {completionPercentage}%
               </span>
-              <span className="text-[12px] text-[#777b86] dark:text-[#9aa4b2]">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                 {completionPercentage === 100
                   ? 'Todo completado'
                   : `${totalScheduled - completedCount} pendientes`}
               </span>
             </div>
-            <div className="w-full h-1.5 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] mt-3 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 mt-3 overflow-hidden border border-slate-200 dark:border-slate-700">
               <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-[#10B981] via-[#06B6D4] to-[#6366F1]"
+                className="h-full rounded-full bg-emerald-600 dark:bg-emerald-500"
                 initial={{ width: 0 }}
                 animate={{ width: `${completionPercentage}%` }}
                 transition={{ duration: 0.45, ease: 'easeOut' }}
@@ -378,25 +377,25 @@ export const TodayView: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="px-4 sm:px-6 py-4 flex flex-col justify-center min-w-0">
-            <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2]">Racha activa</span>
-            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="text-[28px] leading-none font-medium text-[#EA580C] dark:text-[#fb923c] tracking-[-0.02em] tabular-nums inline-flex items-center gap-1.5">
-                <Flame className="w-5 h-5 text-[#EA580C] dark:text-[#fb923c] shrink-0" />
+          <div className="p-6 flex flex-col justify-center min-w-0">
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Racha activa</span>
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="text-3xl font-bold text-amber-700 dark:text-amber-400 tracking-tight tabular-nums inline-flex items-center gap-2">
+                <Flame className="w-6 h-6 text-amber-600 dark:text-amber-400 shrink-0" />
                 {maxStreak}
               </span>
-              <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2]">días consecutivos</span>
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">días consecutivos</span>
             </div>
           </div>
 
-          <div className="px-4 sm:px-6 py-4 flex flex-col justify-center min-w-0">
-            <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2]">Adherencia 7 días</span>
-            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="text-[28px] leading-none font-medium text-[#0284C7] dark:text-[#38bdf8] tracking-[-0.02em] tabular-nums">
+          <div className="p-6 flex flex-col justify-center min-w-0">
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Constancia 7 días</span>
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="text-3xl font-bold text-indigo-700 dark:text-indigo-400 tracking-tight tabular-nums">
                 {realWeeklyRate}%
               </span>
-              <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] tabular-nums">
-                {past7Totals.completed}/{past7Totals.scheduled} programados
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400 tabular-nums">
+                {past7Totals.completed}/{past7Totals.scheduled} metas
               </span>
             </div>
           </div>
@@ -464,38 +463,44 @@ export const TodayView: React.FC<Props> = ({
       </AnimatePresence>
 
       {/* Segmented Filter Bar & Habit List */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-1 p-1 rounded-full bg-[#f2f2f3] dark:bg-[#1b222b] self-start max-w-full overflow-x-auto">
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div role="tablist" aria-label="Filtrar hábitos" className="inline-flex items-center gap-1.5 p-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 self-start max-w-full overflow-x-auto">
             <button
               type="button"
+              role="tab"
+              aria-selected={filter === 'all'}
               onClick={() => setFilter('all')}
-              className={`px-3 sm:px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+              className={`min-h-[44px] px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                 filter === 'all'
-                  ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
-                  : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs border border-slate-200 dark:border-slate-600'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Todos ({totalScheduled})
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={filter === 'pending'}
               onClick={() => setFilter('pending')}
-              className={`px-3 sm:px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+              className={`min-h-[44px] px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                 filter === 'pending'
-                  ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
-                  : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs border border-slate-200 dark:border-slate-600'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Pendientes ({pendingHabits.length})
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={filter === 'completed'}
               onClick={() => setFilter('completed')}
-              className={`px-3 sm:px-4 py-1.5 rounded-full text-[13px] transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+              className={`min-h-[44px] px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                 filter === 'completed'
-                  ? 'bg-white dark:bg-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] font-medium shadow-xs'
-                  : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs border border-slate-200 dark:border-slate-600'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Completados ({completedCount})
@@ -503,8 +508,8 @@ export const TodayView: React.FC<Props> = ({
           </div>
 
           {orderSavedFlash && (
-            <span className="text-[13px] text-[#059669] dark:text-[#34d399] font-medium inline-flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 shrink-0" />
+            <span className="text-sm text-emerald-700 dark:text-emerald-400 font-semibold inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+              <Check className="w-4 h-4 shrink-0" />
               Secuencia guardada
             </span>
           )}
@@ -512,11 +517,11 @@ export const TodayView: React.FC<Props> = ({
 
         {/* Empty State */}
         {totalScheduled === 0 && (
-          <div className="rounded-[24px] bg-[#ECFDF5]/60 dark:bg-[#059669]/10 border border-[#059669]/18 dark:border-[#10b981]/25 p-6 sm:p-12 text-center flex flex-col items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-[#D1FAE5] dark:bg-[#059669]/25 flex items-center justify-center text-[#047857] dark:text-[#34d399] mb-4">
-              <Coffee className="w-6 h-6" />
+          <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 sm:p-12 text-center flex flex-col items-center justify-center shadow-sm">
+            <div className="w-14 h-14 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-4">
+              <Coffee className="w-7 h-7" />
             </div>
-            <h3 className="font-signifier font-normal text-[22px] sm:text-[26px] text-[#17191c] dark:text-[#f1f5f9]">
+            <h3 className="font-bold text-xl sm:text-2xl text-slate-900 dark:text-white">
               Día libre de hábitos programados
             </h3>
             <p className="text-[15px] text-[#5c616d] dark:text-[#9aa4b2] max-w-md mt-2 mb-6">
