@@ -424,21 +424,16 @@ export const TodayView: React.FC<Props> = ({
       {/* Single Blush Peach Editorial Celebration Banner when 100% completed */}
       <AnimatePresence>
         {isAllCompleted && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98, y: -8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            className="steep-card-peach p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#f2ceb8] dark:border-[#4a2d20]"
-          >
-            <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0">
-              <div className="w-11 h-11 rounded-full bg-[#059669] text-white flex items-center justify-center shrink-0">
-                <CheckCircle className="w-6 h-6" />
+          <div className="rounded-xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 shadow-sm">
+            <div className="flex items-start sm:items-center gap-4 min-w-0">
+              <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <CheckCircle className="w-6 h-6 stroke-[2.5]" />
               </div>
-              <div className="min-w-0">
-                <h4 className="font-signifier font-normal text-[20px] sm:text-[22px] leading-snug text-[#5d2a1a] dark:text-[#fbdac7]">
-                  Día completado al <em className="italic font-normal">100%</em>
+              <div className="min-w-0 space-y-1">
+                <h4 className="font-bold text-xl sm:text-2xl text-emerald-950 dark:text-emerald-100 tracking-tight">
+                  Día completado al 100%
                 </h4>
-                <p className="text-[13px] sm:text-[14px] text-[#5d2a1a]/85 dark:text-[#fbdac7]/80 mt-0.5">
+                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300 max-w-prose text-left">
                   Has completado todos tus rituales programados para hoy. Tu disciplina alimenta tu libertad.
                 </p>
               </div>
@@ -454,11 +449,11 @@ export const TodayView: React.FC<Props> = ({
                   colors: ['#059669', '#10b981', '#f59e0b', '#0284c7', '#fbe1d1'],
                 });
               }}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 rounded-full border border-[#5d2a1a] dark:border-[#fbdac7]/60 text-[#5d2a1a] dark:text-[#fbdac7] hover:bg-[#5d2a1a] hover:text-white dark:hover:bg-[#fbdac7] dark:hover:text-[#241814] text-[13px] font-medium transition-colors cursor-pointer shrink-0"
+              className="min-h-[44px] px-6 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 shadow-sm flex items-center justify-center"
             >
               Celebrar
             </button>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
@@ -524,21 +519,21 @@ export const TodayView: React.FC<Props> = ({
             <h3 className="font-bold text-xl sm:text-2xl text-slate-900 dark:text-white">
               Día libre de hábitos programados
             </h3>
-            <p className="text-[15px] text-[#5c616d] dark:text-[#9aa4b2] max-w-md mt-2 mb-6">
+            <p className="text-base font-normal text-slate-700 dark:text-slate-300 max-w-prose mt-2 mb-6">
               Hoy no tienes hábitos activos asignados para este día de la semana. Descansa o añade un nuevo ritual a tu rutina.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={onOpenTemplates}
-                className="px-5 py-2.5 rounded-full bg-white dark:bg-[#141920] hover:bg-[#E0F2FE] dark:hover:bg-[#0284C7]/15 border border-[#0284C7]/30 dark:border-[#38BDF8]/35 text-[14px] text-[#0369A1] dark:text-[#38bdf8] transition-colors cursor-pointer"
+                className="min-h-[44px] px-5 py-2.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-800 dark:text-slate-200 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
               >
                 Explorar plantillas
               </button>
               <button
                 type="button"
                 onClick={onOpenCreateModal}
-                className="btn-chromatic px-5 py-2.5 rounded-full text-white text-[14px] font-medium transition-all cursor-pointer"
+                className="min-h-[44px] px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-all cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
               >
                 + Crear hábito personalizado
               </button>
@@ -547,8 +542,8 @@ export const TodayView: React.FC<Props> = ({
         )}
 
         {totalScheduled > 0 && displayHabits.length === 0 && (
-          <div className="steep-card-mist p-10 text-center">
-            <p className="text-[15px] text-[#777b86] dark:text-[#9aa4b2]">
+          <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-10 text-center shadow-xs">
+            <p className="text-base font-medium text-slate-600 dark:text-slate-400">
               No hay hábitos en el filtro seleccionado ({filter === 'pending' ? 'pendientes' : 'completados'}).
             </p>
           </div>

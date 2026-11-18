@@ -236,7 +236,7 @@ export const Navbar: React.FC<Props> = ({
 
       {/* Mobile dropdown menu */}
       {user && mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#ececec] dark:border-[#252e3a] bg-white dark:bg-[#141920] px-4 py-4 space-y-1 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain">
+        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-4 space-y-1 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain">
           {[
             { route: 'today' as ViewRoute, label: 'Hoy', icon: Calendar },
             { route: 'habits' as ViewRoute, label: 'Mis Hábitos', icon: CheckSquare },
@@ -255,28 +255,29 @@ export const Navbar: React.FC<Props> = ({
                   onNavigate(item.route);
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full text-left px-4 py-2.5 rounded-full text-[15px] flex items-center gap-3 transition-colors cursor-pointer ${
+                className={`w-full min-h-[44px] text-left px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-3 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                   active
-                    ? 'bg-[#ECFDF5] dark:bg-[#059669]/20 text-[#047857] dark:text-[#34d399] font-medium'
-                    : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:bg-[#fafafb] dark:hover:bg-[#1b222b]'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-400 font-bold border border-indigo-200 dark:border-indigo-800'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="w-5 h-5 stroke-[2]" />
                 <span>{item.label}</span>
               </button>
             );
           })}
 
-          <div className="pt-3 mt-2 border-t border-[#ececec] dark:border-[#252e3a] space-y-2">
+          <div className="pt-3 mt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
             <button
               type="button"
               onClick={() => {
                 setMobileMenuOpen(false);
                 onOpenCreateModal();
               }}
-              className="w-full py-3 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-[14px] font-medium text-center cursor-pointer"
+              className="w-full min-h-[44px] py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 shadow-sm"
             >
-              + Nuevo hábito
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Nuevo hábito</span>
             </button>
             <button
               type="button"
@@ -284,7 +285,7 @@ export const Navbar: React.FC<Props> = ({
                 setMobileMenuOpen(false);
                 onLogout();
               }}
-              className="w-full py-2.5 rounded-full border border-[#ececec] dark:border-[#252e3a] text-[#b91c1c] dark:text-[#fca5a5] text-[14px] font-normal flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full min-h-[44px] py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-sm font-medium flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
             >
               <LogOut className="w-4 h-4" />
               <span>Cerrar sesión</span>
