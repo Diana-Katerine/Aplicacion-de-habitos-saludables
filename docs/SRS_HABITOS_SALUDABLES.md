@@ -176,26 +176,71 @@ La "Aplicación de Hábitos Saludables" es una plataforma digital integral e ind
 
 ---
 
-### 3.2. HISTORIAS DE USUARIO
+### 3.2. HISTORIAS DE USUARIO ORGANIZADAS POR MÓDULOS
+
+A continuación se presentan las historias de usuario agrupadas en sus módulos funcionales correspondientes, facilitando la planificación, trazabilidad y ejecución del proyecto:
+
+#### Módulo 1: Autenticación, Seguridad y Gestión de Cuenta
+Este módulo abarca el control de acceso, registro, verificación de credenciales, seguridad y administración del perfil del usuario.
 
 | ID | Historia de Usuario | Criterios de Validación | Valor / Prioridad / Estimación |
 | :--- | :--- | :--- | :--- |
-| **#1** | **Registro de usuario nuevo:** Como usuario nuevo quiero registrarme con mi nombre, correo y contraseña para crear un perfil único donde guardar mi progreso. | • Validación de formato de campos.<br>• Correo único en base de datos.<br>• Contraseña $\ge$ 6 caracteres cifrada con hash.<br>• Rol asignado "Usuario".<br>• Correo de confirmación con tolerancia a fallas. | **Valor:** Alto<br>**Prioridad:** Alta<br>**Estimación:** 3 días |
+| **#1** | **Registro de usuario nuevo:** Como usuario nuevo quiero registrarme con mi nombre, correo y contraseña para crear un perfil único donde guardar mi progreso. | • Validación de formato de campos.<br>• Correo único en base de datos.<br>• Contraseña $\ge$ 6 caracteres cifrada con hash (bcrypt/scrypt).<br>• Rol asignado "Usuario".<br>• Correo de confirmación con tolerancia a fallas. | **Valor:** Alto<br>**Prioridad:** Alta<br>**Estimación:** 3 días |
 | **#2** | **Inicio de sesión:** Como usuario quiero ingresar con mi correo y contraseña para acceder a mi panel diario de hábitos de forma segura. | • Autenticación contra base de datos.<br>• Mensaje genérico ante credenciales incorrectas.<br>• Generación de token JWT de acceso.<br>• Redirección inmediata al Dashboard.<br>• Enlace visible a recuperación de clave. | **Valor:** Alto<br>**Prioridad:** Alta<br>**Estimación:** 2 días |
-| **#3** | **Creación de hábito personalizado:** Como usuario activo quiero agregar un nuevo hábito con nombre, meta y categoría para iniciar el seguimiento. | • Campos obligatorios: nombre, meta numérica $> 0$, ícono y categoría.<br>• Relación con el usuario en la base de datos.<br>• Aparición inmediata en el panel del día. | **Valor:** Alto<br>**Prioridad:** Alta<br>**Estimación:** 3 días |
-| **#4** | **Registro de progreso diario (Check-in):** Como usuario ocupado quiero presionar un botón junto a mi hábito para marcarlo como completado en el día de forma instantánea. | • Cambio visual a completado en $< 2$ segundos.<br>• Registro en tabla de seguimiento con fecha y hora.<br>• Prevención de duplicados del mismo día.<br>• Opción reversible (deshacer). | **Valor:** Alto<br>**Prioridad:** Alta<br>**Estimación:** 4 días |
-| **#5** | **Visualización de rachas y estadísticas:** Como usuario quiero ver un gráfico visual y el número de días seguidos cumplidos para sentirme motivado. | • Cálculo exacto de días consecutivos con éxito total.<br>• Reinicio de racha ante días fallidos.<br>• Gráfico circular o de barra de avance diario. | **Valor:** Alto<br>**Prioridad:** Media<br>**Estimación:** 4 días |
-| **#6** | **Generación de consejo mediante IA:** Como usuario quiero recibir un consejo semanal con IA para saber en qué mejorar y mantener el impulso. | • Resumen de cumplimiento semanal anonimizado.<br>• Envío JSON HTTPS a la API de IA.<br>• Enfoque de bienestar general sin recetas médicas.<br>• Frases de respaldo automáticas si la API falla. | **Valor:** Alto<br>**Prioridad:** Media<br>**Estimación:** 5 días |
 | **#7** | **Recuperación de contraseña:** Como usuario que olvidó su clave quiero solicitar un enlace a mi correo para restablecer mi acceso. | • Mensaje neutro de confirmación protegiendo la existencia del correo.<br>• Código o token temporal de un solo uso.<br>• Cifrado de la nueva contraseña. | **Valor:** Alto<br>**Prioridad:** Alta<br>**Estimación:** 3 días |
 | **#8** | **Edición del perfil personal:** Como usuario quiero actualizar mi nombre o foto de perfil para mantener mis datos al día. | • Precarga de datos existentes.<br>• Nombre obligatorio y validación de imagen.<br>• Actualización persistente inmediata. | **Valor:** Medio<br>**Prioridad:** Baja<br>**Estimación:** 2 días |
+
+---
+
+#### Módulo 2: Gestión y Configuración de Hábitos (CRUD y Categorías)
+Este módulo gestiona la creación, mantenimiento, categorización y ciclo de vida de los hábitos personalizados del usuario.
+
+| ID | Historia de Usuario | Criterios de Validación | Valor / Prioridad / Estimación |
+| :--- | :--- | :--- | :--- |
+| **#3** | **Creación de hábito personalizado:** Como usuario activo quiero agregar un nuevo hábito con nombre, meta y categoría para iniciar el seguimiento. | • Campos obligatorios: nombre, meta numérica $> 0$, ícono y categoría.<br>• Relación con el usuario en la base de datos.<br>• Aparición inmediata en el panel del día. | **Valor:** Alto<br>**Prioridad:** Alta<br>**Estimación:** 3 días |
 | **#9** | **Edición de hábito existente:** Como usuario quiero modificar los datos de mi hábito para ajustar mis metas si cambian mis exigencias. | • Modificación de título, meta, unidad o categoría.<br>• Los cambios solo aplican a registros futuros, conservando el historial.<br>• Actualización en base de datos. | **Valor:** Alto<br>**Prioridad:** Alta<br>**Estimación:** 3 días |
 | **#10** | **Eliminación o pausa de hábito:** Como usuario quiero pausar o eliminar un hábito que ya no realizaré para organizar mi lista. | • Confirmación previa de seguridad.<br>• Borrado lógico (ocultamiento sin perder historial).<br>• Los hábitos pausados no afectan rachas activas. | **Valor:** Alto<br>**Prioridad:** Media<br>**Estimación:** 2 días |
 | **#11** | **Categorización de hábitos:** Como usuario quiero asignar una categoría para tener mi panel ordenado por áreas de salud. | • Selector de categorías (Físico, Nutrición, Mental).<br>• Catálogo relacional y agrupación visual en el panel. | **Valor:** Medio<br>**Prioridad:** Baja<br>**Estimación:** 2 días |
-| **#12** | **Visualización de calendario histórico:** Como usuario quiero ver un calendario con indicadores de colores para conocer mi constancia mensual. | • Agrupación histórica por fecha.<br>• Puntos indicadores de días exitosos vs. incompletos.<br>• Navegación entre meses pasados. | **Valor:** Alto<br>**Prioridad:** Media<br>**Estimación:** 4 días |
-| **#13** | **Configuración de recordatorios diarios:** Como usuario quiero programar una hora para recibir alertas locales antes de terminar el día. | • Selector de hora en configuración.<br>• Solicitud de permisos del navegador.<br>• Notificación local programada en el cliente. | **Valor:** Alto<br>**Prioridad:** Media<br>**Estimación:** 3 días |
-| **#14** | **Historial de consejos de la IA:** Como usuario quiero acceder a la lista de consejos previos recibidos para releer sugerencias valiosas. | • Almacenamiento de cada mensaje generado.<br>• Listado cronológico descendente.<br>• Opción de eliminar consejos específicos. | **Valor:** Medio<br>**Prioridad:** Baja<br>**Estimación:** 3 días |
-| **#15** | **Modo Oscuro:** Como usuario nocturno quiero cambiar la interfaz a modo oscuro para descansar la vista. | • Conmutador visual instantáneo.<br>• Persistencia local de la preferencia en el dispositivo. | **Valor:** Medio<br>**Prioridad:** Baja<br>**Estimación:** 2 días |
+
+---
+
+#### Módulo 3: Seguimiento Diario y Check-in (Panel / Dashboard)
+Este módulo comprende la interacción del día a día, permitiendo al usuario registrar o corregir de forma ágil el cumplimiento de sus metas diarias.
+
+| ID | Historia de Usuario | Criterios de Validación | Valor / Prioridad / Estimación |
+| :--- | :--- | :--- | :--- |
+| **#4** | **Registro de progreso diario (Check-in):** Como usuario ocupado quiero presionar un botón junto a mi hábito para marcarlo como completado en el día de forma instantánea. | • Cambio visual a completado en $< 2$ segundos.<br>• Registro en tabla de seguimiento con fecha y hora.<br>• Prevención de duplicados del mismo día.<br>• Opción reversible (deshacer). | **Valor:** Alto<br>**Prioridad:** Alta<br>**Estimación:** 4 días |
 | **#16** | **Deshacer check-in por error:** Como usuario quiero poder revertir un hábito marcado accidentalmente. | • Reversión inmediata a estado pendiente al tocar hábito completado.<br>• Eliminación del registro diario en base de datos.<br>• Recálculo automático de gráficos y racha. | **Valor:** Alto<br>**Prioridad:** Alta<br>**Estimación:** 2 días |
+
+---
+
+#### Módulo 4: Estadísticas, Progreso Histórico y Visualización
+Este módulo calcula indicadores de consistencia, rachas consecutivas y despliega componentes gráficos y calendarios históricos.
+
+| ID | Historia de Usuario | Criterios de Validación | Valor / Prioridad / Estimación |
+| :--- | :--- | :--- | :--- |
+| **#5** | **Visualización de rachas y estadísticas:** Como usuario quiero ver un gráfico visual y el número de días seguidos cumplidos para sentirme motivado. | • Cálculo exacto de días consecutivos con éxito total.<br>• Reinicio de racha ante días fallidos.<br>• Gráfico circular o de barra de avance diario. | **Valor:** Alto<br>**Prioridad:** Media<br>**Estimación:** 4 días |
+| **#12** | **Visualización de calendario histórico:** Como usuario quiero ver un calendario con indicadores de colores para conocer mi constancia mensual. | • Agrupación histórica por fecha.<br>• Puntos indicadores de días exitosos vs. incompletos.<br>• Navegación entre meses pasados. | **Valor:** Alto<br>**Prioridad:** Media<br>**Estimación:** 4 días |
+
+---
+
+#### Módulo 5: Asistente Motivacional e Inteligencia Artificial
+Este módulo orquesta la generación de retroalimentación semanal con IA, el repositorio histórico de mensajes y el mecanismo de respaldo.
+
+| ID | Historia de Usuario | Criterios de Validación | Valor / Prioridad / Estimación |
+| :--- | :--- | :--- | :--- |
+| **#6** | **Generación de consejo mediante IA:** Como usuario quiero recibir un consejo semanal con IA para saber en qué mejorar y mantener el impulso. | • Resumen de cumplimiento semanal anonimizado.<br>• Envío JSON HTTPS a la API de IA.<br>• Enfoque de bienestar general sin recetas médicas.<br>• Frases de respaldo automáticas si la API falla. | **Valor:** Alto<br>**Prioridad:** Media<br>**Estimación:** 5 días |
+| **#14** | **Historial de consejos de la IA:** Como usuario quiero acceder a la lista de consejos previos recibidos para releer sugerencias valiosas. | • Almacenamiento de cada mensaje generado.<br>• Listado cronológico descendente.<br>• Opción de eliminar consejos específicos. | **Valor:** Medio<br>**Prioridad:** Baja<br>**Estimación:** 3 días |
+
+---
+
+#### Módulo 6: Personalización, Notificaciones y Experiencia de Usuario
+Este módulo engloba las preferencias de interfaz visual (tema) y la programación de recordatorios locales.
+
+| ID | Historia de Usuario | Criterios de Validación | Valor / Prioridad / Estimación |
+| :--- | :--- | :--- | :--- |
+| **#13** | **Configuración de recordatorios diarios:** Como usuario quiero programar una hora para recibir alertas locales antes de terminar el día. | • Selector de hora en configuración.<br>• Solicitud de permisos del navegador.<br>• Notificación local programada en el cliente. | **Valor:** Alto<br>**Prioridad:** Media<br>**Estimación:** 3 días |
+| **#15** | **Modo Oscuro:** Como usuario nocturno quiero cambiar la interfaz a modo oscuro para descansar la vista. | • Conmutador visual instantáneo.<br>• Persistencia local de la preferencia en el dispositivo. | **Valor:** Medio<br>**Prioridad:** Baja<br>**Estimación:** 2 días |
 
 ---
 
