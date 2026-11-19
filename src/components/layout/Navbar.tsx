@@ -167,13 +167,21 @@ export const Navbar: React.FC<Props> = ({
                   type="button"
                   onClick={() => onNavigate('profile')}
                   aria-label="Perfil y configuración"
-                  className={`min-h-[44px] min-w-[44px] rounded-lg bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-sm font-bold flex items-center justify-center transition-all shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
+                  className={`min-h-[44px] min-w-[44px] rounded-lg bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-sm font-bold flex items-center justify-center transition-all shrink-0 cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                     currentRoute === 'profile'
                       ? 'ring-2 ring-indigo-600 ring-offset-2'
                       : ''
                   }`}
                 >
-                  {user.fullName.charAt(0).toUpperCase()}
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    user.fullName.charAt(0).toUpperCase()
+                  )}
                 </button>
               </ActionHint>
 

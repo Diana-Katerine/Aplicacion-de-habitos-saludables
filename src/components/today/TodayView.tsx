@@ -408,6 +408,7 @@ export const TodayView: React.FC<Props> = ({
       {/* AI Personalized Encouragement */}
       {onRefreshEncouragement && (
         <AiEncouragementCard
+          userId={user.id}
           encouragement={aiEncouragement}
           isLoading={isEncouragementLoading}
           error={encouragementError}

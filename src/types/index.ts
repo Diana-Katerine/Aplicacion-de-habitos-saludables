@@ -88,6 +88,7 @@ export interface User {
   themePreference: 'DARK' | 'LIGHT';
   role: 'USER' | 'ADMIN';
   createdAt: string;
+  avatarUrl?: string;
   reminderEnabled?: boolean;
   reminderMorningTime?: string;
   reminderEveningTime?: string;
@@ -207,6 +208,7 @@ export type EncouragementTrigger =
   | 'manual_boost';
 
 export interface AiEncouragementMessage {
+  id?: string;
   headline: string;
   message: string;
   microAction: string;

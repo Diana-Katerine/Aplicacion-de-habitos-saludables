@@ -108,6 +108,8 @@ const STORAGE_KEYS = {
   CUSTOM_CHALLENGES: 'lm_custom_challenges',
   KNOWN_ACCOUNTS: 'lm_known_accounts',
   DEMO_SEED_VERSION: 'lm_demo_seed_version',
+  AI_ENCOURAGEMENT_HISTORY: 'impulso_diario_ai_history',
+  PASSWORD_RESETS: 'impulso_diario_password_resets',
 };
 
 export const DEMO_USER_ID = 'user-demo-1';
@@ -2025,5 +2027,125 @@ export class StorageService {
       localStorage.removeItem('lm_unlocked_badges');
     }
     this.initializeSeedData(userId, true, timezone);
+  }
+
+  // --- Password Reset Simulation (HU #7) ---
+  static createPasswordResetToken(email: string): { code: string; expiresAt: number } {
+    const key = email.trim().toLowerCase();
+    // Generate 6-digit verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes validity
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.PASSWORD_RESETS);
+      const resets = raw ? JSON.parse(raw) : {};
+      resets[key] = { code, expiresAt };
+      localStorage.setItem(STORAGE_KEYS.PASSWORD_RESETS, JSON.stringify(resets));
+    } catch (e) {
+      console.error('Error saving password reset request:', e);
+    }
+    return { code, expiresAt };
+  }
+
+  static validateAndResetPassword(
+    email: string,
+    code: string,
+    newPassword: string
+  ): { success: boolean; error?: string } {
+    const key = email.trim().toLowerCase();
+    if (!key) return { success: false, error: 'Correo inválido.' };
+    if (!newPassword || newPassword.trim().length < 6) {
+      return { success: false, error: 'La nueva contraseña debe tener al menos 6 caracteres.' };
+    }
+
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.PASSWORD_RESETS);
+      const resets = raw ? JSON.parse(raw) : {};
+      const record = resets[key];
+
+      if (!record) {
+        return { success: false, error: 'No se encontró una solicitud activa de recuperación para este correo.' };
+      }
+
+      if (Date.now() > record.expiresAt) {
+        delete resets[key];
+        localStorage.setItem(STORAGE_KEYS.PASSWORD_RESETS, JSON.stringify(resets));
+        return { success: false, error: 'El código de verificación ha expirado. Solicita uno nuevo.' };
+      }
+
+      if (record.code !== code.trim()) {
+        return { success: false, error: 'El código de verificación es incorrecto.' };
+      }
+
+      // Successful verification: consume token and update known account profile
+      delete resets[key];
+      localStorage.setItem(STORAGE_KEYS.PASSWORD_RESETS, JSON.stringify(resets));
+
+      const accounts = this.getKnownAccounts();
+      if (accounts[key]) {
+        accounts[key].updatedAt = new Date().toISOString();
+        localStorage.setItem(STORAGE_KEYS.KNOWN_ACCOUNTS, JSON.stringify(accounts));
+      }
+
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Error al procesar el cambio de contraseña.' };
+    }
+  }
+
+  // --- AI Encouragement Advice History (HU #14) ---
+  static getAiEncouragementHistory(userId: string): import('../types').AiEncouragementMessage[] {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.AI_ENCOURAGEMENT_HISTORY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw) as Record<string, import('../types').AiEncouragementMessage[]>;
+      return parsed[userId] || [];
+    } catch {
+      return [];
+    }
+  }
+
+  static saveAiEncouragementToHistory(
+    userId: string,
+    message: import('../types').AiEncouragementMessage
+  ): void {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.AI_ENCOURAGEMENT_HISTORY);
+      const parsed = raw ? (JSON.parse(raw) as Record<string, import('../types').AiEncouragementMessage[]>) : {};
+      const userList = parsed[userId] || [];
+
+      const withId: import('../types').AiEncouragementMessage = {
+        ...message,
+        id: message.id || `ai-msg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      };
+
+      // Avoid duplicates with the exact same headline and timestamp
+      const isDuplicate = userList.some(
+        (m) => m.headline === withId.headline && m.generatedAt === withId.generatedAt
+      );
+      if (!isDuplicate) {
+        userList.unshift(withId); // Most recent first
+        // Limit history to 50 items to keep storage lean
+        if (userList.length > 50) {
+          userList.length = 50;
+        }
+        parsed[userId] = userList;
+        localStorage.setItem(STORAGE_KEYS.AI_ENCOURAGEMENT_HISTORY, JSON.stringify(parsed));
+      }
+    } catch (e) {
+      console.error('Error saving AI encouragement history:', e);
+    }
+  }
+
+  static deleteAiEncouragementFromHistory(userId: string, messageId: string): void {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.AI_ENCOURAGEMENT_HISTORY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as Record<string, import('../types').AiEncouragementMessage[]>;
+      if (!parsed[userId]) return;
+      parsed[userId] = parsed[userId].filter((m) => m.id !== messageId);
+      localStorage.setItem(STORAGE_KEYS.AI_ENCOURAGEMENT_HISTORY, JSON.stringify(parsed));
+    } catch (e) {
+      console.error('Error deleting AI encouragement from history:', e);
+    }
   }
 }
