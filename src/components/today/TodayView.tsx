@@ -63,6 +63,7 @@ interface SortableHabitItemProps {
   activeMilestone?: StreakMilestone | null;
   onDismissMilestone?: (habitId: string, milestoneDays: number) => void;
   onReplayMilestone?: (habitId: string, milestone: StreakMilestone) => void;
+  onApplyReminderTime?: (habitId: string, newReminderTime: string) => void;
 }
 
 const SortableHabitItem: React.FC<SortableHabitItemProps> = ({
@@ -78,6 +79,7 @@ const SortableHabitItem: React.FC<SortableHabitItemProps> = ({
   activeMilestone = null,
   onDismissMilestone,
   onReplayMilestone,
+  onApplyReminderTime,
 }) => {
   const dragControls = useDragControls();
 
@@ -108,6 +110,7 @@ const SortableHabitItem: React.FC<SortableHabitItemProps> = ({
         activeMilestone={activeMilestone}
         onDismissMilestone={onDismissMilestone}
         onReplayMilestone={onReplayMilestone}
+        onApplyReminderTime={onApplyReminderTime}
       />
     </Reorder.Item>
   );
@@ -572,6 +575,7 @@ export const TodayView: React.FC<Props> = ({
                 activeMilestone={celebratingMilestones[habit.id] || null}
                 onDismissMilestone={onDismissMilestone}
                 onReplayMilestone={onReplayMilestone}
+                onApplyReminderTime={onApplyReminderTime}
               />
             ))}
           </Reorder.Group>

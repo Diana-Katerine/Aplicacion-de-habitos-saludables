@@ -21,6 +21,7 @@ import {
   Crown,
   X,
   BatteryCharging,
+  Clock,
 } from 'lucide-react';
 import { HabitWithTodayLog } from '../../types';
 import { CategoryIcon } from '../common/CategoryIcon';
@@ -49,6 +50,7 @@ interface Props {
   activeMilestone?: StreakMilestone | null;
   onDismissMilestone?: (habitId: string, milestoneDays: number) => void;
   onReplayMilestone?: (habitId: string, milestone: StreakMilestone) => void;
+  onApplyReminderTime?: (habitId: string, newReminderTime: string) => void;
 }
 
 const MILESTONE_STYLES: Record<
@@ -162,9 +164,12 @@ export const HabitCard: React.FC<Props> = ({
   activeMilestone = null,
   onDismissMilestone,
   onReplayMilestone,
+  onApplyReminderTime,
 }) => {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [notesExpanded, setNotesExpanded] = React.useState(false);
+  const [isEditingReminder, setIsEditingReminder] = React.useState(false);
+  const [tempReminderTime, setTempReminderTime] = React.useState(habit.reminderTime || '');
   const isCompleted = habit.todayLog?.isCompleted ?? false;
   const completedValue = habit.todayLog?.completedValue ?? 0;
   const targetValue = habit.targetValue;
@@ -356,12 +361,64 @@ export const HabitCard: React.FC<Props> = ({
               <span className="font-semibold text-indigo-700 dark:text-indigo-400">
                 {habit.category.name}
               </span>
-              {habit.reminderTime && (
+              {onApplyReminderTime ? (
+                <button
+                  type="button"
+                  onClick={() => setIsEditingReminder((v) => !v)}
+                  title="Cambiar hora de recordatorio"
+                  className="inline-flex items-center gap-1 font-mono tabular-nums text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline cursor-pointer"
+                >
+                  <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  <span>{habit.reminderTime ? habit.reminderTime : '+ Hora aviso'}</span>
+                </button>
+              ) : habit.reminderTime ? (
                 <span className="font-mono tabular-nums text-slate-500 dark:text-slate-400">
                   · {habit.reminderTime}
                 </span>
-              )}
+              ) : null}
             </div>
+
+            {isEditingReminder && onApplyReminderTime && (
+              <div className="mt-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Hora:</span>
+                <input
+                  type="time"
+                  value={tempReminderTime}
+                  onChange={(e) => setTempReminderTime(e.target.value)}
+                  className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs font-medium dark:[color-scheme:dark]"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    onApplyReminderTime(habit.id, tempReminderTime);
+                    setIsEditingReminder(false);
+                  }}
+                  className="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium cursor-pointer"
+                >
+                  Guardar
+                </button>
+                {habit.reminderTime && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onApplyReminderTime(habit.id, '');
+                      setTempReminderTime('');
+                      setIsEditingReminder(false);
+                    }}
+                    className="px-2 py-1 rounded text-rose-600 hover:text-rose-700 dark:text-rose-400 text-xs font-medium cursor-pointer"
+                  >
+                    Quitar
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsEditingReminder(false)}
+                  className="px-2 py-1 rounded text-slate-500 hover:text-slate-700 dark:text-slate-400 text-xs cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
 
             {deepWork && onOpenAmbientFocus ? (
               <button
