@@ -107,7 +107,7 @@ export const DailyFocusCard: React.FC<Props> = ({
               <p
                 className={`text-lg sm:text-xl font-bold tracking-tight break-words transition-colors ${
                   focus.isCompleted
-                    ? 'text-slate-500 dark:text-slate-400 line-through'
+                    ? 'text-emerald-800 dark:text-emerald-300'
                     : 'text-slate-900 dark:text-white'
                 }`}
               >

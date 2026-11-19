@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import confetti from 'canvas-confetti';
 import { AiEncouragementMessage, AiHabitSuggestion, Challenge, DailyFocus, EnergyLevel, EvaluatedBadge, Habit, HabitLog, HabitWithTodayLog, MoodTag, User, ViewRoute, WeeklyFocus } from './types';
 import { StorageService, getSundayWeekKey, getTodayDateString, isTodaySunday } from './services/storage';
@@ -23,17 +23,19 @@ import {
 } from './services/reminders';
 import { Navbar } from './components/layout/Navbar';
 import { TodayView } from './components/today/TodayView';
-import { HabitsView } from './components/habits/HabitsView';
-import { StatsView } from './components/stats/StatsView';
-import { ChallengesView } from './components/challenges/ChallengesView';
-import { TemplatesView } from './components/templates/TemplatesView';
-import { ProfileView } from './components/profile/ProfileView';
-import { LandingPage } from './components/landing/LandingPage';
 import { HabitModal, JournalSavePayload } from './components/habits/HabitModal';
 import { getMoodMeta } from './services/journaling';
 import { AuthModal } from './components/auth/AuthModal';
 import { WeeklyReflectionModal } from './components/today/WeeklyReflectionModal';
 import { ToastContainer, ToastMessage } from './components/common/Toast';
+
+// Lazy loading de vistas secundarias para optimizar el rendimiento y bundle inicial en intranet
+const LandingPage = lazy(() => import('./components/landing/LandingPage').then(m => ({ default: m.LandingPage })));
+const HabitsView = lazy(() => import('./components/habits/HabitsView').then(m => ({ default: m.HabitsView })));
+const StatsView = lazy(() => import('./components/stats/StatsView').then(m => ({ default: m.StatsView })));
+const ChallengesView = lazy(() => import('./components/challenges/ChallengesView').then(m => ({ default: m.ChallengesView })));
+const TemplatesView = lazy(() => import('./components/templates/TemplatesView').then(m => ({ default: m.TemplatesView })));
+const ProfileView = lazy(() => import('./components/profile/ProfileView').then(m => ({ default: m.ProfileView })));
 
 const THEME_STORAGE_KEY = 'impulso_diario_theme';
 
@@ -899,184 +901,195 @@ export default function App() {
             : 'flex-1 max-w-[1200px] w-full min-w-0 mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-10'
         }
       >
-        {currentRoute === 'landing' && !user && (
-          <LandingPage
-            isDark={theme === 'DARK'}
-            onStartFree={() => {
-              setAuthMode('register');
-              setIsAuthModalOpen(true);
-            }}
-            onLogin={() => {
-              setAuthMode('login');
-              setIsAuthModalOpen(true);
-            }}
-            onTryDemo={handleTryDemo}
-          />
-        )}
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center min-h-[300px] py-16">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Cargando vista...</span>
+              </div>
+            </div>
+          }
+        >
+          {currentRoute === 'landing' && !user && (
+            <LandingPage
+              isDark={theme === 'DARK'}
+              onStartFree={() => {
+                setAuthMode('register');
+                setIsAuthModalOpen(true);
+              }}
+              onLogin={() => {
+                setAuthMode('login');
+                setIsAuthModalOpen(true);
+              }}
+              onTryDemo={handleTryDemo}
+            />
+          )}
 
-        {user && currentRoute === 'today' && (
-          <TodayView
-            user={user}
-            habits={todayHabits}
-            dailyFocus={dailyFocus}
-            weeklyFocus={weeklyFocus}
-            onSaveFocus={handleSaveFocus}
-            onToggleFocusComplete={handleToggleFocusComplete}
-            onClearFocus={handleClearFocus}
-            onOpenWeeklyReflection={() => setIsWeeklyReflectionOpen(true)}
-            onApplyReminderTime={handleApplyReminderTime}
-            onTriggerPushAlert={handleTriggerPushAlert}
-            onCheckIn={handleCheckIn}
-            onOpenCreateModal={() => {
-              setHabitToEdit(null);
-              setIsHabitModalOpen(true);
-            }}
-            onOpenTemplates={() => setCurrentRoute('templates')}
-            onEditHabit={(h) => {
-              setHabitToEdit(h);
-              setIsHabitModalOpen(true);
-            }}
-            onTogglePause={handleTogglePause}
-            onDeleteHabit={handleDeleteHabit}
-            onReorderHabits={handleReorderHabits}
-            aiEncouragement={aiEncouragement}
-            isEncouragementLoading={isEncouragementLoading}
-            encouragementError={encouragementError}
-            onRefreshEncouragement={() => {
-              if (!user) return;
-              void triggerAiEncouragement({
-                activeUser: user,
-                habitsList: todayHabits,
-                focus: dailyFocus,
-                trigger: 'manual_boost',
-                forceRefresh: true,
-              });
-            }}
-            celebratingMilestones={celebratingMilestones}
-            onDismissMilestone={(habitId, milestoneDays) => {
-              if (user) {
-                dismissMilestoneToday(user.id, habitId, milestoneDays, user.timezone);
-              }
-              setCelebratingMilestones((prev) => {
-                const next = { ...prev };
-                delete next[habitId];
-                return next;
-              });
-            }}
-            onReplayMilestone={(habitId, milestone) => {
-              if (user) {
-                clearDismissedMilestoneToday(user.id, habitId, user.timezone);
-              }
-              setCelebratingMilestones((prev) => ({
-                ...prev,
-                [habitId]: milestone,
-              }));
-              try {
-                confetti({
-                  particleCount: 45,
-                  spread: 55,
-                  origin: { y: 0.65 },
-                  colors: ['#10b981', '#8b5cf6', '#f59e0b', '#06b6d4', '#f43f5e'],
+          {user && currentRoute === 'today' && (
+            <TodayView
+              user={user}
+              habits={todayHabits}
+              dailyFocus={dailyFocus}
+              weeklyFocus={weeklyFocus}
+              onSaveFocus={handleSaveFocus}
+              onToggleFocusComplete={handleToggleFocusComplete}
+              onClearFocus={handleClearFocus}
+              onOpenWeeklyReflection={() => setIsWeeklyReflectionOpen(true)}
+              onApplyReminderTime={handleApplyReminderTime}
+              onTriggerPushAlert={handleTriggerPushAlert}
+              onCheckIn={handleCheckIn}
+              onOpenCreateModal={() => {
+                setHabitToEdit(null);
+                setIsHabitModalOpen(true);
+              }}
+              onOpenTemplates={() => setCurrentRoute('templates')}
+              onEditHabit={(h) => {
+                setHabitToEdit(h);
+                setIsHabitModalOpen(true);
+              }}
+              onTogglePause={handleTogglePause}
+              onDeleteHabit={handleDeleteHabit}
+              onReorderHabits={handleReorderHabits}
+              aiEncouragement={aiEncouragement}
+              isEncouragementLoading={isEncouragementLoading}
+              encouragementError={encouragementError}
+              onRefreshEncouragement={() => {
+                if (!user) return;
+                void triggerAiEncouragement({
+                  activeUser: user,
+                  habitsList: todayHabits,
+                  focus: dailyFocus,
+                  trigger: 'manual_boost',
+                  forceRefresh: true,
                 });
-              } catch {
-                // ignore confetti errors
-              }
-            }}
-          />
-        )}
+              }}
+              celebratingMilestones={celebratingMilestones}
+              onDismissMilestone={(habitId, milestoneDays) => {
+                if (user) {
+                  dismissMilestoneToday(user.id, habitId, milestoneDays, user.timezone);
+                }
+                setCelebratingMilestones((prev) => {
+                  const next = { ...prev };
+                  delete next[habitId];
+                  return next;
+                });
+              }}
+              onReplayMilestone={(habitId, milestone) => {
+                if (user) {
+                  clearDismissedMilestoneToday(user.id, habitId, user.timezone);
+                }
+                setCelebratingMilestones((prev) => ({
+                  ...prev,
+                  [habitId]: milestone,
+                }));
+                try {
+                  confetti({
+                    particleCount: 45,
+                    spread: 55,
+                    origin: { y: 0.65 },
+                    colors: ['#10b981', '#8b5cf6', '#f59e0b', '#06b6d4', '#f43f5e'],
+                  });
+                } catch {
+                  // ignore confetti errors
+                }
+              }}
+            />
+          )}
 
-        {user && currentRoute === 'habits' && (
-          <HabitsView
-            habits={allHabits}
-            categories={categories}
-            onOpenCreateModal={() => {
-              setHabitToEdit(null);
-              setIsHabitModalOpen(true);
-            }}
-            onOpenTemplates={() => setCurrentRoute('templates')}
-            onEditHabit={(h) => {
-              setHabitToEdit(h);
-              setIsHabitModalOpen(true);
-            }}
-            onTogglePause={handleTogglePause}
-            onDeleteHabit={handleDeleteHabit}
-          />
-        )}
+          {user && currentRoute === 'habits' && (
+            <HabitsView
+              habits={allHabits}
+              categories={categories}
+              onOpenCreateModal={() => {
+                setHabitToEdit(null);
+                setIsHabitModalOpen(true);
+              }}
+              onOpenTemplates={() => setCurrentRoute('templates')}
+              onEditHabit={(h) => {
+                setHabitToEdit(h);
+                setIsHabitModalOpen(true);
+              }}
+              onTogglePause={handleTogglePause}
+              onDeleteHabit={handleDeleteHabit}
+            />
+          )}
 
-        {user && currentRoute === 'challenges' && (
-          <ChallengesView
-            userId={user.id}
-            timezone={user.timezone}
-            habits={allHabits}
-            logs={allLogs}
-            dailyFocuses={allDailyFocuses}
-            categories={categories}
-            badges={badges}
-            joinedChallengeIds={joinedChallengeIds}
-            customChallenges={customChallenges}
-            onToggleJoin={handleToggleJoinChallenge}
-            onCreateCustomChallenge={handleCreateCustomChallenge}
-            onStepCustomChallenge={handleStepCustomChallenge}
-            onDeleteCustomChallenge={handleDeleteCustomChallenge}
-          />
-        )}
+          {user && currentRoute === 'challenges' && (
+            <ChallengesView
+              userId={user.id}
+              timezone={user.timezone}
+              habits={allHabits}
+              logs={allLogs}
+              dailyFocuses={allDailyFocuses}
+              categories={categories}
+              badges={badges}
+              joinedChallengeIds={joinedChallengeIds}
+              customChallenges={customChallenges}
+              onToggleJoin={handleToggleJoinChallenge}
+              onCreateCustomChallenge={handleCreateCustomChallenge}
+              onStepCustomChallenge={handleStepCustomChallenge}
+              onDeleteCustomChallenge={handleDeleteCustomChallenge}
+            />
+          )}
 
-        {user && currentRoute === 'stats' && (
-          <StatsView
-            habits={allHabits}
-            logs={allLogs}
-            categories={categories}
-            badges={badges}
-            userName={user.fullName}
-            timezone={user.timezone}
-            isDark={theme === 'DARK'}
-            onApplyReminderTime={handleApplyReminderTime}
-            onReportExported={(filename, topCategoryName, weeklyRate) => {
-              addToast({
-                type: 'success',
-                title: 'Reporte semanal PDF generado',
-                description: topCategoryName
-                  ? `Adherencia 7d: ${weeklyRate}% · Top categoría: ${topCategoryName} (${filename})`
-                  : `Archivo guardado como ${filename}`,
-              });
-            }}
-          />
-        )}
+          {user && currentRoute === 'stats' && (
+            <StatsView
+              habits={allHabits}
+              logs={allLogs}
+              categories={categories}
+              badges={badges}
+              userName={user.fullName}
+              timezone={user.timezone}
+              isDark={theme === 'DARK'}
+              onApplyReminderTime={handleApplyReminderTime}
+              onReportExported={(filename, topCategoryName, weeklyRate) => {
+                addToast({
+                  type: 'success',
+                  title: 'Reporte semanal PDF generado',
+                  description: topCategoryName
+                    ? `Adherencia 7d: ${weeklyRate}% · Top categoría: ${topCategoryName} (${filename})`
+                    : `Archivo guardado como ${filename}`,
+                });
+              }}
+            />
+          )}
 
-        {user && currentRoute === 'templates' && (
-          <TemplatesView
-            templates={templates}
-            categories={categories}
-            existingHabitTitles={allHabits.map((h) => h.title)}
-            onAddTemplate={handleAddTemplate}
-            onOpenCreateCustom={() => {
-              setHabitToEdit(null);
-              setIsHabitModalOpen(true);
-            }}
-            user={user}
-            habits={allHabits}
-            logs={allLogs}
-            onAddSuggestedHabit={handleAddSuggestedHabit}
-          />
-        )}
+          {user && currentRoute === 'templates' && (
+            <TemplatesView
+              templates={templates}
+              categories={categories}
+              existingHabitTitles={allHabits.map((h) => h.title)}
+              onAddTemplate={handleAddTemplate}
+              onOpenCreateCustom={() => {
+                setHabitToEdit(null);
+                setIsHabitModalOpen(true);
+              }}
+              user={user}
+              habits={allHabits}
+              logs={allLogs}
+              onAddSuggestedHabit={handleAddSuggestedHabit}
+            />
+          )}
 
-        {user && currentRoute === 'profile' && (
-          <ProfileView
-            user={user}
-            theme={theme}
-            onChangeTheme={handleSetTheme}
-            badges={badges}
-            categories={categories}
-            habits={allHabits}
-            logs={allLogs}
-            onCreateCategory={handleCreateCategory}
-            onUpdateCategory={handleUpdateCategory}
-            onDeleteCategory={handleDeleteCategory}
-            onUpdateUser={handleUpdateUser}
-            onResetData={handleResetData}
-            onLogout={() => handleLogout(true)}
-          />
-        )}
+          {user && currentRoute === 'profile' && (
+            <ProfileView
+              user={user}
+              theme={theme}
+              onChangeTheme={handleSetTheme}
+              badges={badges}
+              categories={categories}
+              habits={allHabits}
+              logs={allLogs}
+              onCreateCategory={handleCreateCategory}
+              onUpdateCategory={handleUpdateCategory}
+              onDeleteCategory={handleDeleteCategory}
+              onUpdateUser={handleUpdateUser}
+              onResetData={handleResetData}
+              onLogout={() => handleLogout(true)}
+            />
+          )}
+        </Suspense>
       </main>
 
       {/* Editorial Footer */}

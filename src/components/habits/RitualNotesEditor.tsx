@@ -153,7 +153,7 @@ export const RitualNotesMarkdown: React.FC<MarkdownRendererProps> = ({
               >
                 <Check className="w-3.5 h-3.5 stroke-[3]" />
               </button>
-              <span className={checked ? 'line-through text-slate-400 dark:text-slate-500 font-medium' : 'text-slate-800 dark:text-slate-200 font-medium'}>
+              <span className={checked ? 'text-slate-500 dark:text-slate-400 font-medium' : 'text-slate-800 dark:text-slate-200 font-medium'}>
                 {renderInlineMarkdown(taskMatch[2])}
               </span>
             </div>

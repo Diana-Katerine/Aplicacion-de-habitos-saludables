@@ -373,7 +373,7 @@ export const HabitCard: React.FC<Props> = ({
                 <h3
                   className={`text-base sm:text-lg font-bold tracking-tight line-clamp-2 md:truncate transition-colors ${
                     isCompleted
-                      ? 'text-slate-500 dark:text-slate-400 line-through'
+                      ? 'text-slate-600 dark:text-slate-300'
                       : 'text-slate-900 dark:text-white group-hover/focus:text-indigo-600 dark:group-hover/focus:text-indigo-400'
                   }`}
                 >
@@ -384,7 +384,7 @@ export const HabitCard: React.FC<Props> = ({
             ) : (
               <h3
                 className={`text-base sm:text-lg font-bold tracking-tight mt-1 line-clamp-2 md:truncate transition-colors ${
-                  isCompleted ? 'text-slate-500 dark:text-slate-400 line-through' : 'text-slate-900 dark:text-white'
+                  isCompleted ? 'text-slate-600 dark:text-slate-300' : 'text-slate-900 dark:text-white'
                 }`}
               >
                 {habit.title}
