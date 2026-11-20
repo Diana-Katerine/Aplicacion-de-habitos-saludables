@@ -8,6 +8,7 @@ import authRoutes from './server/routes/auth';
 import categoriesRoutes from './server/routes/categories';
 import habitsRoutes from './server/routes/habits';
 import logsRoutes from './server/routes/logs';
+import adminRoutes from './server/routes/admin';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -111,8 +112,46 @@ async function startServer() {
   app.use('/api/categories', categoriesRoutes);
   app.use('/api/habits', habitsRoutes);
   app.use('/api/logs', logsRoutes);
+  app.use('/api/admin', adminRoutes);
 
-  // Endpoint de documentación OpenAPI
+  // Visor interactivo Swagger UI para documentación OpenAPI (Sprint 2)
+  app.get('/api/docs', (_req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(`<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>API Impulso Diario - Documentación Swagger UI</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    body { margin: 0; padding: 0; background: #fafafa; }
+    .topbar { display: none; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        url: '/api/docs/openapi.yaml',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "BaseLayout"
+      });
+    };
+  </script>
+</body>
+</html>`);
+  });
+
+  // Endpoint de especificación OpenAPI en YAML
   app.get('/api/docs/openapi.yaml', (_req: Request, res: Response) => {
     const openapiPath = path.resolve(__dirname, 'server/docs/openapi.yaml');
     if (fs.existsSync(openapiPath)) {
