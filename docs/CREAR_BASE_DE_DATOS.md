@@ -1,4 +1,4 @@
-# Documento 1: Crear Base de Datos
+# Crear Base de Datos
 
 ## 1. Introducción y Stack Tecnológico
 El almacenamiento persistente del proyecto **Aplicación de Hábitos Saludables (*Impulso Diario*)** se fundamenta en un modelo de datos relacional normalizado (3NF). El proyecto implementa un soporte dual coherente:

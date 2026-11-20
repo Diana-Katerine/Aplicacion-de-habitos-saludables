@@ -1,4 +1,4 @@
-# Documento 4: Implementar Operaciones CRUD
+# Implementar Operaciones CRUD
 
 ## 1. Introducción y Convenciones de Dominio
 Este documento describe las operaciones de Creación, Lectura, Actualización y Eliminación (CRUD) para los recursos centrales del sistema:

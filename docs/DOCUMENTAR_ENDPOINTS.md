@@ -1,4 +1,4 @@
-# Documento 5: Documentar Endpoints
+# Documentar Endpoints
 
 ## 1. Información General y Servidores
 * **Título de la API:** API Impulso Diario - Hábitos Saludables

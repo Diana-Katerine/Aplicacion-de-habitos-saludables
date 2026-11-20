@@ -1,4 +1,4 @@
-# Documento 2: Implementar API REST
+# Implementar API REST
 
 ## 1. Arquitectura y Principios de Diseño
 La API de **Aplicación de Hábitos Saludables (*Impulso Diario*)** sigue el estilo arquitectónico **REST (Representational State Transfer)**, operando sobre HTTP/1.1 y HTTP/2 mediante Node.js y Express.

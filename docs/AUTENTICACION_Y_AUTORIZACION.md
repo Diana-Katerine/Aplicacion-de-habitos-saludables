@@ -1,4 +1,4 @@
-# Documento 3: Desarrollar Autenticación y Autorización
+# Desarrollar Autenticación y Autorización
 
 ## 1. Mecanismo de Autenticación Basado en Tokens (JWT)
 La seguridad del sistema está construida sobre el estándar abierto **JSON Web Tokens (JWT / RFC 7519)**, utilizando firma criptográfica con algoritmo de clave simétrica **HMAC-SHA256 (HS256)**.
