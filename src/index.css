@@ -395,3 +395,56 @@
       transparent 55%
     );
 }
+
+/* ==========================================================================
+   Accessibility Overlay Classes (Applied dynamically to document.documentElement)
+   ========================================================================== */
+
+/* Text Scaling */
+html.a11y-font-sm {
+  font-size: 87.5% !important; /* 14px base */
+}
+
+html.a11y-font-md {
+  font-size: 100% !important; /* 16px base */
+}
+
+html.a11y-font-lg {
+  font-size: 112.5% !important; /* 18px base */
+}
+
+html.a11y-font-xl {
+  font-size: 125% !important; /* 20px base */
+}
+
+/* High Contrast Mode */
+html.a11y-high-contrast {
+  filter: contrast(135%) !important;
+}
+
+html.a11y-high-contrast :focus-visible {
+  outline: 3px solid #000000 !important;
+  outline-offset: 3px !important;
+}
+
+html.dark.a11y-high-contrast :focus-visible {
+  outline: 3px solid #ffffff !important;
+  outline-offset: 3px !important;
+}
+
+/* Reduced Motion Mode */
+html.a11y-reduce-motion *,
+html.a11y-reduce-motion *::before,
+html.a11y-reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Readable Sans Font */
+html.a11y-readable-font {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  letter-spacing: 0.02em !important;
+  word-spacing: 0.05em !important;
+}

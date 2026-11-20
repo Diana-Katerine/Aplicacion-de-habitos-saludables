@@ -28,6 +28,7 @@ import { getMoodMeta } from './services/journaling';
 import { AuthModal } from './components/auth/AuthModal';
 import { WeeklyReflectionModal } from './components/today/WeeklyReflectionModal';
 import { ToastContainer, ToastMessage } from './components/common/Toast';
+import { AccessibilityWidget } from './components/common/AccessibilityWidget';
 
 // Lazy loading de vistas secundarias para optimizar el rendimiento y bundle inicial en intranet
 const LandingPage = lazy(() => import('./components/landing/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -1175,6 +1176,9 @@ export default function App() {
 
       {/* Global Toast Alerts */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
+      {/* Control Flotante Global de Accesibilidad */}
+      <AccessibilityWidget />
     </div>
   );
 }
