@@ -27,3 +27,23 @@ export function authenticate(req: AuthenticatedRequest, res: Response, next: Nex
   req.user = payload;
   next();
 }
+
+export function requireRole(allowedRoles: string[]) {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({
+        error: 'No autorizado. Se requiere iniciar sesión.',
+      });
+      return;
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      res.status(403).json({
+        error: `Acceso denegado. Se requiere uno de los siguientes roles: ${allowedRoles.join(', ')}.`,
+      });
+      return;
+    }
+
+    next();
+  };
+}

@@ -187,7 +187,66 @@ async function runTests() {
   });
   assert(listAfterDelete.data?.habits?.length === 0, 'Hábito eliminado ya no aparece en la lista');
 
-  console.log('\n🎉 ¡TODAS LAS PRUEBAS DE LA API REST (SPRINT 2) PASARON EXITOSAMENTE!');
+  // 17. PRUEBAS DE AUTORIZACIÓN BASADA EN ROLES (RBAC)
+  // Usuario 1 tiene rol 'USER' por defecto; intentar acceder a /admin debe retornar 403 Forbidden
+  const userAccessDenied = await request('/admin/metrics', {
+    headers: { Authorization: `Bearer ${token1}` },
+  });
+  assert(userAccessDenied.status === 403, 'RBAC: Usuario estándar recibe 403 Forbidden al acceder a /admin/metrics');
+
+  // 18. Simular o crear un usuario con rol 'ADMIN'
+  const adminEmail = `admin_${uniqueSuffix}@test.com`;
+  const regAdmin = await request('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({
+      email: adminEmail,
+      password,
+      fullName: 'Administrador General',
+    }),
+  });
+  const adminId = regAdmin.data?.user?.id;
+  const adminToken = regAdmin.data?.token;
+
+  // Promover directamente en la base de datos o verificar acceso admin
+  // Dado que /auth/register por defecto asigna 'USER', actualizamos el rol del admin de prueba:
+  const { db } = await import('./db/index.ts');
+  db.prepare("UPDATE users SET role = 'ADMIN' WHERE id = ?").run(adminId);
+
+  // Obtener token fresco con rol ADMIN haciendo login
+  const loginAdmin = await request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: adminEmail, password }),
+  });
+  const refreshedAdminToken = loginAdmin.data?.token;
+
+  // 19. Verificar acceso exitoso de ADMIN a /admin/metrics
+  const adminMetrics = await request('/admin/metrics', {
+    headers: { Authorization: `Bearer ${refreshedAdminToken}` },
+  });
+  assert(adminMetrics.status === 200, 'RBAC: Administrador accede exitosamente a /admin/metrics (200 OK)');
+  assert(typeof adminMetrics.data?.metrics?.totalUsers === 'number', 'Métricas administrativas calculan conteo de usuarios');
+
+  // 20. Verificar creación de categoría global por parte del Administrador
+  const createGlobalCat = await request('/admin/categories', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${refreshedAdminToken}` },
+    body: JSON.stringify({
+      name: `Finanzas Personales ${uniqueSuffix}`,
+      iconName: 'DollarSign',
+      colorHex: '#10B981',
+    }),
+  });
+  assert(createGlobalCat.status === 201, 'RBAC: Administrador crea categoría global oficial (201 Created)');
+  assert(createGlobalCat.data?.category?.userId === null, 'La categoría global tiene userId = null');
+
+  // 21. Verificar documentación OpenAPI y visor interactivo Swagger UI
+  const swaggerUI = await fetch(`${BASE_URL}/docs`);
+  assert(swaggerUI.status === 200, 'Visor interactivo Swagger UI disponible en GET /api/docs (200 OK)');
+
+  const openapiYaml = await fetch(`${BASE_URL}/docs/openapi.yaml`);
+  assert(openapiYaml.status === 200, 'Especificación OpenAPI YAML servida en GET /api/docs/openapi.yaml (200 OK)');
+
+  console.log('\n🎉 ¡TODAS LAS PRUEBAS DE LA API REST Y CONTROL DE ROLES (SPRINT 2) PASARON EXITOSAMENTE!');
 }
 
 runTests().catch((err) => {

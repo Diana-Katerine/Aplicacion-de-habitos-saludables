@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Globe,
   Bell,
@@ -9,6 +9,8 @@ import {
   Palette,
   Sun,
   Moon,
+  Camera,
+  Trash2,
 } from 'lucide-react';
 import { BioluminescentThemeId, Category, EvaluatedBadge, Habit, HabitLog, User } from '../../types';
 import { detectBrowserTimezone, StorageService } from '../../services/storage';
@@ -85,6 +87,38 @@ export const ProfileView: React.FC<Props> = ({
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(user.avatarUrl);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('La imagen no debe superar los 2MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setAvatarUrl(result);
+      onUpdateUser({ avatarUrl: result });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarUrl(undefined);
+    onUpdateUser({ avatarUrl: undefined });
+  };
+
+  const PRESET_AVATARS = [
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
+  ];
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +126,7 @@ export const ProfileView: React.FC<Props> = ({
       fullName: fullName.trim() || user.fullName,
       email: email.trim() || user.email,
       timezone,
+      avatarUrl,
       reminderEnabled,
       reminderMorningTime: morningTime,
       reminderEveningTime: eveningTime,
@@ -191,22 +226,83 @@ export const ProfileView: React.FC<Props> = ({
         {/* User Card */}
         <div className="rounded-[24px] p-4 sm:p-6 bg-white dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a]">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#059669] to-[#0284C7] text-white flex items-center justify-center font-signifier text-[28px] shrink-0 shadow-xs">
-              {user.fullName.charAt(0)}
+            <div className="relative group shrink-0">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={user.fullName}
+                  className="w-16 h-16 rounded-full object-cover border border-[#ececec] dark:border-[#252e3a] shadow-xs"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#059669] to-[#0284C7] text-white flex items-center justify-center font-signifier text-[28px] shadow-xs">
+                  {user.fullName.charAt(0)}
+                </div>
+              )}
+
+              {/* Quick upload button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label="Cambiar foto de perfil"
+                className="absolute inset-0 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                <Camera className="w-5 h-5" />
+              </button>
             </div>
+
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
                 <h3 className="text-[18px] font-medium text-[#17191c] dark:text-[#f1f5f9] break-words">{user.fullName}</h3>
                 <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a]">· {user.role}</span>
               </div>
               <p className="text-[14px] text-[#777b86] dark:text-[#9aa4b2] mt-0.5 break-all">{user.email}</p>
-              <p className="text-[12px] text-[#979799] dark:text-[#6f7a8a] mt-1">
-                Miembro desde{' '}
-                {new Date(user.createdAt).toLocaleDateString('es-ES', {
-                  month: 'short',
-                  year: 'numeric',
-                })}
-              </p>
+              
+              {/* Photo customization controls (HU #8) */}
+              <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleAvatarFileChange}
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-1.5 rounded-lg border border-[#ececec] dark:border-[#252e3a] bg-[#fafafb] dark:bg-[#1b222b] text-[12px] font-medium text-[#17191c] dark:text-[#f1f5f9] hover:bg-[#ececec] dark:hover:bg-[#252e3a] transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  Subir foto
+                </button>
+
+                {avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    className="px-3 py-1.5 rounded-lg border border-transparent hover:border-rose-200 dark:hover:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-[12px] font-medium text-rose-700 dark:text-rose-400 hover:bg-rose-100 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Quitar foto
+                  </button>
+                )}
+
+                <div className="flex items-center gap-1.5 ml-1">
+                  <span className="text-[11px] text-[#777b86] dark:text-[#9aa4b2]">Predefinidos:</span>
+                  {PRESET_AVATARS.map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setAvatarUrl(preset);
+                        onUpdateUser({ avatarUrl: preset });
+                      }}
+                      className="w-6 h-6 rounded-full overflow-hidden border border-[#ececec] dark:border-[#252e3a] hover:scale-110 transition-transform cursor-pointer"
+                    >
+                      <img src={preset} alt={`Avatar preset ${idx + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 

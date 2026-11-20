@@ -55,18 +55,18 @@ export const DailyFocusCard: React.FC<Props> = ({
   if (focus && !isEditing) {
     return (
       <motion.section
-        aria-label="Enfoque del día"
+        aria-label="Objetivo prioritario del día"
         initial={{ opacity: 0, y: -4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18 }}
-        className={`rounded-[24px] p-4 sm:p-5 md:p-6 border transition-colors ${
+        className={`rounded-xl p-6 sm:p-8 border shadow-sm transition-colors ${
           focus.isCompleted
-            ? 'bg-gradient-to-r from-[#ECFDF5] via-[#F0FDFA] to-[#E0F2FE] dark:from-[#059669]/22 dark:via-[#0D9488]/14 dark:to-[#0284C7]/14 border-[#059669]/35 dark:border-[#34d399]/40'
-            : 'bg-gradient-to-r from-[#EEF2FF] via-[#F5F3FF] to-[#ECFEFF] dark:from-[#4F46E5]/20 dark:via-[#7C3AED]/14 dark:to-[#06B6D4]/16 border-[#4F46E5]/25 dark:border-[#818CF8]/30'
+            ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800'
+            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
         }`}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
             <ActionHint
               message={
                 focus.isCompleted
@@ -79,36 +79,36 @@ export const DailyFocusCard: React.FC<Props> = ({
             >
               <motion.button
                 type="button"
-                whileTap={{ scale: 0.9 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={onToggleComplete}
                 aria-label={focus.isCompleted ? 'Marcar enfoque como pendiente' : 'Marcar enfoque como logrado'}
-                className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors cursor-pointer ${
+                className={`min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center shrink-0 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                   focus.isCompleted
-                    ? 'bg-[#059669] text-white border border-[#059669]'
-                    : 'bg-white dark:bg-[#1b222b] text-transparent hover:text-[#059669] dark:hover:text-[#34d399] border border-[#059669]/35 dark:border-[#34d399]/40 hover:border-[#059669]'
+                    ? 'bg-emerald-600 text-white border border-emerald-700'
+                    : 'bg-white dark:bg-slate-800 text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 border border-slate-300 dark:border-slate-600 hover:border-emerald-600'
                 }`}
               >
-                <Check className="w-5 h-5 stroke-[2.5]" />
+                <Check className={`w-5 h-5 stroke-[2.5] ${focus.isCompleted ? 'text-white' : 'opacity-0 hover:opacity-100'}`} />
               </motion.button>
             </ActionHint>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 text-[13px] text-[#4338CA] dark:text-[#a5b4fc]">
-                <Compass className="w-4 h-4 text-[#4F46E5] dark:text-[#818cf8] shrink-0" />
-                <span className="font-medium">Enfoque del día</span>
+              <div className="flex items-center gap-2 text-sm text-indigo-700 dark:text-indigo-400 font-semibold mb-1">
+                <Compass className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <span>Objetivo prioritario del día</span>
                 {focus.isCompleted && (
                   <>
-                    <span aria-hidden="true">·</span>
-                    <span className="text-[#059669] dark:text-[#34d399] font-medium">Logrado hoy</span>
+                    <span aria-hidden="true" className="text-slate-400">·</span>
+                    <span className="text-emerald-700 dark:text-emerald-300 font-medium bg-emerald-100/80 dark:bg-emerald-900/50 px-2 py-0.5 rounded text-xs">Cumplido</span>
                   </>
                 )}
               </div>
 
               <p
-                className={`text-[18px] font-medium tracking-[-0.01em] mt-0.5 break-words transition-colors ${
+                className={`text-lg sm:text-xl font-bold tracking-tight break-words transition-colors ${
                   focus.isCompleted
-                    ? 'text-[#777b86] dark:text-[#6f7a8a] line-through'
-                    : 'text-[#17191c] dark:text-[#f1f5f9]'
+                    ? 'text-emerald-800 dark:text-emerald-300'
+                    : 'text-slate-900 dark:text-white'
                 }`}
               >
                 {focus.intent}
@@ -126,7 +126,7 @@ export const DailyFocusCard: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={handleStartEdit}
-                className="px-3.5 py-2 rounded-full bg-white dark:bg-[#1b222b] hover:bg-[#f2f2f3] dark:hover:bg-[#252e3a] border border-[#ececec] dark:border-[#252e3a] text-[13px] text-[#17191c] dark:text-[#f1f5f9] transition-colors inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                className="min-h-[44px] px-3.5 py-2 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-800 dark:text-slate-100 transition-colors inline-flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
               >
                 <Edit2 className="w-4 h-4" />
                 <span>Editar</span>
@@ -143,9 +143,9 @@ export const DailyFocusCard: React.FC<Props> = ({
                 type="button"
                 onClick={onClearFocus}
                 aria-label="Quitar enfoque del día"
-                className="w-11 h-11 rounded-full bg-white dark:bg-[#1b222b] hover:bg-[#fee2e2]/70 dark:hover:bg-[#7f1d1d]/35 border border-[#ececec] dark:border-[#252e3a] hover:border-[#ef4444]/45 text-[#5c616d] dark:text-[#9aa4b2] hover:text-[#b91c1c] dark:hover:text-[#fca5a5] flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+                className="min-h-[44px] min-w-[44px] rounded-lg bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-300 dark:border-slate-600 hover:border-rose-300 text-slate-700 dark:text-slate-300 hover:text-rose-700 dark:hover:text-rose-300 flex items-center justify-center transition-colors shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
               >
-                <X className="w-6 h-6 stroke-[2.5]" />
+                <X className="w-5 h-5 stroke-[2.25]" />
               </button>
             </ActionHint>
           </div>
@@ -156,19 +156,19 @@ export const DailyFocusCard: React.FC<Props> = ({
 
   return (
     <motion.section
-      aria-label="Definir enfoque del día"
+      aria-label="Definir objetivo prioritario del día"
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18 }}
-      className="rounded-[24px] p-4 sm:p-5 md:p-6 bg-gradient-to-r from-[#EEF2FF] via-[#F5F3FF] to-[#ECFEFF] dark:from-[#4F46E5]/20 dark:via-[#7C3AED]/14 dark:to-[#06B6D4]/16 border border-[#4F46E5]/25 dark:border-[#818CF8]/30"
+      className="rounded-xl p-6 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm"
     >
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#4F46E5] to-[#7C3AED] text-white shadow-xs shadow-[#4F46E5]/30 flex items-center justify-center shrink-0">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0">
             <Compass className="w-5 h-5" />
           </div>
-          <h2 className="text-[15px] font-medium text-[#17191c] dark:text-[#f1f5f9] tracking-tight">
-            {isEditing ? 'Actualizar enfoque del día' : 'Enfoque de hoy'}
+          <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+            {isEditing ? 'Actualizar objetivo del día' : 'Objetivo principal para hoy'}
           </h2>
         </div>
 
@@ -176,41 +176,45 @@ export const DailyFocusCard: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setIsEditing(false)}
-            className="text-[13px] text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
           >
             Cancelar
           </button>
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <label htmlFor="daily-focus-input" className="sr-only">
+          Objetivo prioritario para hoy
+        </label>
         <input
+          id="daily-focus-input"
           ref={inputRef}
           type="text"
           maxLength={120}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="¿Qué es lo único que hará que hoy valga la pena?"
-          className="flex-1 min-w-0 w-full px-4 py-2.5 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] placeholder-[#a3a6af] dark:placeholder-[#6f7a8a] text-[15px] focus:outline-none focus:border-[#4F46E5] dark:focus:border-[#818cf8] transition-colors"
+          placeholder="Ej: Completar el módulo 2 de estudio sin interrupciones..."
+          className="flex-1 min-w-0 w-full min-h-[44px] px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 transition-colors"
         />
 
         <button
           type="submit"
           disabled={!draft.trim()}
-          className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] hover:from-[#4338CA] hover:to-[#6D28D9] shadow-sm shadow-[#4F46E5]/30 disabled:opacity-40 disabled:pointer-events-none text-white text-[14px] font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer"
+          className="min-h-[44px] px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 shadow-sm disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed"
         >
-          {isEditing ? 'Guardar enfoque' : 'Fijar enfoque'}
+          {isEditing ? 'Guardar objetivo' : 'Fijar objetivo'}
         </button>
       </form>
 
-      <div className="mt-3.5 flex flex-wrap items-center gap-2">
-        <span className="text-[12px] text-[#5c616d] dark:text-[#9aa4b2]">Sugerencias:</span>
+      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Sugerencias rápidas:</span>
         {FOCUS_PRESETS.map((preset) => (
           <button
             key={preset}
             type="button"
             onClick={() => handlePresetClick(preset)}
-            className="px-3 py-1.5 sm:py-1 rounded-[14px] sm:rounded-full bg-white dark:bg-[#1b222b] hover:bg-[#EEF2FF] dark:hover:bg-[#4F46E5]/20 border border-[#ececec] dark:border-[#252e3a] hover:border-[#4F46E5]/30 dark:hover:border-[#818cf8]/40 text-[12px] text-left text-[#5c616d] dark:text-[#cbd5e1] hover:text-[#4338CA] dark:hover:text-[#a5b4fc] transition-colors whitespace-normal sm:whitespace-nowrap cursor-pointer"
+            className="min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors whitespace-normal sm:whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
           >
             {preset}
           </button>

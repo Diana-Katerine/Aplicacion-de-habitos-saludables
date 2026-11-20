@@ -7,7 +7,7 @@ import {
   MoodTag,
   User,
 } from '../types';
-import { getTodayDateString } from './storage';
+import { getTodayDateString, StorageService } from './storage';
 import { getGreetingFirstName, getTimeOfDayPeriod } from './greeting';
 
 const ENCOURAGEMENT_CACHE_PREFIX = 'impulso_diario_ai_encouragement_v1';
@@ -138,6 +138,7 @@ export async function requestAiEncouragement(
   }
 
   const result: AiEncouragementMessage = {
+    id: `ai-msg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     headline: body.headline || `Ánimo, ${firstName}`,
     message: body.message || 'Cada pequeño paso suma a tu constancia diaria.',
     microAction: body.microAction || 'Elige un hábito corto para mantener el impulso.',
@@ -147,5 +148,6 @@ export async function requestAiEncouragement(
   };
 
   setCachedEncouragement(user.id, signature, result);
+  StorageService.saveAiEncouragementToHistory(user.id, result);
   return result;
 }

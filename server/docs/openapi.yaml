@@ -539,3 +539,135 @@ paths:
           description: Registro eliminado correctamente.
         '404':
           description: Registro no encontrado.
+
+  /admin/metrics:
+    get:
+      summary: Obtener métricas globales del sistema (Solo administradores)
+      tags: [Administración (RBAC)]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Métricas agregadas de usuarios, hábitos y cumplimiento.
+        '401':
+          description: No autenticado.
+        '403':
+          description: Acceso denegado (requiere rol ADMIN).
+
+  /admin/users:
+    get:
+      summary: Listar todos los usuarios del sistema (Solo administradores)
+      tags: [Administración (RBAC)]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista completa de usuarios.
+        '403':
+          description: Acceso denegado (requiere rol ADMIN).
+
+  /admin/categories:
+    post:
+      summary: Crear una categoría global oficial del sistema (Solo administradores)
+      tags: [Administración (RBAC)]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: "Finanzas Personales"
+                iconName:
+                  type: string
+                  example: "DollarSign"
+                colorHex:
+                  type: string
+                  example: "#10B981"
+      responses:
+        '201':
+          description: Categoría global creada.
+        '403':
+          description: Acceso denegado (requiere rol ADMIN).
+
+  /coach/forecast:
+    post:
+      summary: Generar pronóstico predictivo semanal de momentum con IA
+      tags: [Asistente IA]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timezone:
+                  type: string
+                  example: "America/Bogota"
+                weekdayHistory:
+                  type: array
+                  items:
+                    type: object
+                habits:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '200':
+          description: Pronóstico predictivo calculado.
+        '502':
+          description: Error al comunicarse con Gemini API.
+
+  /coach/encouragement:
+    post:
+      summary: Generar mensaje motivacional contextualizado con IA
+      tags: [Asistente IA]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                trigger:
+                  type: string
+                  enum: [daily_brief, habit_completed, journal_saved, manual_boost]
+                userName:
+                  type: string
+                completedToday:
+                  type: integer
+                totalToday:
+                  type: integer
+      responses:
+        '200':
+          description: Mensaje motivacional generado con micro-acción.
+        '502':
+          description: Error al comunicarse con Gemini API.
+
+  /coach/habit-suggestions:
+    post:
+      summary: Recomendar hábitos personalizados basados en intereses y rutinas
+      tags: [Asistente IA]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userName:
+                  type: string
+                categories:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '200':
+          description: Lista de sugerencias de hábitos recomendados.
+        '502':
+          description: Error al comunicarse con Gemini API.

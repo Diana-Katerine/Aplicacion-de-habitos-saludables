@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Check, Plus, Minus, Flame, Sparkles, Headphones, Layers, Activity } from 'lucide-react';
-import { HeroThreeScene } from './HeroThreeScene';
+import { HeroCreativeImage } from './HeroCreativeImage';
 
 interface Props {
   isDark?: boolean;
@@ -148,7 +148,7 @@ export const LandingPage: React.FC<Props> = ({
             </div>
 
             <div className="lg:col-span-6">
-              <HeroThreeScene isDark={isDark} />
+              <HeroCreativeImage isDark={isDark} />
             </div>
           </div>
         </div>
@@ -245,7 +245,7 @@ export const LandingPage: React.FC<Props> = ({
                       <span className="text-[12px] font-medium text-[#4F46E5] dark:text-[#a5b4fc] block">Mente &amp; Foco</span>
                       <p
                         className={`text-[15px] font-medium mt-0.5 line-clamp-2 sm:truncate ${
-                          demoMeditation ? 'text-[#777b86] dark:text-[#6f7a8a] line-through' : 'text-[#17191c] dark:text-[#f1f5f9]'
+                          demoMeditation ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-[#17191c] dark:text-[#f1f5f9]'
                         }`}
                       >
                         Meditación consciente matutina
@@ -281,7 +281,7 @@ export const LandingPage: React.FC<Props> = ({
                       <span className="text-[12px] font-medium text-[#0284C7] dark:text-[#38bdf8] block">Vitalidad</span>
                       <p
                         className={`text-[15px] font-medium mt-0.5 line-clamp-2 sm:truncate ${
-                          isWaterDone ? 'text-[#777b86] dark:text-[#6f7a8a] line-through' : 'text-[#17191c] dark:text-[#f1f5f9]'
+                          isWaterDone ? 'text-sky-700 dark:text-sky-400 font-semibold' : 'text-[#17191c] dark:text-[#f1f5f9]'
                         }`}
                       >
                         Tomar 8 vasos de agua

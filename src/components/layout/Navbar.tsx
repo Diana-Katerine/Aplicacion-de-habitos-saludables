@@ -56,25 +56,23 @@ export const Navbar: React.FC<Props> = ({
 
   return (
     <header
-      className={`sticky top-0 z-40 w-full bg-white/95 dark:bg-[#0c0f12]/95 backdrop-blur-md transition-colors duration-200 ${
-        user ? 'border-b border-[#ececec] dark:border-[#252e3a]' : 'border-b border-transparent dark:border-[#181f28]'
-      }`}
+      className={`sticky top-0 z-40 w-full min-h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors duration-200`}
     >
-      <div className="max-w-[1200px] mx-auto px-3 sm:px-6 min-h-[64px] py-2 sm:py-0 sm:h-[72px] flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-2 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 min-h-16 py-3 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-3 gap-y-2">
         {/* Zone 1: Brand Wordmark */}
         <button
           type="button"
           onClick={() => onNavigate(user ? 'today' : 'landing')}
-          className="text-left text-[#17191c] dark:text-[#f1f5f9] whitespace-nowrap shrink-0 cursor-pointer"
+          className="text-left text-slate-900 dark:text-white whitespace-nowrap shrink-0 cursor-pointer min-h-[44px] min-w-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 rounded-lg"
         >
-          <span className="font-signifier text-[19px] sm:text-[24px] leading-none tracking-[-0.02em] text-[#17191c] dark:text-[#f1f5f9]">
-            Impulso <span className="chromatic-gradient-text italic">diario</span>
+          <span className="font-bold text-xl sm:text-2xl leading-tight tracking-tight text-slate-900 dark:text-white">
+            Impulso <span className="text-indigo-600 dark:text-indigo-400">Diario</span>
           </span>
         </button>
 
-        {/* Zone 2: Whisper-quiet Navigation Links */}
+        {/* Zone 2: Navigation Links */}
         {user ? (
-          <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-[14px] lg:text-[15px] font-normal">
+          <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-1 lg:gap-2">
             {navItems.map((item) => {
               const active = currentRoute === item.route;
               return (
@@ -82,10 +80,10 @@ export const Navbar: React.FC<Props> = ({
                   key={item.route}
                   type="button"
                   onClick={() => onNavigate(item.route)}
-                  className={`py-0.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  className={`min-h-[44px] px-3.5 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                     active
-                      ? 'text-[#059669] dark:text-[#34d399] font-medium underline decoration-[#059669] dark:decoration-[#34d399] decoration-2 underline-offset-[6px]'
-                      : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:underline hover:underline-offset-[6px]'
+                      ? 'bg-slate-100 dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 font-semibold border border-slate-200 dark:border-slate-700'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60'
                   }`}
                 >
                   {item.label}
@@ -94,7 +92,7 @@ export const Navbar: React.FC<Props> = ({
             })}
           </nav>
         ) : (
-          <nav className="hidden md:flex items-center gap-7 text-[15px] font-normal">
+          <nav aria-label="Navegación de secciones" className="hidden md:flex items-center gap-6">
             {[
               { href: '#que-ofrecemos', label: 'Qué ofrecemos' },
               { href: '#como-funciona', label: 'Cómo funciona' },
@@ -103,7 +101,7 @@ export const Navbar: React.FC<Props> = ({
               <a
                 key={anchor.href}
                 href={anchor.href}
-                className="py-0.5 text-[#777b86] dark:text-[#9aa4b2] hover:text-[#059669] dark:hover:text-[#34d399] hover:underline hover:underline-offset-[6px] transition-colors whitespace-nowrap shrink-0"
+                className="min-h-[44px] inline-flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 rounded-md px-2"
               >
                 {anchor.label}
               </a>
@@ -112,7 +110,7 @@ export const Navbar: React.FC<Props> = ({
         )}
 
         {/* Zone 3: Theme Toggle, Pill CTA & User Action */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 max-w-full flex-wrap justify-end">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 max-w-full flex-wrap justify-end">
           {onToggleTheme && (
             <ActionHint
               message={
@@ -128,14 +126,14 @@ export const Navbar: React.FC<Props> = ({
                 type="button"
                 onClick={onToggleTheme}
                 aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-                className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full border border-[#ececec] dark:border-[#252e3a] bg-[#fafafb] dark:bg-[#141920] hover:border-[#4F46E5]/45 dark:hover:border-[#818cf8]/50 hover:bg-[#EEF2FF]/70 dark:hover:bg-[#4F46E5]/15 text-[#17191c] dark:text-[#f1f5f9] inline-flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-[13px] font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                className="min-h-[44px] min-w-[44px] px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 inline-flex items-center justify-center gap-2 text-sm font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
               >
                 {isDark ? (
-                  <Sun className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[#fbbf24] shrink-0" />
+                  <Sun className="w-5 h-5 text-amber-500 shrink-0" />
                 ) : (
-                  <Moon className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[#4F46E5] shrink-0" />
+                  <Moon className="w-5 h-5 text-indigo-600 shrink-0" />
                 )}
-                <span>Cambiar claro/oscuro</span>
+                <span className="hidden sm:inline">Tema</span>
               </button>
             </ActionHint>
           )}
@@ -152,7 +150,7 @@ export const Navbar: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={onOpenCreateModal}
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full btn-chromatic text-[14px] leading-none font-medium whitespace-nowrap shrink-0 cursor-pointer"
+                  className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 shadow-sm"
                 >
                   <Plus className="w-4 h-4 stroke-[2.5]" />
                   <span>Nuevo hábito</span>
@@ -160,7 +158,7 @@ export const Navbar: React.FC<Props> = ({
               </ActionHint>
 
               <ActionHint
-                message="Abrirá tu perfil, categorías y tema visual"
+                message="Abrirá tu perfil, categorías y configuración"
                 tone="accent"
                 position="bottom"
                 align="right"
@@ -169,13 +167,21 @@ export const Navbar: React.FC<Props> = ({
                   type="button"
                   onClick={() => onNavigate('profile')}
                   aria-label="Perfil y configuración"
-                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#059669] via-[#0284c7] to-[#7c3aed] hover:opacity-90 text-[13px] font-medium text-white flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-xs ${
+                  className={`min-h-[44px] min-w-[44px] rounded-lg bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-sm font-bold flex items-center justify-center transition-all shrink-0 cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                     currentRoute === 'profile'
-                      ? 'ring-2 ring-[#0284c7] dark:ring-[#38bdf8] ring-offset-2 ring-offset-white dark:ring-offset-[#0c0f12]'
+                      ? 'ring-2 ring-indigo-600 ring-offset-2'
                       : ''
                   }`}
                 >
-                  {user.fullName.charAt(0).toUpperCase()}
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    user.fullName.charAt(0).toUpperCase()
+                  )}
                 </button>
               </ActionHint>
 
@@ -189,10 +195,10 @@ export const Navbar: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={onLogout}
-                  aria-label="Cerrar sesión e ir al login"
-                  className="flex w-10 h-10 rounded-full border border-[#ececec] dark:border-[#252e3a] bg-[#fafafb] dark:bg-[#141920] hover:border-[#b91c1c]/45 dark:hover:border-[#f87171]/45 text-[#777b86] dark:text-[#9aa4b2] hover:text-[#b91c1c] dark:hover:text-[#fca5a5] items-center justify-center transition-colors shrink-0 cursor-pointer"
+                  aria-label="Cerrar sesión"
+                  className="min-h-[44px] min-w-[44px] flex rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-rose-300 dark:hover:border-rose-700 text-slate-700 dark:text-slate-300 hover:text-rose-700 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 items-center justify-center transition-colors shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
                 >
-                  <LogOut className="w-[18px] h-[18px]" />
+                  <LogOut className="w-5 h-5" />
                 </button>
               </ActionHint>
 
@@ -211,9 +217,9 @@ export const Navbar: React.FC<Props> = ({
                   type="button"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-[#17191c] dark:text-[#f1f5f9] bg-[#fafafb] dark:bg-[#141920] border border-[#ececec] dark:border-[#252e3a] hover:bg-[#f2f2f3] dark:hover:bg-[#1b222b] cursor-pointer"
+                  className="min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
                 >
-                  {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.25]" />}
+                  {mobileMenuOpen ? <X className="w-6 h-6 stroke-[2.25]" /> : <Menu className="w-6 h-6 stroke-[2.25]" />}
                 </button>
               </ActionHint>
             </>
@@ -227,7 +233,7 @@ export const Navbar: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => onOpenAuth('login')}
-                className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full btn-chromatic text-[12px] sm:text-[14px] leading-none font-medium whitespace-nowrap shrink-0 cursor-pointer"
+                className="min-h-[44px] px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 shadow-sm"
               >
                 Iniciar sesión
               </button>
@@ -238,7 +244,7 @@ export const Navbar: React.FC<Props> = ({
 
       {/* Mobile dropdown menu */}
       {user && mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#ececec] dark:border-[#252e3a] bg-white dark:bg-[#141920] px-4 py-4 space-y-1 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain">
+        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-4 space-y-1 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain">
           {[
             { route: 'today' as ViewRoute, label: 'Hoy', icon: Calendar },
             { route: 'habits' as ViewRoute, label: 'Mis Hábitos', icon: CheckSquare },
@@ -257,28 +263,29 @@ export const Navbar: React.FC<Props> = ({
                   onNavigate(item.route);
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full text-left px-4 py-2.5 rounded-full text-[15px] flex items-center gap-3 transition-colors cursor-pointer ${
+                className={`w-full min-h-[44px] text-left px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-3 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                   active
-                    ? 'bg-[#ECFDF5] dark:bg-[#059669]/20 text-[#047857] dark:text-[#34d399] font-medium'
-                    : 'text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:bg-[#fafafb] dark:hover:bg-[#1b222b]'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-400 font-bold border border-indigo-200 dark:border-indigo-800'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="w-5 h-5 stroke-[2]" />
                 <span>{item.label}</span>
               </button>
             );
           })}
 
-          <div className="pt-3 mt-2 border-t border-[#ececec] dark:border-[#252e3a] space-y-2">
+          <div className="pt-3 mt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
             <button
               type="button"
               onClick={() => {
                 setMobileMenuOpen(false);
                 onOpenCreateModal();
               }}
-              className="w-full py-3 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-[14px] font-medium text-center cursor-pointer"
+              className="w-full min-h-[44px] py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 shadow-sm"
             >
-              + Nuevo hábito
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Nuevo hábito</span>
             </button>
             <button
               type="button"
@@ -286,7 +293,7 @@ export const Navbar: React.FC<Props> = ({
                 setMobileMenuOpen(false);
                 onLogout();
               }}
-              className="w-full py-2.5 rounded-full border border-[#ececec] dark:border-[#252e3a] text-[#b91c1c] dark:text-[#fca5a5] text-[14px] font-normal flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full min-h-[44px] py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-sm font-medium flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
             >
               <LogOut className="w-4 h-4" />
               <span>Cerrar sesión</span>

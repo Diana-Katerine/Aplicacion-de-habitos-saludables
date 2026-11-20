@@ -1,8 +1,11 @@
-import React from 'react';
-import { Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Sparkles, RefreshCw, AlertCircle, History } from 'lucide-react';
 import { AiEncouragementMessage, EncouragementTone } from '../../types';
+import { StorageService } from '../../services/storage';
+import { AiEncouragementHistoryModal } from './AiEncouragementHistoryModal';
 
 interface Props {
+  userId?: string;
   encouragement: AiEncouragementMessage | null;
   isLoading: boolean;
   error: string | null;
@@ -14,117 +17,154 @@ const TONE_STYLES: Record<
   {
     container: string;
     iconBox: string;
+    badge: string;
     accentText: string;
   }
 > = {
   celebration: {
-    container:
-      'bg-gradient-to-r from-[#ECFDF5] via-[#F0FDFA] to-[#E0F2FE] dark:from-[#059669]/22 dark:via-[#0D9488]/14 dark:to-[#0284C7]/14 border-[#10B981]/30 dark:border-[#34d399]/35',
-    iconBox:
-      'bg-gradient-to-br from-[#10B981] to-[#0D9488] text-white shadow-sm shadow-[#10B981]/30',
-    accentText: 'text-[#047857] dark:text-[#34d399]',
+    container: 'bg-white dark:bg-slate-900 border-emerald-300 dark:border-emerald-800',
+    iconBox: 'bg-emerald-600 text-white',
+    badge: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+    accentText: 'text-emerald-800 dark:text-emerald-300',
   },
   momentum: {
-    container:
-      'bg-gradient-to-r from-[#EEF2FF] via-[#F5F3FF] to-[#ECFEFF] dark:from-[#4F46E5]/20 dark:via-[#7C3AED]/14 dark:to-[#06B6D4]/14 border-[#6366F1]/28 dark:border-[#818CF8]/35',
-    iconBox:
-      'bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white shadow-sm shadow-[#6366F1]/30',
-    accentText: 'text-[#4338CA] dark:text-[#a5b4fc]',
+    container: 'bg-white dark:bg-slate-900 border-indigo-200 dark:border-indigo-800',
+    iconBox: 'bg-indigo-600 text-white',
+    badge: 'bg-indigo-50 text-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+    accentText: 'text-indigo-800 dark:text-indigo-300',
   },
   resilience: {
-    container:
-      'bg-gradient-to-r from-[#FFFBEB] via-[#FFF1F2] to-[#FEF3C7]/70 dark:from-[#D97706]/20 dark:via-[#E11D48]/12 dark:to-[#F59E0B]/14 border-[#F59E0B]/30 dark:border-[#FBBF24]/35',
-    iconBox:
-      'bg-gradient-to-br from-[#F59E0B] to-[#F43F5E] text-white shadow-sm shadow-[#F59E0B]/30',
-    accentText: 'text-[#B45309] dark:text-[#fbbf24]',
+    container: 'bg-white dark:bg-slate-900 border-amber-300 dark:border-amber-800',
+    iconBox: 'bg-amber-600 text-white',
+    badge: 'bg-amber-50 text-amber-900 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+    accentText: 'text-amber-900 dark:text-amber-300',
   },
   calm: {
-    container:
-      'bg-gradient-to-r from-[#E0F2FE] via-[#ECFEFF] to-[#F0FDF4] dark:from-[#0284C7]/20 dark:via-[#06B6D4]/14 dark:to-[#10B981]/14 border-[#0284C7]/28 dark:border-[#38BDF8]/35',
-    iconBox:
-      'bg-gradient-to-br from-[#0284C7] to-[#06B6D4] text-white shadow-sm shadow-[#0284C7]/30',
-    accentText: 'text-[#0369A1] dark:text-[#38bdf8]',
+    container: 'bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800',
+    iconBox: 'bg-blue-600 text-white',
+    badge: 'bg-blue-50 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+    accentText: 'text-blue-800 dark:text-blue-300',
   },
 };
 
 export const AiEncouragementCard: React.FC<Props> = ({
+  userId,
   encouragement,
   isLoading,
   error,
   onRefresh,
 }) => {
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [historyList, setHistoryList] = useState<AiEncouragementMessage[]>([]);
+
   const toneStyle = TONE_STYLES[encouragement?.tone || 'momentum'];
 
+  const handleOpenHistory = () => {
+    if (userId) {
+      const history = StorageService.getAiEncouragementHistory(userId);
+      setHistoryList(history);
+    }
+    setIsHistoryOpen(true);
+  };
+
+  const handleDeleteHistoryItem = (messageId: string) => {
+    if (!userId) return;
+    StorageService.deleteAiEncouragementFromHistory(userId, messageId);
+    setHistoryList((prev) => prev.filter((item) => item.id !== messageId));
+  };
+
   return (
-    <section
-      aria-label="Mensaje de ánimo con IA"
-      className={`rounded-[24px] p-4 sm:p-5 border transition-colors ${toneStyle.container}`}
-    >
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div className="flex items-start gap-3.5 min-w-0 flex-1">
-          <div
-            className={`w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 mt-0.5 ${toneStyle.iconBox}`}
-          >
-            <Sparkles className="w-6 h-6" />
+    <>
+      <article
+        aria-label="Respuesta y recomendación de IA"
+        className={`rounded-xl p-6 sm:p-8 border shadow-sm transition-colors ${toneStyle.container}`}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+          <div className="flex items-start gap-4 min-w-0 flex-1">
+            <div
+              className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${toneStyle.iconBox}`}
+            >
+              <Sparkles className="w-6 h-6" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              {isLoading && !encouragement ? (
+                <div className="space-y-3 py-1 animate-pulse">
+                  <div className="h-4 w-48 rounded bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-4 w-full max-w-lg rounded bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-4 w-2/3 max-w-sm rounded bg-slate-200 dark:bg-slate-800" />
+                </div>
+              ) : error && !encouragement ? (
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-200 text-sm font-medium">
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-700 dark:text-rose-400" />
+                  <span className="leading-relaxed">{error}</span>
+                </div>
+              ) : encouragement ? (
+                <>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className={`text-xs px-2.5 py-1 rounded-md font-medium border ${toneStyle.badge}`}>
+                      Asistente de Estudio IA
+                    </span>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                      {encouragement.headline}
+                    </h3>
+                  </div>
+
+                  <p className="text-base leading-relaxed text-slate-800 dark:text-slate-200 text-left max-w-prose">
+                    {encouragement.message}
+                  </p>
+
+                  {encouragement.microAction && (
+                    <div className="mt-3 p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        <strong className={`font-semibold ${toneStyle.accentText}`}>Paso sugerido:</strong>{' '}
+                        {encouragement.microAction}
+                      </p>
+                    </div>
+                  )}
+
+                  {error && (
+                    <p className="text-sm font-medium text-rose-700 dark:text-rose-400 mt-2">
+                      {error}
+                    </p>
+                  )}
+                </>
+              ) : null}
+            </div>
           </div>
 
-          <div className="min-w-0 flex-1">
-            {isLoading && !encouragement ? (
-              <div className="space-y-2 py-0.5 animate-pulse">
-                <div className="h-4 w-44 rounded bg-[#17191c]/10 dark:bg-white/10" />
-                <div className="h-3.5 w-full max-w-lg rounded bg-[#17191c]/10 dark:bg-white/10" />
-                <div className="h-3 w-2/3 max-w-sm rounded bg-[#17191c]/10 dark:bg-white/10" />
-              </div>
-            ) : error && !encouragement ? (
-              <div className="flex items-start gap-2 text-[13px] text-[#5d2a1a] dark:text-[#fbdac7]">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{error}</span>
-              </div>
-            ) : encouragement ? (
-              <>
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                  <span className={`text-[12px] font-medium ${toneStyle.accentText}`}>
-                    Impulso IA
-                  </span>
-                  <span aria-hidden="true" className="text-[#a3a6af] dark:text-[#6f7a8a]">
-                    ·
-                  </span>
-                  <h3 className="text-[15px] font-medium text-[#17191c] dark:text-[#f1f5f9]">
-                    {encouragement.headline}
-                  </h3>
-                </div>
+          <div className="flex flex-row sm:flex-col items-stretch gap-2 shrink-0 sm:self-start">
+            <button
+              type="button"
+              onClick={onRefresh}
+              disabled={isLoading}
+              className="min-h-[44px] px-4 py-2 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-800 dark:text-slate-100 inline-flex items-center justify-center gap-2 transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>{isLoading ? 'Generando...' : 'Nueva sugerencia'}</span>
+            </button>
 
-                <p className="text-[14px] leading-relaxed text-[#454a54] dark:text-[#cbd5e1] mt-1">
-                  {encouragement.message}
-                </p>
-
-                {encouragement.microAction && (
-                  <p className="text-[12px] text-[#777b86] dark:text-[#9aa4b2] mt-1.5">
-                    <span className={`font-medium ${toneStyle.accentText}`}>Siguiente paso:</span>{' '}
-                    {encouragement.microAction}
-                  </p>
-                )}
-
-                {error && (
-                  <p className="text-[12px] text-[#b91c1c] dark:text-[#fca5a5] mt-1.5">
-                    {error}
-                  </p>
-                )}
-              </>
-            ) : null}
+            {userId && (
+              <button
+                type="button"
+                onClick={handleOpenHistory}
+                aria-label="Ver historial de consejos de IA"
+                className="min-h-[44px] px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-transparent dark:border-slate-700"
+              >
+                <History className="w-3.5 h-3.5" />
+                <span>Historial de consejos</span>
+              </button>
+            )}
           </div>
         </div>
+      </article>
 
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={isLoading}
-          className="w-full sm:w-auto px-3.5 py-2 sm:py-1.5 rounded-full bg-white/85 dark:bg-[#141920]/85 hover:bg-white dark:hover:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[12px] font-medium text-[#17191c] dark:text-[#f1f5f9] inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shrink-0 sm:self-start cursor-pointer disabled:opacity-60"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          <span>{isLoading ? 'Generando...' : 'Otro mensaje'}</span>
-        </button>
-      </div>
-    </section>
+      <AiEncouragementHistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        history={historyList}
+        onDeleteMessage={handleDeleteHistoryItem}
+      />
+    </>
   );
 };

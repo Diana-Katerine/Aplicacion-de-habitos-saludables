@@ -21,6 +21,7 @@ import {
   Crown,
   X,
   BatteryCharging,
+  Clock,
 } from 'lucide-react';
 import { HabitWithTodayLog } from '../../types';
 import { CategoryIcon } from '../common/CategoryIcon';
@@ -49,6 +50,7 @@ interface Props {
   activeMilestone?: StreakMilestone | null;
   onDismissMilestone?: (habitId: string, milestoneDays: number) => void;
   onReplayMilestone?: (habitId: string, milestone: StreakMilestone) => void;
+  onApplyReminderTime?: (habitId: string, newReminderTime: string) => void;
 }
 
 const MILESTONE_STYLES: Record<
@@ -162,9 +164,12 @@ export const HabitCard: React.FC<Props> = ({
   activeMilestone = null,
   onDismissMilestone,
   onReplayMilestone,
+  onApplyReminderTime,
 }) => {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [notesExpanded, setNotesExpanded] = React.useState(false);
+  const [isEditingReminder, setIsEditingReminder] = React.useState(false);
+  const [tempReminderTime, setTempReminderTime] = React.useState(habit.reminderTime || '');
   const isCompleted = habit.todayLog?.isCompleted ?? false;
   const completedValue = habit.todayLog?.completedValue ?? 0;
   const targetValue = habit.targetValue;
@@ -203,7 +208,7 @@ export const HabitCard: React.FC<Props> = ({
     <div
       data-completed={isCompleted ? 'true' : 'false'}
       style={bioTheme.cssVars}
-      className="group relative rounded-[24px] bioluminescent-card"
+      className="group relative rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
     >
       {/* Animated Celebration Overlay when reaching a streak milestone */}
       <AnimatePresence>
@@ -317,10 +322,10 @@ export const HabitCard: React.FC<Props> = ({
         )}
       </AnimatePresence>
 
-      <div className={activeMilestone ? 'hidden' : 'p-4 sm:p-5 md:p-6'}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className={activeMilestone ? 'hidden' : 'p-6 sm:p-7'}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         {/* Left Side: Drag Handle + Category Icon + Title + Meta */}
-        <div className="flex items-start gap-3 flex-1 min-w-0">
+        <div className="flex items-start gap-4 flex-1 min-w-0">
           {canReorder && (
             <button
               type="button"
@@ -339,78 +344,124 @@ export const HabitCard: React.FC<Props> = ({
               }}
               aria-label={`Reordenar ${habit.title}. Arrastra o usa las flechas arriba y abajo.`}
               title="Arrastra para reordenar (o usa ↑ / ↓)"
-              className="w-9 h-9 -ml-1.5 rounded-full flex items-center justify-center text-[#a3a6af] dark:text-[#6f7a8a] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:bg-[#f2f2f3] dark:hover:bg-[#1b222b] cursor-grab active:cursor-grabbing touch-none shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17191c]/30 dark:focus-visible:ring-[#f1f5f9]/30 transition-colors"
+              className="min-h-[44px] min-w-[44px] -ml-2 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-grab active:cursor-grabbing touch-none shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 transition-colors"
             >
               <GripVertical className="w-5 h-5" />
             </button>
           )}
 
           <div
-            className="w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border transition-all"
-            style={{
-              backgroundColor: `rgba(${bioTheme.rgb}, 0.16)`,
-              borderColor: `rgba(${bioTheme.rgb}, 0.34)`,
-              color: 'var(--bio-text)',
-              boxShadow: isCompleted ? `0 4px 14px -4px rgba(${bioTheme.rgb}, 0.38)` : undefined,
-            }}
+            className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400"
           >
             <CategoryIcon name={habit.category.iconName} className="w-6 h-6" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px]">
-              <span className="font-normal" style={{ color: 'var(--bio-text)' }}>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-slate-600 dark:text-slate-400">
+              <span className="font-semibold text-indigo-700 dark:text-indigo-400">
                 {habit.category.name}
               </span>
-              {habit.reminderTime && (
-                <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] font-mono tabular-nums">
+              {onApplyReminderTime ? (
+                <button
+                  type="button"
+                  onClick={() => setIsEditingReminder((v) => !v)}
+                  title="Cambiar hora de recordatorio"
+                  className="inline-flex items-center gap-1 font-mono tabular-nums text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline cursor-pointer"
+                >
+                  <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  <span>{habit.reminderTime ? habit.reminderTime : '+ Hora aviso'}</span>
+                </button>
+              ) : habit.reminderTime ? (
+                <span className="font-mono tabular-nums text-slate-500 dark:text-slate-400">
                   · {habit.reminderTime}
                 </span>
-              )}
+              ) : null}
             </div>
+
+            {isEditingReminder && onApplyReminderTime && (
+              <div className="mt-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Hora:</span>
+                <input
+                  type="time"
+                  value={tempReminderTime}
+                  onChange={(e) => setTempReminderTime(e.target.value)}
+                  className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs font-medium dark:[color-scheme:dark]"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    onApplyReminderTime(habit.id, tempReminderTime);
+                    setIsEditingReminder(false);
+                  }}
+                  className="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium cursor-pointer"
+                >
+                  Guardar
+                </button>
+                {habit.reminderTime && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onApplyReminderTime(habit.id, '');
+                      setTempReminderTime('');
+                      setIsEditingReminder(false);
+                    }}
+                    className="px-2 py-1 rounded text-rose-600 hover:text-rose-700 dark:text-rose-400 text-xs font-medium cursor-pointer"
+                  >
+                    Quitar
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsEditingReminder(false)}
+                  className="px-2 py-1 rounded text-slate-500 hover:text-slate-700 dark:text-slate-400 text-xs cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
 
             {deepWork && onOpenAmbientFocus ? (
               <button
                 type="button"
                 onClick={() => onOpenAmbientFocus(habit)}
-                title="Abrir Enfoque Ambiental"
-                className="group/focus text-left w-full mt-0.5 flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#17191c]/30 dark:focus-visible:ring-[#f1f5f9]/30 rounded"
+                title="Abrir Enfoque de Estudio"
+                className="group/focus text-left w-full mt-1 flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 rounded"
               >
                 <h3
-                  className={`text-[16px] sm:text-[17px] font-medium tracking-[-0.01em] line-clamp-2 md:truncate transition-colors ${
+                  className={`text-base sm:text-lg font-bold tracking-tight line-clamp-2 md:truncate transition-colors ${
                     isCompleted
-                      ? 'text-[#777b86] dark:text-[#6f7a8a] line-through'
-                      : 'text-[#17191c] dark:text-[#f1f5f9] group-hover/focus:underline underline-offset-4'
+                      ? 'text-slate-600 dark:text-slate-300'
+                      : 'text-slate-900 dark:text-white group-hover/focus:text-indigo-600 dark:group-hover/focus:text-indigo-400'
                   }`}
                 >
                   {habit.title}
                 </h3>
-                <Headphones className="w-3.5 h-3.5 text-[#4338CA] dark:text-[#a5b4fc] opacity-75 group-hover/focus:opacity-100 shrink-0 transition-opacity" />
+                <Headphones className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
               </button>
             ) : (
               <h3
-                className={`text-[16px] sm:text-[17px] font-medium tracking-[-0.01em] mt-0.5 line-clamp-2 md:truncate transition-colors ${
-                  isCompleted ? 'text-[#777b86] dark:text-[#6f7a8a] line-through' : 'text-[#17191c] dark:text-[#f1f5f9]'
+                className={`text-base sm:text-lg font-bold tracking-tight mt-1 line-clamp-2 md:truncate transition-colors ${
+                  isCompleted ? 'text-slate-600 dark:text-slate-300' : 'text-slate-900 dark:text-white'
                 }`}
               >
                 {habit.title}
               </h3>
             )}
 
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-[#777b86] dark:text-[#9aa4b2] mt-0.5">
-              <span className="tabular-nums">
-                {targetValue} {habit.unitLabel}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600 dark:text-slate-400 mt-1">
+              <span className="tabular-nums font-medium">
+                Meta: {targetValue} {habit.unitLabel}
               </span>
               {habit.notes && (
                 <>
-                  <span aria-hidden="true" className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
+                  <span aria-hidden="true" className="text-slate-300 dark:text-slate-700">·</span>
                   <button
                     type="button"
                     onClick={() => setNotesExpanded((prev) => !prev)}
-                    className="inline-flex items-center gap-1 text-[12px] font-medium text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 rounded px-1"
                   >
-                    <FileText className="w-3 h-3" />
-                    <span>{notesExpanded ? 'Ocultar notas' : 'Notas'}</span>
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>{notesExpanded ? 'Ocultar notas' : 'Ver notas'}</span>
                     {notesExpanded ? (
                       <ChevronUp className="w-3 h-3" />
                     ) : (
@@ -487,10 +538,10 @@ export const HabitCard: React.FC<Props> = ({
           {isCumulative ? (
             <div className="flex items-center gap-2">
               <div className="text-right mr-1">
-                <span className="text-[13px] font-medium text-[#17191c] dark:text-[#f1f5f9] tabular-nums">
+                <span className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
                   {completedValue}/{targetValue}
                 </span>
-                <span className="text-[11px] text-[#979799] dark:text-[#6f7a8a] block -mt-0.5">
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block -mt-0.5">
                   {habit.unitLabel}
                 </span>
               </div>
@@ -506,7 +557,7 @@ export const HabitCard: React.FC<Props> = ({
                   onClick={handleDecrement}
                   disabled={completedValue <= 0}
                   aria-label={`Restar 1 ${habit.unitLabel}`}
-                  className="w-9 h-9 rounded-full bg-white dark:bg-[#1b222b] hover:bg-[#f2f2f3] dark:hover:bg-[#252e3a] disabled:opacity-35 disabled:pointer-events-none text-[#17191c] dark:text-[#f1f5f9] flex items-center justify-center border border-[#ececec] dark:border-[#252e3a] transition-colors cursor-pointer"
+                  className="min-h-[44px] min-w-[44px] rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-800 dark:text-slate-200 flex items-center justify-center border border-slate-300 dark:border-slate-600 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
                 >
                   <Minus className="w-4 h-4 stroke-[2.25]" />
                 </button>
@@ -520,25 +571,16 @@ export const HabitCard: React.FC<Props> = ({
               >
                 <motion.button
                   type="button"
-                  whileTap={{ scale: 0.92 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleIncrement}
                   aria-label={`Sumar 1 ${habit.unitLabel}`}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center border transition-colors cursor-pointer ${
+                  className={`min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                     isCompleted
-                      ? 'text-white'
-                      : 'bg-[#ECFDF5] dark:bg-[#059669]/20 hover:bg-[#059669] hover:text-white border-[#059669]/30 dark:border-[#34d399]/35 text-[#047857] dark:text-[#34d399]'
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700'
+                      : 'bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
                   }`}
-                  style={
-                    isCompleted
-                      ? {
-                          backgroundColor: bioTheme.glowHex,
-                          borderColor: bioTheme.glowHex,
-                          boxShadow: `0 4px 14px -3px rgba(${bioTheme.rgb}, 0.5)`,
-                        }
-                      : undefined
-                  }
                 >
-                  <Plus className="w-4 h-4 stroke-[2.25]" />
+                  <Plus className="w-5 h-5 stroke-[2.25]" />
                 </motion.button>
               </ActionHint>
             </div>
@@ -555,26 +597,16 @@ export const HabitCard: React.FC<Props> = ({
             >
               <motion.button
                 type="button"
-                whileTap={{ scale: 0.9 }}
-                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleToggleSingle}
                 aria-label={isCompleted ? 'Marcar como pendiente' : 'Completar hábito'}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                className={`min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center transition-all cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
                   isCompleted
-                    ? 'text-white'
-                    : 'bg-white dark:bg-[#1b222b] text-transparent hover:text-[#059669] dark:hover:text-[#34d399] border-[#059669]/35 dark:border-[#34d399]/40 hover:border-[#059669]'
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700'
+                    : 'bg-white dark:bg-slate-800 text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 border-slate-300 dark:border-slate-600 hover:border-emerald-600'
                 }`}
-                style={
-                  isCompleted
-                    ? {
-                        backgroundColor: bioTheme.glowHex,
-                        borderColor: bioTheme.glowHex,
-                        boxShadow: `0 4px 14px -3px rgba(${bioTheme.rgb}, 0.5)`,
-                      }
-                    : undefined
-                }
               >
-                <Check className="w-5 h-5 stroke-[2.5]" />
+                <Check className={`w-5 h-5 stroke-[2.5] ${isCompleted ? 'text-white' : 'opacity-0 hover:opacity-100'}`} />
               </motion.button>
             </ActionHint>
           )}
@@ -585,7 +617,7 @@ export const HabitCard: React.FC<Props> = ({
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Opciones del hábito"
-              className="w-10 h-10 rounded-full flex items-center justify-center text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:bg-[#f2f2f3] dark:hover:bg-[#1b222b] transition-colors cursor-pointer"
+              className="min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
             >
               <MoreVertical className="w-5 h-5" />
             </button>

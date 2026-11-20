@@ -585,36 +585,78 @@ export const HabitModal: React.FC<Props> = ({
 
           {/* Reminder Time & Contextual Journaling Toggle */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-            <div>
-              <label className="block text-[13px] text-[#777b86] dark:text-[#9aa4b2] mb-1.5">
-                Hora de recordatorio (opcional)
+            <div className="space-y-1.5">
+              <label htmlFor="habit-reminder-time" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Hora de recordatorio (notificación)
               </label>
-              <input
-                type="time"
-                value={reminderTime}
-                onChange={(e) => setReminderTime(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-[16px] bg-white dark:bg-[#1b222b] border border-[#ececec] dark:border-[#252e3a] text-[#17191c] dark:text-[#f1f5f9] dark:[color-scheme:dark] text-[14px] focus:outline-none focus:border-[#059669] dark:focus:border-[#34d399]"
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  id="habit-reminder-time"
+                  type="time"
+                  value={reminderTime}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                  className="w-full min-h-[44px] px-3.5 py-2 rounded-lg glass-input text-sm font-medium focus:ring-2 focus:ring-indigo-600 focus:outline-none dark:[color-scheme:dark]"
+                />
+                {reminderTime && (
+                  <button
+                    type="button"
+                    onClick={() => setReminderTime('')}
+                    title="Quitar hora de recordatorio"
+                    className="min-h-[44px] px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors shrink-0 cursor-pointer"
+                  >
+                    Borrar
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Horas frecuentes:
+                <button
+                  type="button"
+                  onClick={() => setReminderTime('07:30')}
+                  className="ml-1 text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                >
+                  07:30
+                </button>
+                ,
+                <button
+                  type="button"
+                  onClick={() => setReminderTime('13:00')}
+                  className="ml-1 text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                >
+                  13:00
+                </button>
+                ,
+                <button
+                  type="button"
+                  onClick={() => setReminderTime('20:00')}
+                  className="ml-1 text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                >
+                  20:00
+                </button>
+              </p>
             </div>
 
-            <div>
-              <label className="block text-[13px] text-[#777b86] dark:text-[#9aa4b2] mb-1.5">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Diario contextual
               </label>
               <button
                 type="button"
                 onClick={() => setContextualJournalingEnabled((prev) => !prev)}
-                className={`w-full px-4 py-2.5 rounded-[16px] border text-left text-[13px] flex items-center justify-between transition-colors cursor-pointer ${
+                className={`w-full min-h-[44px] px-4 py-2.5 rounded-lg border text-left text-sm flex items-center justify-between transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
                   contextualJournalingEnabled
-                    ? 'bg-[#ECFDF5] dark:bg-[#059669]/18 border-[#059669] dark:border-[#34d399] text-[#047857] dark:text-[#34d399]'
-                    : 'bg-white dark:bg-[#1b222b] border-[#ececec] dark:border-[#252e3a] text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 font-semibold'
+                    : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <span>Energía y ánimo al completar</span>
-                <span className="font-medium">
+                <span className="font-semibold">
                   {contextualJournalingEnabled ? 'Activo' : 'Inactivo'}
                 </span>
               </button>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Permite registrar sensaciones al marcar el hábito.
+              </p>
             </div>
           </div>
 
