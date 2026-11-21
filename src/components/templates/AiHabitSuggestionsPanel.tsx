@@ -164,18 +164,18 @@ export const AiHabitSuggestionsPanel: React.FC<Props> = ({
         <header className="border-b border-slate-200 dark:border-slate-800 pb-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="min-w-0 space-y-2">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 px-3 py-1 rounded-md">
-                <Sparkles className="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#344E41] dark:text-[#D8F3DC] bg-[#D8F3DC] dark:bg-[#22332A] border border-[#84A98C]/40 px-3 py-1 rounded-md">
+                <Sparkles className="w-4 h-4 shrink-0 text-[#52796F] dark:text-[#84A98C]" />
                 <span>Asistente IA · Rutinas y Estudio</span>
               </div>
-              <h2 className="font-bold text-2xl sm:text-3xl text-slate-900 dark:text-white tracking-tight">
+              <h2 className="font-bold text-2xl sm:text-3xl text-[#344E41] dark:text-[#EAF4F4] tracking-tight">
                 Hábitos y Técnicas de Estudio Recomendadas
               </h2>
               <p className="text-base leading-relaxed text-slate-700 dark:text-slate-300 max-w-prose text-left">
                 {topInterestCategories.length > 0 ? (
                   <>
                     Adaptado a tus categorías prioritarias ({' '}
-                    <strong className="font-semibold text-slate-900 dark:text-white">
+                    <strong className="font-semibold text-[#344E41] dark:text-[#EAF4F4]">
                       {topInterestCategories.map((c) => c.name).join(', ')}
                     </strong>
                     ) para fortalecer tu concentración y consistencia sin duplicar temas.
@@ -190,7 +190,7 @@ export const AiHabitSuggestionsPanel: React.FC<Props> = ({
               type="button"
               disabled={isLoading || categories.length === 0}
               onClick={() => void loadSuggestions(true)}
-              className="min-h-[44px] px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium inline-flex items-center justify-center gap-2 whitespace-nowrap shrink-0 cursor-pointer disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed self-start lg:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 shadow-sm"
+              className="min-h-[44px] px-5 py-2.5 rounded-lg bg-[#52796F] hover:bg-[#344E41] text-white text-sm font-medium inline-flex items-center justify-center gap-2 whitespace-nowrap shrink-0 cursor-pointer disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed self-start lg:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 shadow-sm transition-colors"
             >
               <RefreshCw className={`w-4 h-4 shrink-0 ${isLoading ? 'animate-spin' : ''}`} />
               <span>{isLoading ? 'Analizando tu consulta...' : 'Generar nuevas ideas'}</span>
@@ -199,15 +199,15 @@ export const AiHabitSuggestionsPanel: React.FC<Props> = ({
         </header>
 
         {/* ZONA 2: ENTRADA / PREGUNTA DE INTERACCIÓN */}
-        <div className="space-y-4 rounded-lg bg-slate-50 dark:bg-slate-800/60 p-4 sm:p-5 border border-slate-200 dark:border-slate-700">
+        <div className="space-y-4 rounded-lg bg-[#EAF4F4] dark:bg-[#22332A]/60 p-4 sm:p-5 border border-[#84A98C]/30">
           <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1">
             <button
               type="button"
               onClick={() => setSelectedCatFilter('all')}
-              className={`min-h-[44px] px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-all border cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
+              className={`min-h-[44px] px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-all border cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 ${
                 selectedCatFilter === 'all'
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent font-semibold shadow-xs'
-                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  ? 'bg-[#52796F] text-white border-[#52796F] font-semibold shadow-xs'
+                  : 'bg-white dark:bg-[#1A2721] text-[#344E41] dark:text-[#EAF4F4] border-[#84A98C]/35 hover:bg-[#EAF4F4]'
               }`}
             >
               Todas las materias ({categories.length})
@@ -220,15 +220,15 @@ export const AiHabitSuggestionsPanel: React.FC<Props> = ({
                   key={profile.id}
                   type="button"
                   onClick={() => setSelectedCatFilter(profile.id)}
-                  className={`min-h-[44px] inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-all border cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
+                  className={`min-h-[44px] inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-all border cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 ${
                     isSelected
-                      ? 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700 font-bold'
-                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      ? 'bg-[#D8F3DC] dark:bg-[#22332A] text-[#344E41] dark:text-[#D8F3DC] border-[#84A98C] font-bold'
+                      : 'bg-white dark:bg-[#1A2721] text-[#344E41] dark:text-[#EAF4F4] border-[#84A98C]/35 hover:bg-[#EAF4F4]'
                   }`}
                 >
                   <span
                     className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: cat?.colorHex || '#4F46E5' }}
+                    style={{ backgroundColor: cat?.colorHex || '#52796F' }}
                   />
                   <span>{profile.name}</span>
                   {profile.habitCount > 0 && (
@@ -256,20 +256,20 @@ export const AiHabitSuggestionsPanel: React.FC<Props> = ({
                 onChange={(e) => setInterestNote(e.target.value)}
                 maxLength={140}
                 placeholder="Ej: Técnicas de estudio Pomodoro, lectura analítica de 20 min..."
-                className="w-full min-h-[44px] px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 transition-colors"
+                className="w-full min-h-[44px] px-4 py-2.5 rounded-lg bg-white dark:bg-[#1A2721] border border-[#84A98C]/35 text-[#344E41] dark:text-[#EAF4F4] placeholder-[#52796F]/60 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 transition-colors"
               />
             </div>
             <button
               type="submit"
               disabled={isLoading}
-              className="min-h-[44px] sm:self-end px-5 py-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 hover:bg-indigo-100 dark:hover:bg-indigo-900 border border-indigo-300 dark:border-indigo-700 text-sm font-semibold text-indigo-700 dark:text-indigo-300 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed"
+              className="min-h-[44px] sm:self-end px-5 py-2.5 rounded-lg bg-[#52796F] hover:bg-[#344E41] text-white text-sm font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 disabled:cursor-not-allowed"
             >
               Consultar IA
             </button>
           </form>
 
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            <span className="text-xs font-medium text-[#52796F] dark:text-[#84A98C]">
               Sugerencias de sesión:
             </span>
             {QUICK_INTEREST_PROMPTS.map((prompt) => {
@@ -280,10 +280,10 @@ export const AiHabitSuggestionsPanel: React.FC<Props> = ({
                   type="button"
                   disabled={isLoading}
                   onClick={() => handleQuickPrompt(prompt)}
-                  className={`min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
+                  className={`min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 ${
                     active
-                      ? 'bg-indigo-600 text-white border-indigo-700 font-bold'
-                      : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-slate-100'
+                      ? 'bg-[#52796F] text-white border-[#344E41] font-bold'
+                      : 'bg-white dark:bg-[#1A2721] border-[#84A98C]/30 text-[#344E41] dark:text-[#EAF4F4] hover:bg-[#EAF4F4]'
                   }`}
                 >
                   {prompt}

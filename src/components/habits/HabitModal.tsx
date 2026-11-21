@@ -595,7 +595,7 @@ export const HabitModal: React.FC<Props> = ({
                   type="time"
                   value={reminderTime}
                   onChange={(e) => setReminderTime(e.target.value)}
-                  className="w-full min-h-[44px] px-3.5 py-2 rounded-lg glass-input text-sm font-medium focus:ring-2 focus:ring-indigo-600 focus:outline-none dark:[color-scheme:dark]"
+                  className="w-full min-h-[44px] px-3.5 py-2 rounded-lg glass-input text-sm font-medium focus:ring-2 focus:ring-[#52796F] focus:outline-none dark:[color-scheme:dark]"
                 />
                 {reminderTime && (
                   <button
@@ -613,7 +613,7 @@ export const HabitModal: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={() => setReminderTime('07:30')}
-                  className="ml-1 text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                  className="ml-1 text-[#52796F] dark:text-[#84A98C] hover:underline font-medium"
                 >
                   07:30
                 </button>
@@ -621,7 +621,7 @@ export const HabitModal: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={() => setReminderTime('13:00')}
-                  className="ml-1 text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                  className="ml-1 text-[#52796F] dark:text-[#84A98C] hover:underline font-medium"
                 >
                   13:00
                 </button>
@@ -629,7 +629,7 @@ export const HabitModal: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={() => setReminderTime('20:00')}
-                  className="ml-1 text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                  className="ml-1 text-[#52796F] dark:text-[#84A98C] hover:underline font-medium"
                 >
                   20:00
                 </button>
@@ -643,9 +643,9 @@ export const HabitModal: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setContextualJournalingEnabled((prev) => !prev)}
-                className={`w-full min-h-[44px] px-4 py-2.5 rounded-lg border text-left text-sm flex items-center justify-between transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
+                className={`w-full min-h-[44px] px-4 py-2.5 rounded-lg border text-left text-sm flex items-center justify-between transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] ${
                   contextualJournalingEnabled
-                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 font-semibold'
+                    ? 'bg-[#D8F3DC] dark:bg-[#22332A] border-[#84A98C] text-[#344E41] dark:text-[#D8F3DC] font-semibold'
                     : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -667,7 +667,7 @@ export const HabitModal: React.FC<Props> = ({
                 <span className="text-[13px] text-[#777b86] dark:text-[#9aa4b2]">
                   Registro contextual de hoy
                 </span>
-                <span className="text-[12px] text-[#17191c] dark:text-[#34d399] font-medium">Completado hoy</span>
+                <span className="text-[12px] text-[#52796F] dark:text-[#84A98C] font-medium">Completado hoy</span>
               </div>
               <div className="grid grid-cols-5 gap-1.5">
                 {ENERGY_OPTIONS.map((opt) => {
@@ -679,7 +679,7 @@ export const HabitModal: React.FC<Props> = ({
                       onClick={() => setEnergyLevel(opt.level)}
                       className={`py-1.5 rounded-full border text-[12px] font-medium tabular-nums transition-colors cursor-pointer ${
                         selected
-                          ? 'bg-[#17191c] dark:bg-[#059669] border-[#17191c] dark:border-[#059669] text-white'
+                          ? 'bg-[#52796F] border-[#344E41] text-white font-bold'
                           : 'bg-white dark:bg-[#1b222b] border-[#ececec] dark:border-[#252e3a] text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
                       }`}
                       title={`Energía ${opt.level}/5 (${opt.shortLabel})`}
@@ -699,7 +699,7 @@ export const HabitModal: React.FC<Props> = ({
                       onClick={() => setMoodTag(opt.id)}
                       className={`px-3 py-1 rounded-full border text-[12px] transition-colors cursor-pointer ${
                         selected
-                          ? 'bg-[#17191c] dark:bg-[#059669] text-white border-[#17191c] dark:border-[#059669]'
+                          ? 'bg-[#52796F] text-white border-[#344E41] font-medium'
                           : 'bg-white dark:bg-[#1b222b] border-[#ececec] dark:border-[#252e3a] text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9]'
                       }`}
                     >
@@ -730,7 +730,7 @@ export const HabitModal: React.FC<Props> = ({
             </button>
             <button
               type="submit"
-              className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-[14px] font-medium text-center transition-colors cursor-pointer"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#52796F] hover:bg-[#344E41] text-white text-[14px] font-medium text-center transition-colors cursor-pointer"
             >
               {habitToEdit ? 'Guardar cambios' : 'Crear hábito'}
             </button>

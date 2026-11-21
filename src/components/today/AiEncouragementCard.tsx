@@ -22,28 +22,28 @@ const TONE_STYLES: Record<
   }
 > = {
   celebration: {
-    container: 'bg-white dark:bg-slate-900 border-emerald-300 dark:border-emerald-800',
-    iconBox: 'bg-emerald-600 text-white',
-    badge: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-    accentText: 'text-emerald-800 dark:text-emerald-300',
+    container: 'bg-white dark:bg-[#1A2721] border-[#84A98C]',
+    iconBox: 'bg-[#52796F] text-white',
+    badge: 'bg-[#D8F3DC] text-[#344E41] dark:bg-[#22332A] dark:text-[#D8F3DC] border-[#84A98C]/40',
+    accentText: 'text-[#344E41] dark:text-[#D8F3DC]',
   },
   momentum: {
-    container: 'bg-white dark:bg-slate-900 border-indigo-200 dark:border-indigo-800',
-    iconBox: 'bg-indigo-600 text-white',
-    badge: 'bg-indigo-50 text-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
-    accentText: 'text-indigo-800 dark:text-indigo-300',
+    container: 'bg-white dark:bg-[#1A2721] border-[#52796F]/40',
+    iconBox: 'bg-[#52796F] text-white',
+    badge: 'bg-[#EAF4F4] text-[#344E41] dark:bg-[#22332A] dark:text-[#EAF4F4] border-[#52796F]/30',
+    accentText: 'text-[#344E41] dark:text-[#EAF4F4]',
   },
   resilience: {
-    container: 'bg-white dark:bg-slate-900 border-amber-300 dark:border-amber-800',
-    iconBox: 'bg-amber-600 text-white',
-    badge: 'bg-amber-50 text-amber-900 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-    accentText: 'text-amber-900 dark:text-amber-300',
+    container: 'bg-white dark:bg-[#1A2721] border-[#84A98C]/50',
+    iconBox: 'bg-[#84A98C] text-white',
+    badge: 'bg-[#D8F3DC] text-[#344E41] dark:bg-[#22332A] dark:text-[#D8F3DC] border-[#84A98C]/40',
+    accentText: 'text-[#344E41] dark:text-[#D8F3DC]',
   },
   calm: {
-    container: 'bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800',
-    iconBox: 'bg-blue-600 text-white',
-    badge: 'bg-blue-50 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border-blue-200 dark:border-blue-800',
-    accentText: 'text-blue-800 dark:text-blue-300',
+    container: 'bg-white dark:bg-[#1A2721] border-[#84A98C]/35',
+    iconBox: 'bg-[#84A98C] text-white',
+    badge: 'bg-[#EAF4F4] text-[#344E41] dark:bg-[#22332A] dark:text-[#EAF4F4] border-[#84A98C]/30',
+    accentText: 'text-[#344E41] dark:text-[#EAF4F4]',
   },
 };
 

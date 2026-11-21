@@ -240,7 +240,7 @@ export const AuthModal: React.FC<Props> = ({
 
               <button
                 type="submit"
-                className="w-full mt-2 py-3 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-[15px] font-normal transition-colors cursor-pointer flex items-center justify-center gap-2"
+                className="w-full mt-2 py-3 rounded-full bg-[#52796F] hover:bg-[#344E41] text-white text-[15px] font-normal transition-colors cursor-pointer flex items-center justify-center gap-2"
               >
                 <KeyRound className="w-4 h-4" />
                 <span>Enviar código de recuperación</span>
@@ -253,7 +253,7 @@ export const AuthModal: React.FC<Props> = ({
                     setError(null);
                     setMode('login');
                   }}
-                  className="inline-flex items-center gap-1.5 text-[13px] text-[#059669] dark:text-[#34d399] font-medium hover:underline cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-[13px] text-[#52796F] dark:text-[#84A98C] font-medium hover:underline cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   Volver a iniciar sesión
@@ -293,7 +293,7 @@ export const AuthModal: React.FC<Props> = ({
 
               <button
                 type="submit"
-                className="w-full mt-2 py-3 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-[15px] font-normal transition-colors cursor-pointer"
+                className="w-full mt-2 py-3 rounded-full bg-[#52796F] hover:bg-[#344E41] text-white text-[15px] font-normal transition-colors cursor-pointer"
               >
                 Establecer nueva contraseña
               </button>
@@ -416,7 +416,7 @@ export const AuthModal: React.FC<Props> = ({
 
             <button
               type="submit"
-              className="w-full mt-2 py-3 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-[15px] font-normal transition-colors cursor-pointer"
+              className="w-full mt-2 py-3 rounded-full bg-[#52796F] hover:bg-[#344E41] text-white text-[15px] font-normal transition-colors cursor-pointer"
             >
               {mode === 'login' ? 'Entrar a mi cuenta' : 'Crear cuenta y comenzar'}
             </button>
@@ -428,7 +428,7 @@ export const AuthModal: React.FC<Props> = ({
             <button
               type="button"
               onClick={handleDemoLogin}
-              className="w-full py-2.5 rounded-full bg-transparent hover:bg-[#E0F2FE]/60 dark:hover:bg-[#0284C7]/15 border border-[#0284C7]/40 dark:border-[#38BDF8]/40 hover:border-[#0284C7] dark:hover:border-[#38BDF8] text-[14px] font-normal text-[#0369A1] dark:text-[#38bdf8] transition-colors cursor-pointer"
+              className="w-full py-2.5 rounded-full bg-transparent hover:bg-[#EAF4F4] dark:hover:bg-[#22332A] border border-[#84A98C]/40 hover:border-[#52796F] text-[14px] font-normal text-[#52796F] dark:text-[#84A98C] transition-colors cursor-pointer"
             >
               Acceder con cuenta demo (Alex)
             </button>
@@ -450,7 +450,7 @@ export const AuthModal: React.FC<Props> = ({
                     setSuccessNotice(null);
                     setMode('register');
                   }}
-                  className="text-[#059669] dark:text-[#34d399] font-medium hover:underline cursor-pointer"
+                  className="text-[#52796F] dark:text-[#84A98C] font-medium hover:underline cursor-pointer"
                 >
                   Regístrate gratis
                 </button>
@@ -465,7 +465,7 @@ export const AuthModal: React.FC<Props> = ({
                     setSuccessNotice(null);
                     setMode('login');
                   }}
-                  className="text-[#059669] dark:text-[#34d399] font-medium hover:underline cursor-pointer"
+                  className="text-[#52796F] dark:text-[#84A98C] font-medium hover:underline cursor-pointer"
                 >
                   Inicia sesión
                 </button>

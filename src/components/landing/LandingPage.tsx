@@ -242,10 +242,10 @@ export const LandingPage: React.FC<Props> = ({
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <span className="text-[12px] font-medium text-[#4F46E5] dark:text-[#a5b4fc] block">Mente &amp; Foco</span>
+                      <span className="text-[12px] font-medium text-[#52796F] dark:text-[#84A98C] block">Mente &amp; Foco</span>
                       <p
                         className={`text-[15px] font-medium mt-0.5 line-clamp-2 sm:truncate ${
-                          demoMeditation ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-[#17191c] dark:text-[#f1f5f9]'
+                          demoMeditation ? 'text-[#344E41] dark:text-[#D8F3DC] font-semibold' : 'text-[#344E41] dark:text-[#EAF4F4]'
                         }`}
                       >
                         Meditación consciente matutina
@@ -259,8 +259,8 @@ export const LandingPage: React.FC<Props> = ({
                       aria-label="Completar meditación de prueba"
                       className={`w-10 h-10 rounded-full flex items-center justify-center border transition-colors shrink-0 cursor-pointer ${
                         demoMeditation
-                          ? 'bg-[#059669] border-[#059669] text-white'
-                          : 'bg-white dark:bg-[#141920] border-[#059669]/40 dark:border-[#34d399]/45 text-transparent hover:border-[#059669] hover:text-[#059669] dark:hover:text-[#34d399]'
+                          ? 'bg-[#84A98C] border-[#52796F] text-white'
+                          : 'bg-white dark:bg-[#141920] border-[#84A98C]/40 dark:border-[#84A98C]/45 text-transparent hover:border-[#52796F] hover:text-[#52796F] dark:hover:text-[#84A98C]'
                       }`}
                     >
                       <Check className="w-5 h-5 stroke-[2.5]" />

@@ -144,16 +144,16 @@ export const RitualNotesMarkdown: React.FC<MarkdownRendererProps> = ({
                 type="button"
                 disabled={!onToggleCheckbox}
                 onClick={() => onToggleCheckbox?.(idx)}
-                className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
+                className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] ${
                   checked
-                    ? 'bg-emerald-600 border-emerald-600 text-white'
-                    : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-transparent hover:border-indigo-600'
+                    ? 'bg-[#84A98C] border-[#52796F] text-white'
+                    : 'bg-white dark:bg-[#1A2721] border-[#84A98C]/40 text-transparent hover:border-[#52796F]'
                 } ${onToggleCheckbox ? 'cursor-pointer' : 'cursor-default'}`}
                 aria-label={checked ? 'Tarea completada' : 'Tarea pendiente'}
               >
                 <Check className="w-3.5 h-3.5 stroke-[3]" />
               </button>
-              <span className={checked ? 'text-slate-500 dark:text-slate-400 font-medium' : 'text-slate-800 dark:text-slate-200 font-medium'}>
+              <span className={checked ? 'text-[#52796F] dark:text-[#84A98C] font-medium line-through' : 'text-[#344E41] dark:text-[#EAF4F4] font-medium'}>
                 {renderInlineMarkdown(taskMatch[2])}
               </span>
             </div>
@@ -164,8 +164,8 @@ export const RitualNotesMarkdown: React.FC<MarkdownRendererProps> = ({
         if (listMatch) {
           return (
             <div key={`l-${idx}`} className="flex items-start gap-2 pl-0.5">
-              <span className="text-indigo-600 dark:text-indigo-400 font-bold select-none leading-5">•</span>
-              <span className="text-slate-800 dark:text-slate-200 font-medium">{renderInlineMarkdown(listMatch[1])}</span>
+              <span className="text-[#52796F] dark:text-[#84A98C] font-bold select-none leading-5">•</span>
+              <span className="text-[#344E41] dark:text-[#EAF4F4] font-medium">{renderInlineMarkdown(listMatch[1])}</span>
             </div>
           );
         }
@@ -304,9 +304,9 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden focus-within:ring-2 focus-within:ring-indigo-600 transition-colors shadow-xs">
+    <div className="rounded-xl border border-[#84A98C]/30 dark:border-[#344E41] bg-white dark:bg-[#1A2721] overflow-hidden focus-within:ring-2 focus-within:ring-[#52796F] transition-colors shadow-xs">
       {/* Toolbar Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 border-b border-[#84A98C]/20 dark:border-[#344E41] bg-[#EAF4F4] dark:bg-[#22332A]">
         <div className="flex flex-wrap items-center gap-1">
           <button
             type="button"
@@ -316,7 +316,7 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
             }}
             title="Negrita (Ctrl+B)"
             aria-label="Negrita"
-            className="min-h-[44px] min-w-[44px] rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            className="min-h-[44px] min-w-[44px] rounded-lg text-[#344E41] dark:text-[#EAF4F4] hover:text-[#52796F] hover:bg-[#D8F3DC]/60 dark:hover:bg-[#1A2721] transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F]"
           >
             <Bold className="w-4 h-4 stroke-[2.25]" />
           </button>
@@ -328,7 +328,7 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
             }}
             title="Cursiva (Ctrl+I)"
             aria-label="Cursiva"
-            className="min-h-[44px] min-w-[44px] rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            className="min-h-[44px] min-w-[44px] rounded-lg text-[#344E41] dark:text-[#EAF4F4] hover:text-[#52796F] hover:bg-[#D8F3DC]/60 dark:hover:bg-[#1A2721] transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F]"
           >
             <Italic className="w-4 h-4 stroke-[2.25]" />
           </button>
@@ -340,7 +340,7 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
             }}
             title="Lista con viñetas"
             aria-label="Lista con viñetas"
-            className="min-h-[44px] min-w-[44px] rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            className="min-h-[44px] min-w-[44px] rounded-lg text-[#344E41] dark:text-[#EAF4F4] hover:text-[#52796F] hover:bg-[#D8F3DC]/60 dark:hover:bg-[#1A2721] transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F]"
           >
             <List className="w-4 h-4 stroke-[2.25]" />
           </button>
@@ -352,7 +352,7 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
             }}
             title="Lista de verificación"
             aria-label="Lista de verificación"
-            className="min-h-[44px] min-w-[44px] rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            className="min-h-[44px] min-w-[44px] rounded-lg text-[#344E41] dark:text-[#EAF4F4] hover:text-[#52796F] hover:bg-[#D8F3DC]/60 dark:hover:bg-[#1A2721] transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F]"
           >
             <ListChecks className="w-4 h-4 stroke-[2.25]" />
           </button>
@@ -364,35 +364,35 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
             }}
             title="Cita o reflexión"
             aria-label="Cita o reflexión"
-            className="min-h-[44px] min-w-[44px] rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            className="min-h-[44px] min-w-[44px] rounded-lg text-[#344E41] dark:text-[#EAF4F4] hover:text-[#52796F] hover:bg-[#D8F3DC]/60 dark:hover:bg-[#1A2721] transition-colors cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F]"
           >
             <Quote className="w-4 h-4 stroke-[2.25]" />
           </button>
 
-          <span aria-hidden="true" className="mx-1.5 h-5 w-px bg-slate-300 dark:bg-slate-700" />
+          <span aria-hidden="true" className="mx-1.5 h-5 w-px bg-[#84A98C]/30 dark:bg-[#344E41]" />
 
           <button
             type="button"
             onClick={insertTodayInsightBlock}
             title="Añadir aprendizaje con la fecha de hoy"
-            className="min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            className="min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-semibold text-[#52796F] dark:text-[#84A98C] hover:bg-[#D8F3DC]/60 dark:hover:bg-[#344E41]/40 inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F]"
           >
-            <CalendarPlus className="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+            <CalendarPlus className="w-4 h-4 shrink-0 text-[#52796F] dark:text-[#84A98C]" />
             <span>+ Insight de hoy</span>
           </button>
         </div>
 
         {/* Edit / Preview Segmented Control */}
-        <div role="tablist" aria-label="Modo de notas" className="flex items-center gap-1 p-1 rounded-lg bg-slate-200/70 dark:bg-slate-800 shrink-0">
+        <div role="tablist" aria-label="Modo de notas" className="flex items-center gap-1 p-1 rounded-lg bg-white dark:bg-[#1A2721] border border-[#84A98C]/30 shrink-0">
           <button
             type="button"
             role="tab"
             aria-selected={mode === 'edit'}
             onClick={() => setMode('edit')}
-            className={`min-h-[36px] px-3 py-1 rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
+            className={`min-h-[36px] px-3 py-1 rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] ${
               mode === 'edit'
-                ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs'
-                : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-[#52796F] text-white font-bold shadow-xs'
+                : 'text-[#344E41] dark:text-[#EAF4F4] hover:text-[#52796F]'
             }`}
           >
             <Edit3 className="w-3.5 h-3.5" />
@@ -403,10 +403,10 @@ export const RitualNotesEditor: React.FC<EditorProps> = ({
             role="tab"
             aria-selected={mode === 'preview'}
             onClick={() => setMode('preview')}
-            className={`min-h-[36px] px-3 py-1 rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 ${
+            className={`min-h-[36px] px-3 py-1 rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] ${
               mode === 'preview'
-                ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs'
-                : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-[#52796F] text-white font-bold shadow-xs'
+                : 'text-[#344E41] dark:text-[#EAF4F4] hover:text-[#52796F]'
             }`}
           >
             <Eye className="w-3.5 h-3.5" />

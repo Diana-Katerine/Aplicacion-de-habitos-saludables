@@ -294,11 +294,11 @@ export const TodayView: React.FC<Props> = ({
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Editorial Greeting Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[#84A98C]/25 dark:border-[#344E41]">
         <div className="min-w-0">
-          <span className="text-sm font-medium text-slate-600 dark:text-slate-400 block mb-1">{capitalizedDate}</span>
-          <h1 className="font-bold text-2xl sm:text-3xl md:text-4xl leading-tight tracking-tight text-slate-900 dark:text-white break-words">
-            {greeting}, <span className="text-indigo-600 dark:text-indigo-400">{firstName}</span>
+          <span className="text-sm font-medium text-[#52796F] dark:text-[#84A98C] block mb-1">{capitalizedDate}</span>
+          <h1 className="font-bold text-2xl sm:text-3xl md:text-4xl leading-tight tracking-tight text-[#344E41] dark:text-[#EAF4F4] break-words">
+            {greeting}, <span className="text-[#52796F] dark:text-[#84A98C]">{firstName}</span>
           </h1>
         </div>
 
@@ -306,16 +306,16 @@ export const TodayView: React.FC<Props> = ({
           <button
             type="button"
             onClick={onOpenWeeklyReflection}
-            className="min-h-[44px] px-4 py-2 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-sm font-medium text-slate-800 dark:text-slate-100 transition-colors inline-flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+            className="min-h-[44px] px-4 py-2 rounded-lg bg-white dark:bg-[#22332A] hover:bg-[#EAF4F4] dark:hover:bg-[#1A2721] border border-[#84A98C]/35 text-sm font-medium text-[#344E41] dark:text-[#EAF4F4] transition-colors inline-flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2"
           >
-            <Compass className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <Compass className="w-4 h-4 text-[#52796F] dark:text-[#84A98C]" />
             <span>Reflexión semanal</span>
           </button>
 
           <button
             type="button"
             onClick={onOpenCreateModal}
-            className="min-h-[44px] px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-all inline-flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 shadow-sm"
+            className="min-h-[44px] px-4 py-2 rounded-lg bg-[#52796F] hover:bg-[#344E41] text-white text-sm font-medium transition-all inline-flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 shadow-sm"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Nuevo hábito</span>
@@ -333,16 +333,16 @@ export const TodayView: React.FC<Props> = ({
         />
 
         {weeklyFocus && (
-          <div className="p-4 sm:p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-4 gap-y-2 text-sm shadow-xs">
+          <div className="p-4 sm:p-5 rounded-xl bg-white dark:bg-[#1A2721] border border-[#84A98C]/30 dark:border-[#344E41] flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-4 gap-y-2 text-sm shadow-xs">
             <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-              <Compass className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5 sm:mt-0" />
-              <span className="text-indigo-700 dark:text-indigo-300 font-semibold shrink-0">Meta Semanal:</span>
-              <span className="text-slate-800 dark:text-slate-200 break-words sm:truncate">{weeklyFocus.intent}</span>
+              <Compass className="w-5 h-5 text-[#52796F] dark:text-[#84A98C] shrink-0 mt-0.5 sm:mt-0" />
+              <span className="text-[#52796F] dark:text-[#84A98C] font-semibold shrink-0">Meta Semanal:</span>
+              <span className="text-[#344E41] dark:text-[#EAF4F4] break-words sm:truncate">{weeklyFocus.intent}</span>
             </div>
             <button
               type="button"
               onClick={onOpenWeeklyReflection}
-              className="min-h-[36px] px-3 py-1 rounded-md text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ml-auto"
+              className="min-h-[36px] px-3 py-1 rounded-md text-sm font-medium text-[#52796F] dark:text-[#84A98C] hover:text-[#344E41] dark:hover:text-white hover:underline whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 ml-auto"
             >
               Revisar →
             </button>
@@ -351,28 +351,28 @@ export const TodayView: React.FC<Props> = ({
       </div>
 
       {/* Unified Single-Row Hairline Summary Bar */}
-      <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
+      <div className="rounded-xl bg-white dark:bg-[#1A2721] border border-[#84A98C]/30 dark:border-[#344E41] shadow-sm overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#84A98C]/20 dark:divide-[#344E41]">
           <div className="p-6 min-w-0">
             <div className="flex items-center justify-between gap-2 text-sm">
-              <span className="text-slate-600 dark:text-slate-400 font-medium">Progreso de hoy</span>
-              <span className="font-semibold text-emerald-700 dark:text-emerald-400 tabular-nums shrink-0">
+              <span className="text-[#52796F] dark:text-[#84A98C] font-medium">Progreso de hoy</span>
+              <span className="font-semibold text-[#52796F] dark:text-[#84A98C] tabular-nums shrink-0">
                 {completedCount}/{totalScheduled}
               </span>
             </div>
             <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-400 tracking-tight tabular-nums">
+              <span className="text-3xl font-bold text-[#344E41] dark:text-[#D8F3DC] tracking-tight tabular-nums">
                 {completionPercentage}%
               </span>
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              <span className="text-xs font-medium text-[#52796F] dark:text-[#84A98C]">
                 {completionPercentage === 100
                   ? 'Todo completado'
                   : `${totalScheduled - completedCount} pendientes`}
               </span>
             </div>
-            <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 mt-3 overflow-hidden border border-slate-200 dark:border-slate-700">
+            <div className="w-full h-2 rounded-full bg-[#EAF4F4] dark:bg-[#22332A] mt-3 overflow-hidden border border-[#84A98C]/30">
               <motion.div
-                className="h-full rounded-full bg-emerald-600 dark:bg-emerald-500"
+                className="h-full rounded-full bg-[#84A98C]"
                 initial={{ width: 0 }}
                 animate={{ width: `${completionPercentage}%` }}
                 transition={{ duration: 0.45, ease: 'easeOut' }}
@@ -381,23 +381,23 @@ export const TodayView: React.FC<Props> = ({
           </div>
 
           <div className="p-6 flex flex-col justify-center min-w-0">
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Racha activa</span>
+            <span className="text-sm font-medium text-[#52796F] dark:text-[#84A98C]">Racha activa</span>
             <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="text-3xl font-bold text-amber-700 dark:text-amber-400 tracking-tight tabular-nums inline-flex items-center gap-2">
-                <Flame className="w-6 h-6 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span className="text-3xl font-bold text-[#344E41] dark:text-[#D8F3DC] tracking-tight tabular-nums inline-flex items-center gap-2">
+                <Flame className="w-6 h-6 text-[#52796F] dark:text-[#84A98C] shrink-0" />
                 {maxStreak}
               </span>
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">días consecutivos</span>
+              <span className="text-sm font-medium text-[#52796F] dark:text-[#84A98C]">días consecutivos</span>
             </div>
           </div>
 
           <div className="p-6 flex flex-col justify-center min-w-0">
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Constancia 7 días</span>
+            <span className="text-sm font-medium text-[#52796F] dark:text-[#84A98C]">Constancia 7 días</span>
             <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="text-3xl font-bold text-indigo-700 dark:text-indigo-400 tracking-tight tabular-nums">
+              <span className="text-3xl font-bold text-[#344E41] dark:text-[#D8F3DC] tracking-tight tabular-nums">
                 {realWeeklyRate}%
               </span>
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400 tabular-nums">
+              <span className="text-sm font-medium text-[#52796F] dark:text-[#84A98C] tabular-nums">
                 {past7Totals.completed}/{past7Totals.scheduled} metas
               </span>
             </div>
@@ -428,16 +428,16 @@ export const TodayView: React.FC<Props> = ({
       {/* Single Blush Peach Editorial Celebration Banner when 100% completed */}
       <AnimatePresence>
         {isAllCompleted && (
-          <div className="rounded-xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 shadow-sm">
+          <div className="rounded-xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#D8F3DC]/70 dark:bg-[#22332A] border border-[#84A98C]/40 shadow-sm">
             <div className="flex items-start sm:items-center gap-4 min-w-0">
-              <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <div className="w-12 h-12 rounded-xl bg-[#52796F] text-white flex items-center justify-center shrink-0 shadow-xs">
                 <CheckCircle className="w-6 h-6 stroke-[2.5]" />
               </div>
               <div className="min-w-0 space-y-1">
-                <h4 className="font-bold text-xl sm:text-2xl text-emerald-950 dark:text-emerald-100 tracking-tight">
+                <h4 className="font-bold text-xl sm:text-2xl text-[#344E41] dark:text-[#D8F3DC] tracking-tight">
                   Día completado al 100%
                 </h4>
-                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300 max-w-prose text-left">
+                <p className="text-sm font-medium text-[#52796F] dark:text-[#84A98C] max-w-prose text-left">
                   Has completado todos tus rituales programados para hoy. Tu disciplina alimenta tu libertad.
                 </p>
               </div>
@@ -450,10 +450,10 @@ export const TodayView: React.FC<Props> = ({
                   particleCount: 55,
                   spread: 60,
                   origin: { y: 0.5 },
-                  colors: ['#059669', '#10b981', '#f59e0b', '#0284c7', '#fbe1d1'],
+                  colors: ['#52796F', '#84A98C', '#D8F3DC', '#EAF4F4', '#344E41'],
                 });
               }}
-              className="min-h-[44px] px-6 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 shadow-sm flex items-center justify-center"
+              className="min-h-[44px] px-6 py-2.5 rounded-lg bg-[#52796F] hover:bg-[#344E41] text-white text-sm font-medium transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 shadow-sm flex items-center justify-center"
             >
               Celebrar
             </button>
@@ -464,16 +464,16 @@ export const TodayView: React.FC<Props> = ({
       {/* Segmented Filter Bar & Habit List */}
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div role="tablist" aria-label="Filtrar hábitos" className="inline-flex items-center gap-1.5 p-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 self-start max-w-full overflow-x-auto">
+          <div role="tablist" aria-label="Filtrar hábitos" className="inline-flex items-center gap-1.5 p-1 rounded-lg bg-[#EAF4F4] dark:bg-[#22332A] border border-[#84A98C]/30 self-start max-w-full overflow-x-auto">
             <button
               type="button"
               role="tab"
               aria-selected={filter === 'all'}
               onClick={() => setFilter('all')}
-              className={`min-h-[44px] px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
+              className={`min-h-[44px] px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 ${
                 filter === 'all'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs border border-slate-200 dark:border-slate-600'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#52796F] text-white font-bold shadow-xs border border-[#52796F]'
+                  : 'text-[#52796F] dark:text-[#84A98C] hover:text-[#344E41] dark:hover:text-white'
               }`}
             >
               Todos ({totalScheduled})
@@ -483,10 +483,10 @@ export const TodayView: React.FC<Props> = ({
               role="tab"
               aria-selected={filter === 'pending'}
               onClick={() => setFilter('pending')}
-              className={`min-h-[44px] px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
+              className={`min-h-[44px] px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 ${
                 filter === 'pending'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs border border-slate-200 dark:border-slate-600'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#52796F] text-white font-bold shadow-xs border border-[#52796F]'
+                  : 'text-[#52796F] dark:text-[#84A98C] hover:text-[#344E41] dark:hover:text-white'
               }`}
             >
               Pendientes ({pendingHabits.length})
@@ -496,10 +496,10 @@ export const TodayView: React.FC<Props> = ({
               role="tab"
               aria-selected={filter === 'completed'}
               onClick={() => setFilter('completed')}
-              className={`min-h-[44px] px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${
+              className={`min-h-[44px] px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 ${
                 filter === 'completed'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs border border-slate-200 dark:border-slate-600'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#52796F] text-white font-bold shadow-xs border border-[#52796F]'
+                  : 'text-[#52796F] dark:text-[#84A98C] hover:text-[#344E41] dark:hover:text-white'
               }`}
             >
               Completados ({completedCount})
@@ -507,8 +507,8 @@ export const TodayView: React.FC<Props> = ({
           </div>
 
           {orderSavedFlash && (
-            <span className="text-sm text-emerald-700 dark:text-emerald-400 font-semibold inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-md border border-emerald-200 dark:border-emerald-800">
-              <Check className="w-4 h-4 shrink-0" />
+            <span className="text-sm text-[#344E41] dark:text-[#D8F3DC] font-semibold inline-flex items-center gap-1.5 bg-[#D8F3DC] dark:bg-[#22332A] px-3 py-1.5 rounded-md border border-[#84A98C]/50">
+              <Check className="w-4 h-4 shrink-0 text-[#52796F]" />
               Secuencia guardada
             </span>
           )}
