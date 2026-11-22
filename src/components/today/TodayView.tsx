@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import confetti from 'canvas-confetti';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'motion/react';
 import {
   Flame,
@@ -12,6 +11,7 @@ import {
 import { AiEncouragementMessage, DailyFocus, HabitWithTodayLog, User, WeeklyFocus } from '../../types';
 import { AdaptiveReminderSuggestion } from '../../services/reminders';
 import { StreakMilestone } from '../../services/streakMilestones';
+import { triggerCelebrationConfetti } from '../../services/confetti';
 import {
   formatLocalizedDate,
   getGreetingFirstName,
@@ -216,16 +216,12 @@ export const TodayView: React.FC<Props> = ({
   React.useEffect(() => {
     if (isAllCompleted && !hasCelebrated) {
       setHasCelebrated(true);
-      try {
-        confetti({
-          particleCount: 80,
-          spread: 65,
-          origin: { y: 0.6 },
-          colors: ['#059669', '#10b981', '#f59e0b', '#0284c7', '#fbe1d1'],
-        });
-      } catch (e) {
-        console.error(e);
-      }
+      void triggerCelebrationConfetti({
+        particleCount: 80,
+        spread: 65,
+        origin: { y: 0.6 },
+        colors: ['#52796F', '#84A98C', '#D8F3DC', '#EAF4F4', '#344E41'],
+      });
     } else if (!isAllCompleted) {
       setHasCelebrated(false);
     }
@@ -446,7 +442,7 @@ export const TodayView: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => {
-                confetti({
+                void triggerCelebrationConfetti({
                   particleCount: 55,
                   spread: 60,
                   origin: { y: 0.5 },

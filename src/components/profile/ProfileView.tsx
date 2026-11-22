@@ -231,6 +231,10 @@ export const ProfileView: React.FC<Props> = ({
                 <img
                   src={avatarUrl}
                   alt={user.fullName}
+                  loading="lazy"
+                  decoding="async"
+                  width={64}
+                  height={64}
                   className="w-16 h-16 rounded-full object-cover border border-[#ececec] dark:border-[#252e3a] shadow-xs"
                 />
               ) : (
@@ -298,7 +302,15 @@ export const ProfileView: React.FC<Props> = ({
                       }}
                       className="w-6 h-6 rounded-full overflow-hidden border border-[#ececec] dark:border-[#252e3a] hover:scale-110 transition-transform cursor-pointer"
                     >
-                      <img src={preset} alt={`Avatar preset ${idx + 1}`} className="w-full h-full object-cover" />
+                      <img
+                        src={preset}
+                        alt={`Avatar preset ${idx + 1}`}
+                        loading="lazy"
+                        decoding="async"
+                        width={24}
+                        height={24}
+                        className="w-full h-full object-cover"
+                      />
                     </button>
                   ))}
                 </div>

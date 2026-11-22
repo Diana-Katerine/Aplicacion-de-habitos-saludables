@@ -177,6 +177,10 @@ export const Navbar: React.FC<Props> = ({
                     <img
                       src={user.avatarUrl}
                       alt={user.fullName}
+                      loading="lazy"
+                      decoding="async"
+                      width={44}
+                      height={44}
                       className="w-full h-full object-cover"
                     />
                   ) : (

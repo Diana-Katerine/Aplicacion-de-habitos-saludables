@@ -15,18 +15,22 @@ export default defineConfig(() => {
       rollupOptions: {
         output: {
           manualChunks(id: string) {
-            if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom')) {
-                return 'vendor-react';
-              }
-              if (id.includes('recharts') || id.includes('d3')) {
-                return 'vendor-charts';
-              }
-              if (id.includes('lucide-react')) {
+            const normalizedId = id.replace(/\\/g, '/');
+            if (normalizedId.includes('node_modules')) {
+              if (normalizedId.includes('lucide-react')) {
                 return 'vendor-icons';
               }
-              if (id.includes('motion')) {
+              if (normalizedId.includes('/react/') || normalizedId.includes('/react-dom/') || normalizedId.includes('/react-is/')) {
+                return 'vendor-react';
+              }
+              if (normalizedId.includes('recharts') || normalizedId.includes('/d3-') || normalizedId.includes('/d3/')) {
+                return 'vendor-charts';
+              }
+              if (normalizedId.includes('motion')) {
                 return 'vendor-motion';
+              }
+              if (normalizedId.includes('jspdf') || normalizedId.includes('html2canvas') || normalizedId.includes('dompurify')) {
+                return 'vendor-pdf';
               }
             }
           },

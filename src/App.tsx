@@ -1,5 +1,4 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import confetti from 'canvas-confetti';
 import { AiEncouragementMessage, AiHabitSuggestion, Challenge, DailyFocus, EnergyLevel, EvaluatedBadge, Habit, HabitLog, HabitWithTodayLog, MoodTag, User, ViewRoute, WeeklyFocus } from './types';
 import { StorageService, getSundayWeekKey, getTodayDateString, isTodaySunday } from './services/storage';
 import { getGreetingFirstName, getSpanishGreeting, getTimeOfDayPeriod, resolveDisplayName } from './services/greeting';
@@ -22,21 +21,23 @@ import {
   tryDispatchBrowserPushNotification,
 } from './services/reminders';
 import { Navbar } from './components/layout/Navbar';
-import { TodayView } from './components/today/TodayView';
-import { HabitModal, JournalSavePayload } from './components/habits/HabitModal';
+import type { JournalSavePayload } from './components/habits/HabitModal';
 import { getMoodMeta } from './services/journaling';
-import { AuthModal } from './components/auth/AuthModal';
-import { WeeklyReflectionModal } from './components/today/WeeklyReflectionModal';
 import { ToastContainer, ToastMessage } from './components/common/Toast';
-import { AccessibilityWidget } from './components/common/AccessibilityWidget';
+import { triggerCelebrationConfetti } from './services/confetti';
 
-// Lazy loading de vistas secundarias para optimizar el rendimiento y bundle inicial en intranet
+// Lazy loading modular de vistas y modales para optimizar la carga inicial en intranet
+const TodayView = lazy(() => import('./components/today/TodayView').then(m => ({ default: m.TodayView })));
 const LandingPage = lazy(() => import('./components/landing/LandingPage').then(m => ({ default: m.LandingPage })));
 const HabitsView = lazy(() => import('./components/habits/HabitsView').then(m => ({ default: m.HabitsView })));
 const StatsView = lazy(() => import('./components/stats/StatsView').then(m => ({ default: m.StatsView })));
 const ChallengesView = lazy(() => import('./components/challenges/ChallengesView').then(m => ({ default: m.ChallengesView })));
 const TemplatesView = lazy(() => import('./components/templates/TemplatesView').then(m => ({ default: m.TemplatesView })));
 const ProfileView = lazy(() => import('./components/profile/ProfileView').then(m => ({ default: m.ProfileView })));
+const HabitModal = lazy(() => import('./components/habits/HabitModal').then(m => ({ default: m.HabitModal })));
+const AuthModal = lazy(() => import('./components/auth/AuthModal').then(m => ({ default: m.AuthModal })));
+const WeeklyReflectionModal = lazy(() => import('./components/today/WeeklyReflectionModal').then(m => ({ default: m.WeeklyReflectionModal })));
+const AccessibilityWidget = lazy(() => import('./components/common/AccessibilityWidget').then(m => ({ default: m.AccessibilityWidget })));
 
 const THEME_STORAGE_KEY = 'impulso_diario_theme';
 
@@ -339,16 +340,12 @@ export default function App() {
           ...prev,
           [habitId]: reachedMilestone,
         }));
-        try {
-          confetti({
-            particleCount: 70,
-            spread: 68,
-            origin: { y: 0.62 },
-            colors: ['#10b981', '#8b5cf6', '#f59e0b', '#06b6d4', '#f43f5e'],
-          });
-        } catch {
-          // ignore confetti canvas error
-        }
+        void triggerCelebrationConfetti({
+          particleCount: 70,
+          spread: 68,
+          origin: { y: 0.62 },
+          colors: ['#52796F', '#84A98C', '#D8F3DC', '#EAF4F4', '#344E41'],
+        });
       }
 
       // Toast feedback & Contextual Journaling prompt
@@ -984,16 +981,12 @@ export default function App() {
                   ...prev,
                   [habitId]: milestone,
                 }));
-                try {
-                  confetti({
-                    particleCount: 45,
-                    spread: 55,
-                    origin: { y: 0.65 },
-                    colors: ['#10b981', '#8b5cf6', '#f59e0b', '#06b6d4', '#f43f5e'],
-                  });
-                } catch {
-                  // ignore confetti errors
-                }
+                void triggerCelebrationConfetti({
+                  particleCount: 45,
+                  spread: 55,
+                  origin: { y: 0.65 },
+                  colors: ['#52796F', '#84A98C', '#D8F3DC', '#EAF4F4', '#344E41'],
+                });
               }}
             />
           )}
@@ -1101,84 +1094,96 @@ export default function App() {
       </footer>
 
       {/* Habit Create / Edit & Contextual Journaling Modal */}
-      <HabitModal
-        isOpen={isHabitModalOpen || Boolean(journalPrompt)}
-        onClose={() => {
-          const skippedJournalHabit = journalPrompt?.habit;
-          setIsHabitModalOpen(false);
-          setHabitToEdit(null);
-          setJournalPrompt(null);
-          if (skippedJournalHabit && user) {
-            void triggerAiEncouragement({
-              activeUser: user,
-              habitsList: todayHabits,
-              focus: dailyFocus,
-              trigger: 'habit_completed',
-              habitTitle: skippedJournalHabit.title,
-              habitStreak: skippedJournalHabit.currentStreak,
-              showToast: true,
-            });
-          }
-        }}
-        categories={categories}
-        habitToEdit={habitToEdit}
-        mode={journalPrompt ? 'journal' : 'habit'}
-        journalHabit={journalPrompt?.habit || null}
-        journalLog={
-          journalPrompt
-            ? journalPrompt.log
-            : habitToEdit && user
-            ? allLogs.find(
-                (l) =>
-                  l.habitId === habitToEdit.id &&
-                  l.logDate === getTodayDateString(user.timezone)
-              ) || null
-            : null
-        }
-        onSaveJournal={handleSaveJournal}
-        onSave={handleSaveHabit}
-      />
+      {(isHabitModalOpen || Boolean(journalPrompt)) && (
+        <Suspense fallback={null}>
+          <HabitModal
+            isOpen={isHabitModalOpen || Boolean(journalPrompt)}
+            onClose={() => {
+              const skippedJournalHabit = journalPrompt?.habit;
+              setIsHabitModalOpen(false);
+              setHabitToEdit(null);
+              setJournalPrompt(null);
+              if (skippedJournalHabit && user) {
+                void triggerAiEncouragement({
+                  activeUser: user,
+                  habitsList: todayHabits,
+                  focus: dailyFocus,
+                  trigger: 'habit_completed',
+                  habitTitle: skippedJournalHabit.title,
+                  habitStreak: skippedJournalHabit.currentStreak,
+                  showToast: true,
+                });
+              }
+            }}
+            categories={categories}
+            habitToEdit={habitToEdit}
+            mode={journalPrompt ? 'journal' : 'habit'}
+            journalHabit={journalPrompt?.habit || null}
+            journalLog={
+              journalPrompt
+                ? journalPrompt.log
+                : habitToEdit && user
+                ? allLogs.find(
+                    (l) =>
+                      l.habitId === habitToEdit.id &&
+                      l.logDate === getTodayDateString(user.timezone)
+                  ) || null
+                : null
+            }
+            onSaveJournal={handleSaveJournal}
+            onSave={handleSaveHabit}
+          />
+        </Suspense>
+      )}
 
       {/* Auth Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        initialMode={authMode}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={(loggedUser) => {
-          setUser(loggedUser);
-          setCurrentRoute('today');
-          refreshData(loggedUser);
-          const greeting = getSpanishGreeting(loggedUser.timezone);
-          const firstName = getGreetingFirstName(loggedUser.fullName, loggedUser.email);
-          addToast({
-            type: 'success',
-            title: `¡${greeting}, ${firstName}!`,
-            description: 'Nos alegra verte de nuevo. Tu rutina de hoy está lista.',
-          });
-        }}
-      />
+      {isAuthModalOpen && (
+        <Suspense fallback={null}>
+          <AuthModal
+            isOpen={isAuthModalOpen}
+            initialMode={authMode}
+            onClose={() => setIsAuthModalOpen(false)}
+            onSuccess={(loggedUser) => {
+              setUser(loggedUser);
+              setCurrentRoute('today');
+              refreshData(loggedUser);
+              const greeting = getSpanishGreeting(loggedUser.timezone);
+              const firstName = getGreetingFirstName(loggedUser.fullName, loggedUser.email);
+              addToast({
+                type: 'success',
+                title: `¡${greeting}, ${firstName}!`,
+                description: 'Nos alegra verte de nuevo. Tu rutina de hoy está lista.',
+              });
+            }}
+          />
+        </Suspense>
+      )}
 
       {/* Sunday Weekly Reflection & Upcoming Week Focus Modal */}
-      {user && (
-        <WeeklyReflectionModal
-          isOpen={isWeeklyReflectionOpen}
-          habits={allHabits}
-          logs={allLogs}
-          categories={categories}
-          badges={badges}
-          timezone={user.timezone}
-          userName={user.fullName}
-          existingWeeklyFocus={weeklyFocus}
-          onSaveWeeklyFocus={handleSaveWeeklyFocus}
-          onDismiss={handleDismissWeeklyReflection}
-        />
+      {user && isWeeklyReflectionOpen && (
+        <Suspense fallback={null}>
+          <WeeklyReflectionModal
+            isOpen={isWeeklyReflectionOpen}
+            habits={allHabits}
+            logs={allLogs}
+            categories={categories}
+            badges={badges}
+            timezone={user.timezone}
+            userName={user.fullName}
+            existingWeeklyFocus={weeklyFocus}
+            onSaveWeeklyFocus={handleSaveWeeklyFocus}
+            onDismiss={handleDismissWeeklyReflection}
+          />
+        </Suspense>
       )}
 
       {/* Global Toast Alerts */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* Control Flotante Global de Accesibilidad */}
-      <AccessibilityWidget />
+      <Suspense fallback={null}>
+        <AccessibilityWidget />
+      </Suspense>
     </div>
   );
 }
