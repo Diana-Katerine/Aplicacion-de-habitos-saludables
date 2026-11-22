@@ -407,7 +407,7 @@ export const AiHabitSuggestionsPanel: React.FC<Props> = ({
                         <span className="font-bold text-slate-900 dark:text-white block">
                           {sug.targetValue} {sug.unitLabel} / día
                         </span>
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                        <span translate="no" className="notranslate text-xs font-medium text-slate-500 dark:text-slate-400">
                           {formatScheduledDaysShort(sug.scheduledDays)}
                         </span>
                       </div>

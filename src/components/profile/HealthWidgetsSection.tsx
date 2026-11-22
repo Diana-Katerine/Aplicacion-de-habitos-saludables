@@ -420,7 +420,8 @@ export const HealthWidgetsSection: React.FC<Props> = ({
                           />
                         </div>
                         <span
-                          className={`text-[10px] tabular-nums ${
+                          translate="no"
+                          className={`notranslate text-[10px] tabular-nums select-none ${
                             day.isToday
                               ? 'font-semibold text-[#D97706] dark:text-[#fbbf24]'
                               : 'text-[#979799] dark:text-[#6f7a8a]'
@@ -663,7 +664,8 @@ export const HealthWidgetsSection: React.FC<Props> = ({
                         />
                       </div>
                       <span
-                        className={`text-[10px] tabular-nums ${
+                        translate="no"
+                        className={`notranslate text-[10px] tabular-nums select-none ${
                           day.isToday
                             ? 'font-semibold text-[#0284C7] dark:text-[#38bdf8]'
                             : 'text-[#979799] dark:text-[#6f7a8a]'

@@ -289,9 +289,9 @@ export const HistoricalStreaksHeatmap: React.FC<Props> = ({
           </div>
 
           <div className="flex gap-2">
-            <div className="grid grid-rows-7 gap-1.5 text-[10px] font-medium text-[#979799] dark:text-[#6f7a8a] pr-1 select-none w-4">
+            <div className="grid grid-rows-7 gap-1.5 text-[10px] font-medium text-[#979799] dark:text-[#6f7a8a] pr-1 select-none w-4" translate="no">
               {WEEKDAY_ROW_LABELS.map((label, idx) => (
-                <span key={idx} className="h-[18px] md:h-5 flex items-center justify-end">
+                <span key={idx} translate="no" className="notranslate h-[18px] md:h-5 flex items-center justify-end select-none">
                   {label}
                 </span>
               ))}

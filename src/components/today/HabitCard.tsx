@@ -475,13 +475,14 @@ export const HabitCard: React.FC<Props> = ({
         </div>
 
         {/* Center: Clean Unboxed 7-Day Trailing Matrix */}
-        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 self-start md:self-center shrink-0">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 self-start md:self-center shrink-0" translate="no">
           {habit.past7Days.map((day, idx) => {
             const isToday = idx === habit.past7Days.length - 1;
             return (
               <div key={day.date} className="flex flex-col items-center gap-1">
                 <span
-                  className={`text-[10px] ${
+                  translate="no"
+                  className={`notranslate text-[10px] select-none ${
                     isToday ? 'text-[#17191c] dark:text-[#f1f5f9] font-semibold' : 'text-[#979799] dark:text-[#6f7a8a]'
                   }`}
                 >

@@ -529,47 +529,56 @@ export const HabitModal: React.FC<Props> = ({
               <label className="block text-[13px] text-[#777b86] dark:text-[#9aa4b2]">
                 Días programados *
               </label>
-              <div className="flex items-center gap-2 text-[12px]">
+              <div className="flex items-center gap-2 text-[12px]" translate="no">
                 <button
                   type="button"
+                  translate="no"
                   onClick={() => setPresetDays('all')}
-                  className="text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] transition-colors cursor-pointer"
+                  className="notranslate text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] transition-colors cursor-pointer"
                 >
                   Todos
                 </button>
-                <span className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
+                <span className="text-[#a3a6af] dark:text-[#6f7a8a]" aria-hidden="true">·</span>
                 <button
                   type="button"
+                  translate="no"
                   onClick={() => setPresetDays('weekdays')}
-                  className="text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] transition-colors cursor-pointer"
+                  title="Lunes a Viernes"
+                  aria-label="Lunes a Viernes"
+                  className="notranslate text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] transition-colors cursor-pointer"
                 >
                   L-V
                 </button>
-                <span className="text-[#a3a6af] dark:text-[#6f7a8a]">·</span>
+                <span className="text-[#a3a6af] dark:text-[#6f7a8a]" aria-hidden="true">·</span>
                 <button
                   type="button"
+                  translate="no"
                   onClick={() => setPresetDays('weekend')}
-                  className="text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] transition-colors cursor-pointer"
+                  title="Sábado y Domingo"
+                  aria-label="Sábado y Domingo"
+                  className="notranslate text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] transition-colors cursor-pointer"
                 >
                   S-D
                 </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+            <div className="grid grid-cols-7 gap-1 sm:gap-1.5" translate="no">
               {DAYS_META.map(({ day, label, full }) => {
                 const active = scheduledDays.includes(day);
                 return (
                   <button
                     key={day}
                     type="button"
+                    translate="no"
                     onClick={() => toggleDay(day)}
-                    className={`min-w-0 px-0 py-2 rounded-full text-[12px] sm:text-[13px] font-medium border transition-colors cursor-pointer ${
+                    className={`notranslate min-w-0 px-0 py-2 rounded-full text-[12px] sm:text-[13px] font-medium border transition-colors cursor-pointer text-center overflow-hidden select-none ${
                       active
                         ? 'bg-[#059669] border-[#059669] text-white'
                         : 'bg-white dark:bg-[#1b222b] border-[#ececec] dark:border-[#252e3a] text-[#777b86] dark:text-[#9aa4b2] hover:text-[#17191c] dark:hover:text-[#f1f5f9] hover:border-[#059669]/40'
                     }`}
                     title={full}
+                    aria-label={full}
                   >
                     {label}
                   </button>

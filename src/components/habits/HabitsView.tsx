@@ -26,7 +26,15 @@ interface Props {
   onDeleteHabit: (habitId: string) => void;
 }
 
-const DAY_LABELS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+const DAY_LABELS: { label: string; full: string }[] = [
+  { label: 'L', full: 'Lunes' },
+  { label: 'M', full: 'Martes' },
+  { label: 'X', full: 'Miércoles' },
+  { label: 'J', full: 'Jueves' },
+  { label: 'V', full: 'Viernes' },
+  { label: 'S', full: 'Sábado' },
+  { label: 'D', full: 'Domingo' },
+];
 
 export const HabitsView: React.FC<Props> = ({
   habits,
@@ -282,16 +290,19 @@ export const HabitsView: React.FC<Props> = ({
                   </div>
 
                   {/* Scheduled Days */}
-                  <div className="mt-4 pt-3.5 border-t border-[#ececec] dark:border-[#252e3a] flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a]">Frecuencia:</span>
-                    <div className="flex items-center gap-1 flex-wrap">
-                      {DAY_LABELS.map((label, idx) => {
+                  <div className="mt-4 pt-3.5 border-t border-[#ececec] dark:border-[#252e3a] flex flex-wrap items-center justify-between gap-2 min-w-0">
+                    <span className="text-[12px] text-[#979799] dark:text-[#6f7a8a] shrink-0">Frecuencia:</span>
+                    <div className="flex items-center gap-1 flex-wrap shrink-0" translate="no">
+                      {DAY_LABELS.map(({ label, full }, idx) => {
                         const dayNum = (idx + 1) as DayOfWeek;
                         const isScheduled = habit.scheduledDays.includes(dayNum);
                         return (
                           <span
                             key={idx}
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-medium ${
+                            translate="no"
+                            title={full}
+                            aria-label={full}
+                            className={`notranslate w-6 h-6 min-w-[24px] max-w-[24px] rounded-full flex items-center justify-center text-[11px] font-medium overflow-hidden select-none ${
                               isScheduled
                                 ? 'border'
                                 : 'bg-[#f2f2f3] dark:bg-[#1b222b] text-[#a3a6af] dark:text-[#6f7a8a]'

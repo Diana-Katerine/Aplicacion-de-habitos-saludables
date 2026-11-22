@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export type ActionHintTone = 'neutral' | 'theme' | 'accent' | 'danger';
 export type ActionHintPosition = 'top' | 'bottom';
@@ -51,6 +51,12 @@ export const ActionHint: React.FC<Props> = ({
   children,
 }) => {
   const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!visible) return;
+    const timer = setTimeout(() => setVisible(false), 3200);
+    return () => clearTimeout(timer);
+  }, [visible]);
 
   return (
     <span

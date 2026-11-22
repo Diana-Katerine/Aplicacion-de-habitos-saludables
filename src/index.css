@@ -456,3 +456,13 @@ html.a11y-readable-font {
   letter-spacing: 0.02em !important;
   word-spacing: 0.05em !important;
 }
+
+/* Antigravity Translation Immunity and Overflow Shield */
+.notranslate {
+  translate: no !important;
+}
+
+[translate='no'] {
+  translate: no !important;
+}
+

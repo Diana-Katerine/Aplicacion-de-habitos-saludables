@@ -455,7 +455,7 @@ export const StatsView: React.FC<Props> = ({
                     const item = payload[0].payload as (typeof past30Days)[number];
                     return (
                       <div className="steep-popover px-3.5 py-2.5 text-[12px]">
-                        <p className="font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1">
+                        <p className="font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1 notranslate" translate="no">
                           {item.fullDateLabel} ({item.dayLabel})
                         </p>
                         <p className="text-[#059669] dark:text-[#34d399] font-medium tabular-nums">
@@ -516,7 +516,7 @@ export const StatsView: React.FC<Props> = ({
                     const item = payload[0].payload as (typeof past30Days)[number];
                     return (
                       <div className="steep-popover px-3.5 py-2.5 text-[12px]">
-                        <p className="font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1">
+                        <p className="font-medium text-[#17191c] dark:text-[#f1f5f9] mb-1 notranslate" translate="no">
                           {item.fullDateLabel} ({item.dayLabel})
                         </p>
                         <p className="text-[#059669] dark:text-[#34d399] font-medium tabular-nums">
