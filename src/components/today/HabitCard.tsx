@@ -208,7 +208,7 @@ export const HabitCard: React.FC<Props> = ({
     <div
       data-completed={isCompleted ? 'true' : 'false'}
       style={bioTheme.cssVars}
-      className="group relative rounded-xl bg-white dark:bg-[#1A2721] border border-[#84A98C]/30 dark:border-[#344E41] shadow-sm hover:border-[#84A98C]/60 transition-colors"
+      className="group relative rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-emerald-300 dark:hover:border-emerald-800/80 transition-colors"
     >
       {/* Animated Celebration Overlay when reaching a streak milestone */}
       <AnimatePresence>
@@ -344,21 +344,21 @@ export const HabitCard: React.FC<Props> = ({
               }}
               aria-label={`Reordenar ${habit.title}. Arrastra o usa las flechas arriba y abajo.`}
               title="Arrastra para reordenar (o usa ↑ / ↓)"
-              className="min-h-[44px] min-w-[44px] -ml-2 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-grab active:cursor-grabbing touch-none shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 transition-colors"
+              className="min-h-[44px] min-w-[44px] -ml-2 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-grab active:cursor-grabbing touch-none shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 transition-colors"
             >
               <GripVertical className="w-5 h-5" />
             </button>
           )}
 
           <div
-            className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 border border-[#84A98C]/30 bg-[#EAF4F4] dark:bg-[#22332A] text-[#52796F] dark:text-[#84A98C]"
+            className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 shadow-xs"
           >
             <CategoryIcon name={habit.category.iconName} className="w-6 h-6" />
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-slate-600 dark:text-slate-400">
-              <span className="font-semibold text-[#52796F] dark:text-[#84A98C]">
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                 {habit.category.name}
               </span>
               {onApplyReminderTime ? (
@@ -366,9 +366,9 @@ export const HabitCard: React.FC<Props> = ({
                   type="button"
                   onClick={() => setIsEditingReminder((v) => !v)}
                   title="Cambiar hora de recordatorio"
-                  className="inline-flex items-center gap-1 font-mono tabular-nums text-[#52796F] dark:text-[#84A98C] hover:text-[#344E41] dark:hover:text-white hover:underline cursor-pointer"
+                  className="inline-flex items-center gap-1 font-mono tabular-nums text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-300 hover:underline cursor-pointer"
                 >
-                  <Clock className="w-3.5 h-3.5 text-[#52796F] dark:text-[#84A98C]" />
+                  <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                   <span>{habit.reminderTime ? habit.reminderTime : '+ Hora aviso'}</span>
                 </button>
               ) : habit.reminderTime ? (
@@ -393,7 +393,7 @@ export const HabitCard: React.FC<Props> = ({
                     onApplyReminderTime(habit.id, tempReminderTime);
                     setIsEditingReminder(false);
                   }}
-                  className="px-2.5 py-1 rounded bg-[#52796F] hover:bg-[#344E41] text-white text-xs font-medium cursor-pointer"
+                  className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium cursor-pointer"
                 >
                   Guardar
                 </button>
@@ -425,23 +425,23 @@ export const HabitCard: React.FC<Props> = ({
                 type="button"
                 onClick={() => onOpenAmbientFocus(habit)}
                 title="Abrir Enfoque de Estudio"
-                className="group/focus text-left w-full mt-1 flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 rounded"
+                className="group/focus text-left w-full mt-1 flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 rounded"
               >
                 <h3
                   className={`text-base sm:text-lg font-bold tracking-tight line-clamp-2 md:truncate transition-colors ${
                     isCompleted
-                      ? 'text-[#52796F] dark:text-[#84A98C]'
-                      : 'text-[#344E41] dark:text-[#EAF4F4] group-hover/focus:text-[#52796F]'
+                      ? 'text-emerald-700 dark:text-emerald-300'
+                      : 'text-slate-900 dark:text-white group-hover/focus:text-emerald-600'
                   }`}
                 >
                   {habit.title}
                 </h3>
-                <Headphones className="w-4 h-4 text-[#52796F] dark:text-[#84A98C] shrink-0" />
+                <Headphones className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
               </button>
             ) : (
               <h3
                 className={`text-base sm:text-lg font-bold tracking-tight mt-1 line-clamp-2 md:truncate transition-colors ${
-                  isCompleted ? 'text-[#52796F] dark:text-[#84A98C]' : 'text-[#344E41] dark:text-[#EAF4F4]'
+                  isCompleted ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-900 dark:text-white'
                 }`}
               >
                 {habit.title}
@@ -558,7 +558,7 @@ export const HabitCard: React.FC<Props> = ({
                   onClick={handleDecrement}
                   disabled={completedValue <= 0}
                   aria-label={`Restar 1 ${habit.unitLabel}`}
-                  className="min-h-[44px] min-w-[44px] rounded-lg bg-white dark:bg-[#22332A] hover:bg-[#EAF4F4] dark:hover:bg-[#1A2721] disabled:opacity-40 disabled:cursor-not-allowed text-[#344E41] dark:text-[#EAF4F4] flex items-center justify-center border border-[#84A98C]/40 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2"
+                  className="min-h-[44px] min-w-[44px] rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 dark:text-slate-200 flex items-center justify-center border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
                 >
                   <Minus className="w-4 h-4 stroke-[2.25]" />
                 </button>
@@ -575,10 +575,10 @@ export const HabitCard: React.FC<Props> = ({
                   whileTap={{ scale: 0.95 }}
                   onClick={handleIncrement}
                   aria-label={`Sumar 1 ${habit.unitLabel}`}
-                  className={`min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 ${
+                  className={`min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
                     isCompleted
-                      ? 'bg-[#84A98C] hover:bg-[#52796F] text-white border-[#52796F]'
-                      : 'bg-[#D8F3DC] dark:bg-[#22332A] hover:bg-[#84A98C]/30 text-[#344E41] dark:text-[#D8F3DC] border-[#84A98C]/40'
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 shadow-sm'
+                      : 'bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
                   }`}
                 >
                   <Plus className="w-5 h-5 stroke-[2.25]" />
@@ -601,10 +601,10 @@ export const HabitCard: React.FC<Props> = ({
                 whileTap={{ scale: 0.95 }}
                 onClick={handleToggleSingle}
                 aria-label={isCompleted ? 'Marcar como pendiente' : 'Completar hábito'}
-                className={`min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center transition-all cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 ${
+                className={`min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center transition-all cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
                   isCompleted
-                    ? 'bg-[#84A98C] hover:bg-[#52796F] text-white border-[#52796F]'
-                    : 'bg-white dark:bg-[#22332A] text-slate-300 hover:text-[#52796F] dark:hover:text-[#84A98C] border-[#84A98C]/40 hover:border-[#52796F]'
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 border-slate-300 dark:border-slate-700 hover:border-emerald-500'
                 }`}
               >
                 <Check className={`w-5 h-5 stroke-[2.5] ${isCompleted ? 'text-white' : 'opacity-0 hover:opacity-100'}`} />

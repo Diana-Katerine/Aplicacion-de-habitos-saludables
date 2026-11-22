@@ -171,10 +171,10 @@ export const AccessibilityWidget: React.FC = () => {
           aria-controls="a11y-accessibility-dialog"
           aria-label="Abrir panel de opciones de accesibilidad"
           title="Opciones de accesibilidad"
-          className={`w-13 h-13 rounded-full flex items-center justify-center shadow-lg border transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#52796F] focus-visible:ring-offset-2 ${
+          className={`w-13 h-13 rounded-full flex items-center justify-center shadow-lg border transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
             isOpen
-              ? 'bg-[#52796F] text-white border-[#344E41] shadow-[#52796F]/30 rotate-12 scale-105'
-              : 'bg-white dark:bg-[#22332A] text-[#344E41] dark:text-[#EAF4F4] border-[#84A98C]/35 hover:bg-[#EAF4F4] dark:hover:bg-[#1A2721] hover:scale-105 shadow-black/10'
+              ? 'bg-gradient-to-br from-emerald-600 to-teal-600 text-white border-emerald-700 shadow-emerald-500/30 rotate-12 scale-105'
+              : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-300 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-slate-700 hover:scale-105 shadow-black/10'
           }`}
         >
           <Accessibility className="w-6 h-6 stroke-[2.25]" />
@@ -190,19 +190,19 @@ export const AccessibilityWidget: React.FC = () => {
           role="dialog"
           aria-modal="false"
           aria-labelledby="a11y-panel-title"
-          className="fixed bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-96 rounded-2xl bg-white dark:bg-[#1A2721] border border-[#84A98C]/40 shadow-2xl p-5 flex flex-col gap-4 text-[#344E41] dark:text-[#EAF4F4] animate-in fade-in zoom-in-95 duration-150"
+          className="fixed bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-96 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-5 flex flex-col gap-4 text-slate-800 dark:text-slate-100 animate-in fade-in zoom-in-95 duration-150"
         >
           {/* Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#84A98C]/20 dark:border-[#344E41]">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#D8F3DC] dark:bg-[#22332A] text-[#344E41] dark:text-[#D8F3DC] border border-[#84A98C]/40 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center">
                 <Accessibility className="w-4 h-4 stroke-[2.5]" />
               </div>
               <div>
-                <h2 id="a11y-panel-title" className="text-base font-bold leading-tight text-[#344E41] dark:text-[#EAF4F4]">
+                <h2 id="a11y-panel-title" className="text-base font-bold leading-tight text-slate-900 dark:text-white">
                   Accesibilidad
                 </h2>
-                <p className="text-[11px] text-[#52796F] dark:text-[#84A98C]">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   Adapta la vista a tus preferencias
                 </p>
               </div>
@@ -215,7 +215,7 @@ export const AccessibilityWidget: React.FC = () => {
                 triggerButtonRef.current?.focus();
               }}
               aria-label="Cerrar panel de accesibilidad"
-              className="w-8 h-8 rounded-full border border-[#84A98C]/30 hover:bg-[#EAF4F4] dark:hover:bg-[#22332A] text-[#52796F] dark:text-[#84A98C] flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -226,15 +226,15 @@ export const AccessibilityWidget: React.FC = () => {
             {/* 1. Tamaño del texto */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#52796F] dark:text-[#84A98C] flex items-center gap-1.5">
-                  <Type className="w-3.5 h-3.5" />
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Type className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   Tamaño de texto
                 </label>
-                <span className="text-xs font-medium text-[#52796F] dark:text-[#84A98C]">
+                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                   {TEXT_SCALE_OPTIONS.find((o) => o.id === settings.textScale)?.pct}
                 </span>
               </div>
-              <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-[#EAF4F4] dark:bg-[#22332A]/70 border border-[#84A98C]/30">
+              <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
                 {TEXT_SCALE_OPTIONS.map((opt) => {
                   const isSelected = settings.textScale === opt.id;
                   return (
@@ -244,8 +244,8 @@ export const AccessibilityWidget: React.FC = () => {
                       onClick={() => updateSetting('textScale', opt.id)}
                       className={`py-1.5 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-[#52796F] text-white shadow-xs font-bold'
-                          : 'text-[#344E41] dark:text-[#D8F3DC] hover:text-[#52796F] dark:hover:text-white'
+                          ? 'bg-emerald-600 text-white shadow-xs font-bold'
+                          : 'text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white'
                       }`}
                     >
                       {opt.label}
@@ -256,12 +256,12 @@ export const AccessibilityWidget: React.FC = () => {
             </div>
 
             {/* 2. Alto Contraste */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#22332A]/50 border border-[#84A98C]/30">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
               <div className="flex items-start gap-2.5">
-                <SunMoon className="w-4 h-4 text-[#52796F] dark:text-[#84A98C] mt-0.5" />
+                <SunMoon className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5" />
                 <div>
-                  <span className="font-medium text-xs sm:text-sm block text-[#344E41] dark:text-[#EAF4F4]">Alto contraste</span>
-                  <span className="text-[11px] text-[#52796F] dark:text-[#84A98C] block">
+                  <span className="font-medium text-xs sm:text-sm block text-slate-900 dark:text-slate-100">Alto contraste</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
                     Maximiza legibilidad y bordes
                   </span>
                 </div>
@@ -271,8 +271,8 @@ export const AccessibilityWidget: React.FC = () => {
                 role="switch"
                 aria-checked={settings.highContrast}
                 onClick={() => updateSetting('highContrast', !settings.highContrast)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] ${
-                  settings.highContrast ? 'bg-[#52796F]' : 'bg-slate-300 dark:bg-slate-700'
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                  settings.highContrast ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
                 <span
@@ -284,12 +284,12 @@ export const AccessibilityWidget: React.FC = () => {
             </div>
 
             {/* 3. Reducir Animaciones */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#22332A]/50 border border-[#84A98C]/30">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
               <div className="flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 text-[#52796F] dark:text-[#84A98C] mt-0.5" />
+                <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5" />
                 <div>
-                  <span className="font-medium text-xs sm:text-sm block text-[#344E41] dark:text-[#EAF4F4]">Reducir movimiento</span>
-                  <span className="text-[11px] text-[#52796F] dark:text-[#84A98C] block">
+                  <span className="font-medium text-xs sm:text-sm block text-slate-900 dark:text-slate-100">Reducir movimiento</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
                     Desactiva transiciones bruscas
                   </span>
                 </div>
@@ -299,8 +299,8 @@ export const AccessibilityWidget: React.FC = () => {
                 role="switch"
                 aria-checked={settings.reduceMotion}
                 onClick={() => updateSetting('reduceMotion', !settings.reduceMotion)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] ${
-                  settings.reduceMotion ? 'bg-[#52796F]' : 'bg-slate-300 dark:bg-slate-700'
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                  settings.reduceMotion ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
                 <span
@@ -312,12 +312,12 @@ export const AccessibilityWidget: React.FC = () => {
             </div>
 
             {/* 4. Tipografía Lectura Fácil */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#22332A]/50 border border-[#84A98C]/30">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
               <div className="flex items-start gap-2.5">
-                <Eye className="w-4 h-4 text-[#52796F] dark:text-[#84A98C] mt-0.5" />
+                <Eye className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5" />
                 <div>
-                  <span className="font-medium text-xs sm:text-sm block text-[#344E41] dark:text-[#EAF4F4]">Fuente nítida y limpia</span>
-                  <span className="text-[11px] text-[#52796F] dark:text-[#84A98C] block">
+                  <span className="font-medium text-xs sm:text-sm block text-slate-900 dark:text-slate-100">Fuente nítida y limpia</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
                     Espaciado y glifos estándar
                   </span>
                 </div>
@@ -327,8 +327,8 @@ export const AccessibilityWidget: React.FC = () => {
                 role="switch"
                 aria-checked={settings.readableFont}
                 onClick={() => updateSetting('readableFont', !settings.readableFont)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#52796F] ${
-                  settings.readableFont ? 'bg-[#52796F]' : 'bg-slate-300 dark:bg-slate-700'
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                  settings.readableFont ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
                 <span

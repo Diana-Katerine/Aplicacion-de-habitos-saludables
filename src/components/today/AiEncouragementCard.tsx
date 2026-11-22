@@ -22,28 +22,28 @@ const TONE_STYLES: Record<
   }
 > = {
   celebration: {
-    container: 'bg-white dark:bg-[#1A2721] border-[#84A98C]',
-    iconBox: 'bg-[#52796F] text-white',
-    badge: 'bg-[#D8F3DC] text-[#344E41] dark:bg-[#22332A] dark:text-[#D8F3DC] border-[#84A98C]/40',
-    accentText: 'text-[#344E41] dark:text-[#D8F3DC]',
+    container: 'bg-white dark:bg-slate-900 border-amber-300 dark:border-amber-700/60 shadow-amber-500/5',
+    iconBox: 'bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-amber-500/20 shadow-sm',
+    badge: 'bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200 border-amber-200 dark:border-amber-800',
+    accentText: 'text-amber-700 dark:text-amber-300',
   },
   momentum: {
-    container: 'bg-white dark:bg-[#1A2721] border-[#52796F]/40',
-    iconBox: 'bg-[#52796F] text-white',
-    badge: 'bg-[#EAF4F4] text-[#344E41] dark:bg-[#22332A] dark:text-[#EAF4F4] border-[#52796F]/30',
-    accentText: 'text-[#344E41] dark:text-[#EAF4F4]',
+    container: 'bg-white dark:bg-slate-900 border-emerald-300 dark:border-emerald-800/70 shadow-emerald-500/5',
+    iconBox: 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-emerald-500/20 shadow-sm',
+    badge: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800',
+    accentText: 'text-emerald-700 dark:text-emerald-300',
   },
   resilience: {
-    container: 'bg-white dark:bg-[#1A2721] border-[#84A98C]/50',
-    iconBox: 'bg-[#84A98C] text-white',
-    badge: 'bg-[#D8F3DC] text-[#344E41] dark:bg-[#22332A] dark:text-[#D8F3DC] border-[#84A98C]/40',
-    accentText: 'text-[#344E41] dark:text-[#D8F3DC]',
+    container: 'bg-white dark:bg-slate-900 border-cyan-300 dark:border-cyan-800/70 shadow-cyan-500/5',
+    iconBox: 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-cyan-500/20 shadow-sm',
+    badge: 'bg-cyan-50 text-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-200 border-cyan-200 dark:border-cyan-800',
+    accentText: 'text-cyan-700 dark:text-cyan-300',
   },
   calm: {
-    container: 'bg-white dark:bg-[#1A2721] border-[#84A98C]/35',
-    iconBox: 'bg-[#84A98C] text-white',
-    badge: 'bg-[#EAF4F4] text-[#344E41] dark:bg-[#22332A] dark:text-[#EAF4F4] border-[#84A98C]/30',
-    accentText: 'text-[#344E41] dark:text-[#EAF4F4]',
+    container: 'bg-white dark:bg-slate-900 border-indigo-200 dark:border-indigo-800/70 shadow-indigo-500/5',
+    iconBox: 'bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-indigo-500/20 shadow-sm',
+    badge: 'bg-indigo-50 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-200 border-indigo-200 dark:border-indigo-800',
+    accentText: 'text-indigo-700 dark:text-indigo-300',
   },
 };
 

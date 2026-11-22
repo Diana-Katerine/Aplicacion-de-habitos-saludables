@@ -240,7 +240,7 @@ export const AuthModal: React.FC<Props> = ({
 
               <button
                 type="submit"
-                className="w-full mt-2 py-3 rounded-full bg-[#52796F] hover:bg-[#344E41] text-white text-[15px] font-normal transition-colors cursor-pointer flex items-center justify-center gap-2"
+                className="w-full mt-2 py-3 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-[15px] font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
               >
                 <KeyRound className="w-4 h-4" />
                 <span>Enviar código de recuperación</span>
@@ -253,7 +253,7 @@ export const AuthModal: React.FC<Props> = ({
                     setError(null);
                     setMode('login');
                   }}
-                  className="inline-flex items-center gap-1.5 text-[13px] text-[#52796F] dark:text-[#84A98C] font-medium hover:underline cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-[13px] text-emerald-600 dark:text-emerald-400 font-medium hover:underline cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   Volver a iniciar sesión
@@ -293,7 +293,7 @@ export const AuthModal: React.FC<Props> = ({
 
               <button
                 type="submit"
-                className="w-full mt-2 py-3 rounded-full bg-[#52796F] hover:bg-[#344E41] text-white text-[15px] font-normal transition-colors cursor-pointer"
+                className="w-full mt-2 py-3 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-[15px] font-medium transition-colors cursor-pointer shadow-sm"
               >
                 Establecer nueva contraseña
               </button>
@@ -416,7 +416,7 @@ export const AuthModal: React.FC<Props> = ({
 
             <button
               type="submit"
-              className="w-full mt-2 py-3 rounded-full bg-[#52796F] hover:bg-[#344E41] text-white text-[15px] font-normal transition-colors cursor-pointer"
+              className="w-full mt-2 py-3 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-[15px] font-medium transition-colors cursor-pointer shadow-sm"
             >
               {mode === 'login' ? 'Entrar a mi cuenta' : 'Crear cuenta y comenzar'}
             </button>
@@ -428,7 +428,7 @@ export const AuthModal: React.FC<Props> = ({
             <button
               type="button"
               onClick={handleDemoLogin}
-              className="w-full py-2.5 rounded-full bg-transparent hover:bg-[#EAF4F4] dark:hover:bg-[#22332A] border border-[#84A98C]/40 hover:border-[#52796F] text-[14px] font-normal text-[#52796F] dark:text-[#84A98C] transition-colors cursor-pointer"
+              className="w-full py-2.5 rounded-full bg-transparent hover:bg-emerald-50 dark:hover:bg-slate-800 border border-emerald-300 dark:border-emerald-750 hover:border-emerald-500 text-[14px] font-medium text-emerald-700 dark:text-emerald-300 transition-colors cursor-pointer"
             >
               Acceder con cuenta demo (Alex)
             </button>
@@ -450,7 +450,7 @@ export const AuthModal: React.FC<Props> = ({
                     setSuccessNotice(null);
                     setMode('register');
                   }}
-                  className="text-[#52796F] dark:text-[#84A98C] font-medium hover:underline cursor-pointer"
+                  className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline cursor-pointer"
                 >
                   Regístrate gratis
                 </button>
@@ -465,7 +465,7 @@ export const AuthModal: React.FC<Props> = ({
                     setSuccessNotice(null);
                     setMode('login');
                   }}
-                  className="text-[#52796F] dark:text-[#84A98C] font-medium hover:underline cursor-pointer"
+                  className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline cursor-pointer"
                 >
                   Inicia sesión
                 </button>

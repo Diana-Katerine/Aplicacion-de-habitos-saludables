@@ -344,7 +344,7 @@ export default function App() {
           particleCount: 70,
           spread: 68,
           origin: { y: 0.62 },
-          colors: ['#52796F', '#84A98C', '#D8F3DC', '#EAF4F4', '#344E41'],
+          colors: ['#10B981', '#06B6D4', '#F59E0B', '#6366F1', '#EC4899'],
         });
       }
 
@@ -872,7 +872,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-white dark:bg-[#0c0f12] text-[#17191c] dark:text-[#f1f5f9] flex flex-col selection:bg-[#fbe1d1] selection:text-[#5d2a1a] dark:selection:bg-[#5d2a1a] dark:selection:text-[#fbe1d1] transition-colors duration-200">
+    <div className="min-h-screen overflow-x-clip bg-slate-50 dark:bg-[#0B0F17] text-slate-900 dark:text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white dark:selection:bg-emerald-600 dark:selection:text-white transition-colors duration-200">
       {/* 3-Zone Navigation Header */}
       <Navbar
         currentRoute={currentRoute}
@@ -985,7 +985,7 @@ export default function App() {
                   particleCount: 45,
                   spread: 55,
                   origin: { y: 0.65 },
-                  colors: ['#52796F', '#84A98C', '#D8F3DC', '#EAF4F4', '#344E41'],
+                  colors: ['#10B981', '#06B6D4', '#F59E0B', '#6366F1', '#EC4899'],
                 });
               }}
             />

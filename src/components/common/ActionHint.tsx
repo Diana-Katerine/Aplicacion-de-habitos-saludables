@@ -15,20 +15,20 @@ interface Props {
 
 const TONE_BOX_CLASSES: Record<ActionHintTone, string> = {
   neutral:
-    'bg-[#344E41] text-[#EAF4F4] border-[#84A98C]/40 dark:bg-[#1A2721] dark:text-[#EAF4F4] dark:border-[#52796F]/60',
+    'bg-slate-900 text-slate-100 border-slate-700/80 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700',
   theme:
-    'bg-[#52796F] text-[#EAF4F4] border-[#84A98C]/60 dark:bg-[#22332A] dark:text-[#EAF4F4] dark:border-[#84A98C]/60',
+    'bg-emerald-950 text-emerald-100 border-emerald-700/80 dark:bg-emerald-950 dark:text-emerald-100 dark:border-emerald-700',
   accent:
-    'bg-[#344E41] text-[#D8F3DC] border-[#84A98C]/60 dark:bg-[#1A2721] dark:text-[#D8F3DC] dark:border-[#52796F]/60',
+    'bg-cyan-950 text-cyan-100 border-cyan-700/80 dark:bg-cyan-950 dark:text-cyan-100 dark:border-cyan-700',
   danger:
-    'bg-[#7f1d1d] text-[#fef2f2] border-[#f87171]/55 dark:bg-[#450a0a] dark:text-[#fecaca] dark:border-[#f87171]/55',
+    'bg-rose-950 text-rose-100 border-rose-700/80 dark:bg-rose-950 dark:text-rose-100 dark:border-rose-700',
 };
 
 const TONE_DOT_CLASSES: Record<ActionHintTone, string> = {
-  neutral: 'bg-[#84A98C] dark:bg-[#84A98C]',
-  theme: 'bg-[#D8F3DC]',
-  accent: 'bg-[#84A98C]',
-  danger: 'bg-[#fca5a5]',
+  neutral: 'bg-slate-400 dark:bg-slate-400',
+  theme: 'bg-emerald-400',
+  accent: 'bg-cyan-400',
+  danger: 'bg-rose-400',
 };
 
 const POSITION_CLASSES: Record<ActionHintPosition, string> = {
